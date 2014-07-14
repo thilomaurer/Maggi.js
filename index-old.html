@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Maggi.js Framework</title>
+		<meta charset="utf-8">
+		<meta name="author" content="Thilo Maurer, www.thilomaurer.de">
+		<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=yes">
+		<meta name="mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<script src="jquery-2.0.3.js"></script>
+		<script src="Maggi.js"></script>
+		<script src="Maggi.UI.js"></script>
+		<script src="shopping.old.js"></script>
+		<script src="tools.js"></script>
+		<script src="sprintf.js"></script>
+		<link rel="stylesheet" type="text/css" href="all.css" media="screen,projection">
+		<link rel="icon" type="image/png" href="maggi-icon-64x64.png">
+		<link rel="apple-touch-icon" type="image/png" href="maggi-icon-128x128.png">
+		<script>
+			$(document).ready(function() {
+				var d=shopping();
+
+				var exec=function(js) {
+					var msg;
+					try {
+						var a=eval(js);
+						msg=JSON.stringify(a);
+					} catch(e)
+					{
+						msg=e.message;
+					}
+					var n=Object.keys(dui.console.log).length
+					dui.console.log.add(n,"> "+js);
+					dui.console.log.add(n+1,msg);
+				}
+				var promptonEnter = function(v) {
+					exec(v); 
+					dui.console.prompt="";
+				};
+
+				var dui=Maggi({
+					d:d,
+					explanation:"This is a javascript-console, feel free to manipulate the items in the shopping cart d.cart.items or the items available d.items:",
+					examples:"For example, try:",
+					items:{
+						a:"d.cart.items.banana=10",
+						b:"d.cart.items.apple=4",
+						c:'d.cart.items.add("orange",4)',
+						d:'d.items.banana.name="rotten brown banana"',
+						e:'d.items.banana.price=0.09'
+					},
+					console: {
+						log:{},
+						prompt:""
+					}
+				});
+
+				HighlightedJS=function(ui,v,setv,format) { 
+					Maggi.UI.BaseFunctionality(ui,format);
+					var message=syntaxHighlight(v);
+					if (format.prepend) message=format.prepend+message;
+					ui.html(message);
+				};
+
+				var format=Maggi({
+					type:"object",
+					children:{
+						d: {type:"user", user:HighlightedJS,class:"scroll preformatted",bubbleupdate:true,prepend:"d="},
+						explanation: {type: "text"},
+						examples: {type: "text"},
+						items: {type:"list", format:{type:"text",class:"link"},select:"single",selected:""},
+						console: {
+							type:"object",
+							class:"scroll preformatted",
+							children: {
+								log: {type:"list", format:{type:"text"}},
+								prompt: {type:"input",onEnter:promptonEnter,placeholder:"enter your js code here"}
+							}
+						}
+					}
+				});
+
+				format.children.items.bind("set",function(k,v) {
+					if (k=="selected") exec(dui.items[v]);
+				});
+				
+				var parent=$('#dui');
+				Maggi.UI(parent,dui,format);
+
+				var uibase={
+					type:"object",
+					children:{
+						items: {
+							type:"list",
+							format:{
+								type:"object",
+								children:{
+									name:{type:"text"},
+									price:{type:"format",format:"$%.2f"},
+									addtoCart:{type:"function",label:"ADD",enabled:true,class:"blue button"},
+									removefromCart:{type:"function",label:"REMOVE",enabled:false,class:"red button"}
+								}
+							},
+							class:"table"
+						},
+						cart:{
+							type:"object",
+							children:{
+								price: {type:"format",format:"Total $%.2f"},
+								pieces: {type:"format",format:"%d pieces"},
+								text: {type:"text"}
+							},
+						},
+					}
+				};
+
+				var ui=Maggi(uibase);
+
+				d.cart.items.bind("set", function(k,v) {
+					ui.children.items.children[k].children.removefromCart.enabled=(v>0);
+				});
+				d.cart.items.bind("remove", function(k,v) {
+					ui.children.items.children[k].children.removefromCart.enabled=false;
+				});
+				d.cart.items.bind("add", function(k,v) {
+					ui.children.items.children[k].children.removefromCart.enabled=true;
+				});
+				Maggi.UI($('#demo'),d,ui);
+				$.each(d.cart.items, function(k,v) {
+					ui.children.items.children[k].children.removefromCart.enabled=(v>0);
+				});
+
+				Maggi.UI($('#demoformat'),Maggi({ui:ui}),{type:"object",children:{ui:{type:"user",user:HighlightedJS,class:"scroll preformatted",bubbleupdate:true,prepend:"ui="}}});
+			});
+		</script>
+	</head>
+	<body>
+		<h1><center><table><tr><td><img src="Maggi.js.svg" width="100px"></td><td>Maggi.js Framework</td></tr></table></center></h1>
+		<div id="left">
+
+		<h2>Maggi.js</h2>
+		<div>Maggi.js is a Javascript framework that enables rapid development of object centric applications, 
+			by "maggically" adding bubbling property-events to any object. 
+			Binding functions to these events allows for a triggering for dependent updates.<BR>
+			<BR>
+			This is a demo for an object <I>d</I> that manages the shopping-cart:
+		</div>
+		<div id="dui"></div>
+		</div>
+		<div id="right">
+		<h2>Maggi.UI.js</h2>
+		<div>
+			Maggi.UI.js is a Javascript UI framework that enables rapid development of user-interfaces for object centric applications. It removes to burden of writing or managing the DOM tree of you web-application yourself. Everything is managed under the hood, controlled though simple objects that define the UI. You don't need to see any HTML any longer.
+
+Maggi.UI is similar to the MVC (model, view, controller) software architecture pattern. 
+If fact it improves MVC to a MM (model, model) pattern:
+Maggi.UI creates (and updates) views and controllers fully automatically from two models:
+the <I>data-model</I>, an object that contains the data that is to be displayed (or not),
+and a second <I>ui-model</I>, an object that defines how the data shall be displayed. 
+
+Here's an example:
+		</div>
+		<div id="demo"></div>
+		<div>Here's the object <I>ui</I> that hold the UI-model of the UI demonstrated above. This UI-model defines an UI of the model <I>d</I> to the left:</div>
+		<div id="demoformat"></div>
+		</div>
+	</body>
+</html>

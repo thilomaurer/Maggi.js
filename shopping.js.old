@@ -1,0 +1,59 @@
+//var fs = require('fs');
+//eval(fs.readFileSync('Maggi.js').toString());
+
+function shopping() {
+
+	var add=function(v) {
+		if (o.cart.items[v.id]==null) o.cart.items.add(v.id,1); else o.cart.items[v.id]+=1;
+	};
+	var remove=function(v) {
+		if (o.cart.items[v.id]==null) return;
+		if (o.cart.items[v.id]==1) o.cart.items.remove(v.id); else o.cart.items[v.id]-=1;
+	};
+
+	var o=Maggi({
+		items:{
+			apple :{id:"apple",name:"Green Apple",price:0.99,addtoCart:add,removefromCart:remove},
+			orange:{id:"orange",name:"Tasty Orange",price:1.79,addtoCart:add,removefromCart:remove},
+			banana:{id:"banana",name:"Yellow Banana",price:2.49,addtoCart:add,removefromCart:remove}
+		},
+		cart:{
+			items:{
+			},
+			price:0,
+			pieces:0,
+			text:""
+		}
+	});
+
+	var updatePrice=function(k,v) {
+		var p=0;
+		for (var k in o.cart.items) p=p+o.cart.items[k]*o.items[k].price;
+		o.cart.price=p;
+	};
+
+	var updateText=function(k) {
+		var text="";
+		for (var k in o.cart.items) {
+			var n=o.cart.items[k];
+			if (n) {
+				if (text!="") text=text+", ";
+				text=text+n+" "+o.items[k].name;
+			}
+		}
+		o.cart.text=text;
+	};
+
+	var updatePieces=function() {
+		var n=0;
+		for (var k in o.cart.items) n=n+o.cart.items[k];
+		o.cart.pieces=n;
+	};
+
+	o.cart.items.bind(["add","remove","set"],[updateText,updatePrice,updatePieces]);
+	for (key in o.items) o.items[key].bind("set",[updatePrice,updateText]);
+	o.cart.items.add("apple",3);
+	o.cart.items.add("banana",2);
+
+	return o;
+}
