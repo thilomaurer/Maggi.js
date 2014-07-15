@@ -228,7 +228,7 @@ Maggi.UI.object=function(ui,o,seto,format) {
 			if (format.children) fmt=format.children[k];
 			if (!fmt) if (format.childdefault) { 
 				if (!format.children) format.add("children",{});
-				format.children.add(k,JSON.parse(JSON.stringify(format.childdefault)));
+				format.children.add(k,format.childdefault);
 				fmt=format.children[k];
 			} 
 			if (!fmt) {
@@ -293,11 +293,26 @@ Maggi.UI.list=function(ui,o,seto,format) {
 		ui.ui=chld;
 		var selected=null;
 		var update=function(k) { 
-			if (!format.children) format.add("children",{});
-			if (!format.children[k]) format.children.add(k,Maggi(JSON.parse(JSON.stringify(format.format))));
-			var fmt=format.children[k];
-			if (k instanceof Array) { k=k[0]; if (!fmt.bubbleupdate) return; }
-			if (chld[k]) Maggi.UI(chld[k],o[k],fmt,function(v) { o[k]=v; });
+			var fmt=null;
+			if (k instanceof Array) { k=k[0]; if (!(format.children&&format.children[k]&&format.children[k].bubbleupdate)) return; }
+			if (format.children) fmt=format.children[k];
+			if (!fmt) if (format.childdefault) { 
+				if (!format.children) format.add("children",{});
+				format.children.add(k,format.childdefault);
+				fmt=format.children[k];
+			} 
+			if (!fmt) {
+				if ((o[k] instanceof Object)&&(!(o[k] instanceof Date))) 
+					type="object";
+				else
+					type="text";
+				fmt={type:type};
+			}
+			if (((o[k] instanceof Object)&&(!(o[k] instanceof Date))&&(!(typeof o[k] == "function")))&&(fmt.type=="text"||fmt.type=="input")) {
+				fmt={type:"object",childdefault:format.childdefault,makechildlabels:format.makechildlabels};
+			}
+			if (fmt) if (chld[k]) Maggi.UI(chld[k],o[k],fmt,function(v) { o[k]=v; });
+
 		};
 		var make=function(k) {
 			var par=ui;
@@ -321,9 +336,7 @@ Maggi.UI.list=function(ui,o,seto,format) {
 		var select=function(k) {
 			if (format.select=="single") format.selected=k;
 			if (format.select=="multi") {
-				var s=format.selected[k];
-				if (s==null) s=true; else s=!s;
-				format.selected[k]=s;
+				format.selected.add(k,!format.selected[k]);
 			}
 		}
 		if (format.listtype=="ordered") listcontainer=$('<ol>').appendTo(ui);
@@ -338,18 +351,20 @@ Maggi.UI.list=function(ui,o,seto,format) {
 		o.bind("add", add);
 		o.bind("remove", remove);
 
+		var updateSingleSelection = function(newv,oldv) {
+			if (oldv) if (chld[oldv]) chld[oldv].removeClass("selected");
+			if (newv) if (chld[newv]) chld[newv].addClass("selected");
+		};
+		var updateMultiSelection = function(k,v) {
+			var c=chld[k];
+			if (c) if (v) c.addClass("selected"); else c.removeClass("selected");
+		};
+
+		if (format.select=="single") updateSingleSelection(format.selected,null);
+		if (format.select=="multi") $.each(format.selected, updateMultiSelection);
 		format.bind("set",function(k,newv,oldv) {
-			if (k=="selected") {
-				if (format.select=="single") {
-					if (chld[oldv]) chld[oldv].removeClass("selected");
-					if (chld[newv]) chld[newv].addClass("selected");
-				}
-				if (format.select=="multi") { 
-					if (!(selected instanceof Object)) format.selected={k:false};
-					for (var k in oldv) if (chld[k]) chld[k].removeClass("selected");
-					for (var k in newv) if (chld[k]) chld[k].addClass("selected");
-				}
-			}
+			if (k=="selected") updateSingleSelection(newv,oldv);
+			if (k[0]=="selected") updateMultiSelection(k[1],newv,oldv);
 			if (k=="select") {
 				if (newv=="single") format.selected=null;
 				if (newv=="multi") format.selected={};
@@ -357,31 +372,6 @@ Maggi.UI.list=function(ui,o,seto,format) {
 		});
 	}
 };
-/*
-Maggi.UI.tabs=function(ui,o,seto,format) {
-	Maggi.UI.object(ui,o,seto,format);
-	ui.head=$("<div>",{id:"_Maggi_UI_TabView_Header"}).prependTo(ui); 
-	if (format.headerdata&&format.headerui) { 
-		Maggi.UI(ui.head,format.headerdata,format.headerui, function(v) {format.headerdata=v; }); 
-		$.each(ui.head.ui,function(k,v) {
-			v.click(function() { select(k); });
-		});
-	}
-	var select=function(k) {
-		var s=format.selected;
-		if (s&&ui.ui[s]) {
-			ui.ui[s].removeClass("selected");
-			ui.head.ui[s].removeClass("selected");
-		}
-		if (k&&ui.ui[k]) {
-			format.selected=k;
-			ui.ui[k].addClass("selected");
-			ui.head.ui[k].addClass("selected");
-		}
-	}
-	select(format.selected);
-};
-*/
 
 Maggi.UI.tabs=function(ui,o,seto,format) {
 	if (o==null) {ui.empty(); return; }
@@ -416,4 +406,24 @@ Maggi.UI.tabs=function(ui,o,seto,format) {
 		});
 	}
 };
-
+/*
+Maggi.UI.list=function(ui,o,seto,format) {
+	if (o==null) {ui.empty(); return; }
+	if (!(ui._Maggi===o)) {
+		Maggi.UI.BaseFunctionality(ui,format);
+		ui._Maggi=o;
+		ui.empty();
+		Maggi.UI.object(ui,o,seto,format);
+		if (ui.ui) $.each(ui.ui,function(k,v) {
+			v.click(function() { select(k,format.selected); });
+		});
+		var select=function(k,oldk) {
+			alert(k+","+oldk);
+		};
+		select(format.selected,null);
+		format.bind("set",function(k,v,oldv) {
+			if (k=="selected") select(v,oldv);
+		});
+	}
+};
+*/

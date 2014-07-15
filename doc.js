@@ -257,6 +257,24 @@ var data=Maggi({debug:true});
 Maggi.UI(container,data,ui);
 	}
 
+	var fnccode=function(container) {
+var data=Maggi({
+	myfunc:function() { alert("alert"); }
+});
+
+var ui=Maggi({
+	type:"object",
+	children:{
+		myfunc:{
+			type:"function",
+			label:"label"
+		}
+	}
+});
+
+Maggi.UI(container,data,ui);
+	}
+
 	var inpcode=function(container) {
 var ui=Maggi({
 	type:"object",
@@ -272,6 +290,22 @@ var ui=Maggi({
 });
 
 var data=Maggi({username:""});
+
+Maggi.UI(container,data,ui);
+	}
+
+	var lstcode=function(container) {
+var ui=Maggi({
+	type:"list",
+	select:"multi",
+	selected:{"child2":true}
+});
+
+var data=Maggi({
+	child1:"element1",
+	child2:"element2",
+	child3:"element3"
+});
 
 Maggi.UI(container,data,ui);
 	}
@@ -357,8 +391,10 @@ Maggi.UI(container,data,ui);
 		txt:{head:"Text",desc:"",props:textprop,democontainer:demoobj(txtcode)},
 		html:{head:"HTML",desc:"",props:textprop,democontainer:demoobj(htmlcode)},
 		inp:{head:"Input",desc:"",props:inputprop,democontainer:demoobj(inpcode)},
+		fnc:{head:"Function",desc:"",props:inputprop,democontainer:demoobj(fnccode)},
 		lnk:{head:"Link",desc:"",props:linkprop,democontainer:demoobj(lnkcode)},
 		cbx:{head:"Checkbox (SHOULD NAME SWITCH?)",desc:"",props:checkboxprop,democontainer:demoobj(cbxcode)},
+		lst:{head:"List",desc:"",props:tabprop,democontainer:demoobj(lstcode)},
 		tab:{head:"Tabs",desc:"",props:tabprop,democontainer:demoobj(tabcode)},
 		dem:{head:"Password Calculator Demo",desc:"This simple example demos a SHA1 Password Calculator.",democontainer:demoobj(pwcalccode)}
 	};
@@ -369,7 +405,7 @@ Maggi.UI(container,data,ui);
 
 	d=Maggi(d);
 	
-	var propui={ type:"list", listtype:"ordered", format:propui};
+	var propui={ type:"list", listtype:"ordered", childdefault:propui};
 /*
 	var uiui={
 		type:"object",
@@ -462,57 +498,54 @@ Maggi.UI.bool=function(ui,v,setv,format) {
 	var __String2FunctionID=0;
 	var __String2Function={};
 	var __String2FunctionArgs=[];
-	var democontainer = function() {
-		return {
-			type:"object",
-			children:{
-				source: { 
-					type:"object",
-					children: {
-						code: {type:"code"},
-						codeErrors: {type:"text"}
-					}
-				},
-				container: null
+	var democontainer = {
+		type:"object",
+		children:{
+			source: { 
+				type:"object",
+				children: {
+					code: {type:"code"},
+					codeErrors: {type:"text"}
+				}
 			},
-			builder: function(dom,data,ui) {
-				var build=function(v) {
-					var func="__String2Function["+(__String2FunctionID)+"]=function(container) { " + v + " };";
-					var err="";
-					try {
-						eval(func);
-						var f=__String2Function[__String2FunctionID]; __String2FunctionID++;
-						f(dom.ui.container);
-					} catch (e) {
-						if (e instanceof SyntaxError) {
-							err="SyntaxError: "+ e.message;
-						} else err=e.message;
-					}
-					data.source.codeErrors=err;
-				};
-				data.source.bind(function(k,v) {
-					if (k=="code") build(v);
-				});
-				build(data.source.code);
-			}
-		};
-	}
-	var maketypeui = function() {
-		return {
-			type:"object",
-			children:{
-				head:{
-					type:"format",
-					format:"Properties of %s"
-				},
-				desc:{type:"text"},
-				props:propui,
-				democontainer: democontainer()
+			container: null
+		},
+		builder: function(dom,data,ui) {
+			var build=function(v) {
+				var func="__String2Function["+(__String2FunctionID)+"]=function(container) { " + v + " };";
+				var err="";
+				try {
+					eval(func);
+					var f=__String2Function[__String2FunctionID]; __String2FunctionID++;
+					f(dom.ui.container);
+				} catch (e) {
+					if (e instanceof SyntaxError) {
+						err="SyntaxError: "+ e.message;
+					} else err=e.message;
+				}
+				data.source.codeErrors=err;
+			};
+			data.source.bind(function(k,v) {
+				if (k=="code") build(v);
+			});
+			build(data.source.code);
+		}
+	};
+
+	var maketypeui = {
+		type:"object",
+		children:{
+			head:{
+				type:"format",
+				format:"Properties of %s"
 			},
-			order:["head","desc","democontainer","props"],
-			class:"typeui"
-		};
-	}
+			desc:{type:"text"},
+			props:propui,
+			democontainer: democontainer
+		},
+		order:["head","desc","democontainer","props"],
+		class:"typeui"
+	};
 	var ui={
 		type:"tabs",
 		headerui:{type:"object"},
@@ -524,26 +557,20 @@ Maggi.UI.bool=function(ui,v,setv,format) {
 			obj:"Object",
 			txt:"Text",
 			html:"HTML",
+			fnc:"Function",
 			inp:"Input",
 			lnk:"Link",
 			cbx:"Checkbox",
+			lst:"List",
 			tab:"Tabs",
 			dem:"Demo"
 		},
 		selected:"intro",
+		childdefault:maketypeui,
 		children: {
 			intro:{type:"html"},
 			mag:{type:"html"},
-			magui:{type:"html"},
-			base:maketypeui(),
-			obj:maketypeui(),
-			txt:maketypeui(),
-			html:maketypeui(),
-			inp:maketypeui(),
-			lnk:maketypeui(),
-			cbx:maketypeui(),
-			tab:maketypeui(),
-			dem:maketypeui()
+			magui:{type:"html"}
 		}
 	};
 

@@ -448,3 +448,8 @@ h2 {
 	white-space: pre; font-family: "Courier New", monospace;
 }
 
+
+#democontainer .list .selected {
+	color:blue;
+}
+
