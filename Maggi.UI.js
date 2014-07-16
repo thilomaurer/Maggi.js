@@ -246,7 +246,7 @@ Maggi.UI.object=function(ui,o,seto,format) {
 			if (fmt) if (chld[k]) Maggi.UI(chld[k],o[k],fmt,function(v) { o[k]=v; });
 		};
 		var make=function(k) {
-			chld[k]=$("<div>",{id:k}).appendTo(ui);
+			chld[k]=$("<"+(format.childHTMLElement||"div")+">",{id:k}).appendTo(ui); 
 			if (format.makechildlabels) { 
 				$("<div>",{"class":"label",text:k}).appendTo(chld[k]); 
 				chld[k]=$("<div>").appendTo(chld[k]); 
@@ -279,97 +279,6 @@ Maggi.UI.object=function(ui,o,seto,format) {
 			if (k[0]=="order"||k=="order") {
 				$.each(chld, function(k,v) { v.remove(); });
 				$.each(format.order, function(idx,v) { if (chld[v]) chld[v].appendTo(ui); });
-			}
-		});
-	}
-};
-
-Maggi.UI.list=function(ui,o,seto,format) {
-	if (o==null) {ui.empty(); return; }
-	if (!(ui._Maggi===o)) {
-		Maggi.UI.BaseFunctionality(ui,format);
-		ui._Maggi=o;
-		var chld={};
-		var head;
-		var listcontainer;
-		ui.ui=chld;
-		var selected=null;
-		var update=function(k) { 
-			var fmt=null;
-			if (k instanceof Array) { k=k[0]; if (!(format.children&&format.children[k]&&format.children[k].bubbleupdate)) return; }
-			if (format.children) fmt=format.children[k];
-			if (!fmt) if (format.childdefault) { 
-				if (!format.children) format.add("children",{});
-				format.children.add(k,format.childdefault);
-				fmt=format.children[k];
-			} 
-			if (!fmt) {
-				if ((o[k] instanceof Object)&&(!(o[k] instanceof Date))) 
-					type="object";
-				else
-					type="text";
-				fmt={type:type};
-			}
-			if (((o[k] instanceof Object)&&(!(o[k] instanceof Date))&&(!(typeof o[k] == "function")))&&(fmt.type=="text"||fmt.type=="input")) {
-				fmt={type:"object",childdefault:format.childdefault,makechildlabels:format.makechildlabels};
-			}
-			if (fmt) if (chld[k]) Maggi.UI(chld[k],o[k],fmt,function(v) { o[k]=v; });
-
-		};
-		var make=function(k) {
-			var par=ui;
-			if (listcontainer) par=$("<li>",{id:k}).appendTo(listcontainer);
-			chld[k]=$("<div>",{id:k}).appendTo(par).click(function() { select(k); });
-		}
-		var add=function(k) {
-			make(k);
-			update(k);
-		}
-		var remove=function(k) {
-			delete chld[k].remove();
-		}
-		ui.empty();
-		if (format.headerdata&&format.headerui) { 
-			head=$("<div>",{id:format.headerid}).appendTo(ui); 
-			Maggi.UI(head,format.headerdata,format.headerui, function(v) {format.header=v; }); 
-		}
-		if (format.order) alert("format not supported:\n"+JSON.stringify(format,null,"\t"));
-
-		var select=function(k) {
-			if (format.select=="single") format.selected=k;
-			if (format.select=="multi") {
-				format.selected.add(k,!format.selected[k]);
-			}
-		}
-		if (format.listtype=="ordered") listcontainer=$('<ol>').appendTo(ui);
-		if (format.listtype=="unordered") listcontainer=$('<ul>').appendTo(ui);
-
-		$.each(o, function(k) {
-			make(k);
-			update(k);
-		});
-
-		o.bind("set", update);
-		o.bind("add", add);
-		o.bind("remove", remove);
-
-		var updateSingleSelection = function(newv,oldv) {
-			if (oldv) if (chld[oldv]) chld[oldv].removeClass("selected");
-			if (newv) if (chld[newv]) chld[newv].addClass("selected");
-		};
-		var updateMultiSelection = function(k,v) {
-			var c=chld[k];
-			if (c) if (v) c.addClass("selected"); else c.removeClass("selected");
-		};
-
-		if (format.select=="single") updateSingleSelection(format.selected,null);
-		if (format.select=="multi") $.each(format.selected, updateMultiSelection);
-		format.bind("set",function(k,newv,oldv) {
-			if (k=="selected") updateSingleSelection(newv,oldv);
-			if (k[0]=="selected") updateMultiSelection(k[1],newv,oldv);
-			if (k=="select") {
-				if (newv=="single") format.selected=null;
-				if (newv=="multi") format.selected={};
 			}
 		});
 	}
@@ -408,24 +317,45 @@ Maggi.UI.tabs=function(ui,o,seto,format) {
 		});
 	}
 };
-/*
+
 Maggi.UI.list=function(ui,o,seto,format) {
 	if (o==null) {ui.empty(); return; }
 	if (!(ui._Maggi===o)) {
-		Maggi.UI.BaseFunctionality(ui,format);
-		ui._Maggi=o;
-		ui.empty();
+		var childHTMLElement="div";
+		var listContainerHTMLElement="div";
+		if (format.listtype=="ordered") listContainerHTMLElement="ol";
+		if (format.listtype=="unordered") listContainerHTMLElement="ul";
+		if (format.listtype) { ui.empty(); format.childHTMLElement="li"; ui=$('<'+listContainerHTMLElement+'>').appendTo(ui); }
 		Maggi.UI.object(ui,o,seto,format);
+		ui._Maggi=o;
 		if (ui.ui) $.each(ui.ui,function(k,v) {
-			v.click(function() { select(k,format.selected); });
+			v.click(function() { select(k); });
 		});
-		var select=function(k,oldk) {
-			alert(k+","+oldk);
+		var chld=ui.ui;
+		var select=function(k) {
+			if (format.select=="single") format.selected=k;
+			if (format.select=="multi") {
+				format.selected.add(k,!format.selected[k]);
+			}
+		}
+		var updateSingleSelection = function(newv,oldv) {
+			if (oldv) if (chld[oldv]) chld[oldv].removeClass("selected");
+			if (newv) if (chld[newv]) chld[newv].addClass("selected");
 		};
-		select(format.selected,null);
-		format.bind("set",function(k,v,oldv) {
-			if (k=="selected") select(v,oldv);
+		var updateMultiSelection = function(k,v) {
+			var c=chld[k];
+			if (c) if (v) c.addClass("selected"); else c.removeClass("selected");
+		};
+		if (format.select=="single") updateSingleSelection(format.selected,null);
+		if (format.select=="multi") $.each(format.selected, updateMultiSelection);
+		format.bind("set",function(k,newv,oldv) {
+			if (k=="selected") updateSingleSelection(newv,oldv);
+			if (k[0]=="selected") updateMultiSelection(k[1],newv,oldv);
+			if (k=="select") {
+				if (newv=="single") format.selected=null;
+				if (newv=="multi") format.selected={};
+			}
 		});
 	}
 };
-*/
+
