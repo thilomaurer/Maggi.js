@@ -167,7 +167,7 @@ var data=Maggi({
 	}
 });
 
-var ui={
+var ui=Maggi({
 	type:"object",
 	childdefault:null,
 	children:{},
@@ -176,7 +176,7 @@ var ui={
 		"child2",
 		"child1"
 	]
-};
+});
 
 Maggi.UI(container,data,ui);
 	}
@@ -188,7 +188,7 @@ var data=Maggi({
 	child3:"element3"
 });
 
-var ui=({
+var ui=Maggi({
 	type:"object",
 	visible:true,
 	enabled:false,
@@ -380,8 +380,8 @@ Maggi.UI(container,data,ui);
 	}
 	var demoobj = function(code) {
 		return {
-			source: {code: removeFunction(code),codeErrors:"" },
-			container: null
+			source: {js:removeFunction(code), jsErrors:null, html:null},
+			container: null,
 		};
 	};
 
@@ -477,7 +477,7 @@ Maggi.UI(container,data,ui);
 			Maggi.UI.BaseFunctionality(ui,format);
 			var editor = ace.edit(ui[0]);
 			editor.setTheme("ace/theme/xcode");
-			editor.getSession().setMode("ace/mode/javascript");
+			editor.getSession().setMode("ace/mode/"+format.mode);
 			editor.on("change", function(e) {
 				setv(editor.getValue());
 			});
@@ -504,31 +504,47 @@ Maggi.UI.bool=function(ui,v,setv,format) {
 			source: { 
 				type:"object",
 				children: {
-					code: {type:"code"},
-					codeErrors: {type:"text"}
+					js: {type:"code",mode:"javascript"},
+					//jsErrors: {type:"text"},
+					html: {type:"code",mode:"html"},
+					htmlErrors: {type:"text"},
+					css: {type:"code",mode:"css"},
+					cssErrors: {type:"text"}
 				}
 			},
 			container: null
 		},
 		builder: function(dom,data,ui) {
 			var build=function(v) {
-				var func="__String2Function["+(__String2FunctionID)+"]=function(container) { " + v + " };";
+				var func="__String2Function["+(__String2FunctionID)+"]=function(container) { " + v + " return({data:data,ui:ui}); };";
 				var err="";
+				var mm=null;
 				try {
 					eval(func);
 					var f=__String2Function[__String2FunctionID]; __String2FunctionID++;
-					f(dom.ui.container);
+					mm=f(dom.ui.container);
 				} catch (e) {
 					if (e instanceof SyntaxError) {
 						err="SyntaxError: "+ e.message;
 					} else err=e.message;
 				}
-				data.source.codeErrors=err;
+				data.source.jsErrors=err;
+				var updateHTML=function() {
+					data.source.html=html_beautify(dom.ui.container[0].outerHTML);
+				};
+				if (mm) {
+					if (mm.ui) mm.ui.bind(updateHTML);
+					if (mm.data) mm.data.bind(updateHTML);
+				}
 			};
 			data.source.bind(function(k,v) {
-				if (k=="code") build(v);
+				if (k=="js") { build(v); /*data.source.html=html_beautify(dom.ui.container[0].outerHTML);*/ }
 			});
-			build(data.source.code);
+			// the following is a jquery-bind-thing
+			dom.ui.container.bind("DOMSubtreeModified", function() {
+				data.source.html=html_beautify(dom.ui.container[0].outerHTML);
+			});
+			build(data.source.js);
 		}
 	};
 

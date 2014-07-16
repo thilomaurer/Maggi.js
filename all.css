@@ -235,6 +235,11 @@ h2 {
 
 #democontainer > #source {
 	text-align:left;
+}
+
+#democontainer > #source > * {
+	display:inline-block;
+	text-align:left;
 	border:1px solid gray;
 }
 
@@ -336,7 +341,7 @@ h2 {
 	white-space: pre; font-family: "Courier New", monospace; background: #fff;
 }
 
-#code {
+.code {
 	font-family: "Courier New", monospace; 
 	font-size:16px;
 	width:800px;
