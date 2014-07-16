@@ -344,8 +344,30 @@ h2 {
 .code {
 	font-family: "Courier New", monospace; 
 	font-size:16px;
-	width:800px;
+}
+
+.code #editor {
+	font-family: "Courier New", monospace; 
+	font-size:16px;
+	width:400px;
 	height:600px;
+}
+
+.code #annot {
+	height:100px;
+	padding:4px;
+}
+
+.code #annot > * > * {
+	display:inline;
+}
+
+.code #annot > * > #row:after {
+	content:":";
+}
+
+.code #annot > * > #column {
+	padding-right:8px;
 }
 
 .uimodel-ui > * { display:block;}

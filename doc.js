@@ -376,11 +376,11 @@ Maggi.UI(container,data,ui);
 		var a=cont.indexOf("{")+1;
 		var b=cont.lastIndexOf("}")-1;
 		cont=cont.substr(a,b-a);
-		return cont;
+		return "var container=$('body');\n"+cont;
 	}
 	var demoobj = function(code) {
 		return {
-			source: {js:removeFunction(code), jsErrors:null, html:null},
+			source: {js:removeFunction(code), css:null, html:null},
 			container: null,
 			iframe: {
 				name: null,
@@ -484,12 +484,34 @@ Maggi.UI(container,data,ui);
 	Maggi.UI.code=function(ui,v,setv,format) {
 		if (!ui._Maggi) {
 			Maggi.UI.BaseFunctionality(ui,format);
-			var editor = ace.edit(ui[0]);
+			
+			var data=Maggi({editor:null,annot:{}});
+			var fmt=Maggi({
+				type:"object",
+				children: {
+					editor:{type:"text"},
+					annot:{
+						type:"list",
+						chlddefault:{
+							type:"object",
+							order:["type","row","column","text"]
+						}, 
+						class:"scroll"
+					}
+				}
+			});
+			Maggi.UI(ui,data,fmt);
+			
+			var editor = ace.edit(ui.ui.editor[0]);
+
 			editor.setTheme("ace/theme/xcode");
 			editor.getSession().setMode("ace/mode/"+format.mode);
 			editor.on("change", function(e) {
 				setv(editor.getValue());
-			});
+	 		});
+			editor.getSession().on("changeAnnotation", function() {
+				data.annot = editor.getSession().getAnnotations();
+			});	
 			ui._Maggi=editor;
 		}
 		if (ui._Maggi.getValue()!=v) { ui._Maggi.setValue(v); ui._Maggi.clearSelection(); }
@@ -513,24 +535,16 @@ Maggi.UI.bool=function(ui,v,setv,format) {
 			source: { 
 				type:"object",
 				children: {
-					js: {type:"code",mode:"javascript"},
-					//jsErrors: {type:"text"},
-					html: {type:"code",mode:"html"},
-					htmlErrors: {type:"text"},
+					js: {type:"code",mode:"javascript",showErrors:true},
 					css: {type:"code",mode:"css"},
-					cssErrors: {type:"text"}
+					//html: {type:"code",mode:"html"},
 				}
 			},
-			container: null,
+			//container: null,
 			iframe: {type:"iframe"}
 		},
 		builder: function(dom,data,ui) {
 			var build=function(v) {
-/*
-				data.iframe.head.add("jquery-2.0.3.js",'<script src="jquery-2.0.3.js"></script>');
-				data.iframe.head.add("Maggi.js",'<script src="Maggi.js"></script>');
-				data.iframe.head.add("Maggi.UI.js",'<script src="Maggi.UI.js"></script>');
-*/
 				data.iframe.scripts.add("jquery-2.0.3.js",null);
 				data.iframe.scripts.add("Maggi.js",null);
 				data.iframe.scripts.add("Maggi.UI.js",null);
@@ -562,9 +576,11 @@ Maggi.UI.bool=function(ui,v,setv,format) {
 				if (k=="js") build(v);
 			});
 			// the following is a jquery-bind-thing
+			/*
 			dom.ui.container.bind("DOMSubtreeModified", function() {
 				data.source.html=html_beautify(dom.ui.container[0].outerHTML);
 			});
+			*/
 			build(data.source.js);
 		}
 	};
