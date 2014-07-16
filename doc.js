@@ -382,6 +382,12 @@ Maggi.UI(container,data,ui);
 		return {
 			source: {js:removeFunction(code), jsErrors:null, html:null},
 			container: null,
+			iframe: {
+				name: null,
+				head: {},
+				styles: {}, 
+				scripts: {}
+			}
 		};
 	};
 
@@ -398,6 +404,9 @@ Maggi.UI(container,data,ui);
 		tab:{head:"Tabs",desc:"",props:tabprop,democontainer:demoobj(tabcode)},
 		dem:{head:"Password Calculator Demo",desc:"This simple example demos a SHA1 Password Calculator.",democontainer:demoobj(pwcalccode)}
 	};
+	$.each(d,function(k,v) {
+		d[k].democontainer.iframe.name=k;
+	});
 
 	d.intro="<h2>Introduction</h2> <b>Maggi.js</b> is a Javascript framework that enables rapid development of object centric applications and their user-interfaces. The framework consists of two parts: <ul><li>The <b>Maggi.js</b> framework enables binding functions to events of object-properties.<li>The <b>Maggi.UI.js</b> framework is as user-interface framework that leverages the Maggi.js framework to bind to data- and ui-models in order to create and manage user-interfaces.</ul>";
 	d.mag="<h2>Maggi.js</h2> Maggi.js is a Javascript framework that enables rapid development of object centric applications, by \"maggically\" adding bubbling property-events to any object. Binding functions to these events allows for a triggering for dependent updates.<BR>This is a demo for an object <I>data</I> that manages a shopping-cart:<BR>";
@@ -512,16 +521,28 @@ Maggi.UI.bool=function(ui,v,setv,format) {
 					cssErrors: {type:"text"}
 				}
 			},
-			container: null
+			container: null,
+			iframe: {type:"iframe"}
 		},
 		builder: function(dom,data,ui) {
 			var build=function(v) {
+/*
+				data.iframe.head.add("jquery-2.0.3.js",'<script src="jquery-2.0.3.js"></script>');
+				data.iframe.head.add("Maggi.js",'<script src="Maggi.js"></script>');
+				data.iframe.head.add("Maggi.UI.js",'<script src="Maggi.UI.js"></script>');
+*/
+				data.iframe.scripts.add("jquery-2.0.3.js",null);
+				data.iframe.scripts.add("Maggi.js",null);
+				data.iframe.scripts.add("Maggi.UI.js",null);
+				data.iframe.scripts.add("demo.js",v);
+/*
 				var func="__String2Function["+(__String2FunctionID)+"]=function(container) { " + v + " return({data:data,ui:ui}); };";
 				var err="";
 				var mm=null;
 				try {
 					eval(func);
 					var f=__String2Function[__String2FunctionID]; __String2FunctionID++;
+					dom.ui.container.removeClass();
 					mm=f(dom.ui.container);
 				} catch (e) {
 					if (e instanceof SyntaxError) {
@@ -535,10 +556,10 @@ Maggi.UI.bool=function(ui,v,setv,format) {
 				if (mm) {
 					if (mm.ui) mm.ui.bind(updateHTML);
 					if (mm.data) mm.data.bind(updateHTML);
-				}
+				}*/
 			};
 			data.source.bind(function(k,v) {
-				if (k=="js") { build(v); /*data.source.html=html_beautify(dom.ui.container[0].outerHTML);*/ }
+				if (k=="js") build(v);
 			});
 			// the following is a jquery-bind-thing
 			dom.ui.container.bind("DOMSubtreeModified", function() {

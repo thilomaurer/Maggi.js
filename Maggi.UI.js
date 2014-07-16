@@ -124,6 +124,35 @@ Maggi.UI.html=function(ui,s,sets,format) {
 	ui.html(s&&s.toString());
 };
 
+Maggi.UI.iframe=function(ui,s,sets,format) {
+	if (!ui._Maggi) {
+		Maggi.UI.BaseFunctionality(ui,format);
+		ui._Maggi=$('<iframe>', {name:s.name}).appendTo(ui);
+	}
+	var updateHead = function() {
+		var doc=ui._Maggi[0].contentWindow.document;
+		var headHTML="";
+		if (s.head) $.each(s.head,function(k,v) {
+			headHTML+=v+"\n";
+		});
+		if (s.scripts) $.each(s.scripts,function(k,v) {
+			var s=doc.createElement("script");
+			if (v==null) s.setAttribute("src",k); else s.setAttribute("id",k);
+			if (v) s.innerHTML=v;
+			doc.head.appendChild(s);
+		});
+		if (s.styles) $.each(s.styles,function(k,v) {
+			headHTML+="<style id=\""+k+"\">"+v+"</style>\n";
+		});
+	}
+	s.bind(function(k,v) {
+		var k=k[0];
+		if (k=="scripts"||k=="head"||k=="styles") updateHead();
+	});
+	updateHead();
+	//ui._Maggi[0].contentWindow.document.body;
+};
+
 Maggi.UI.link=function(ui,v,setv,format) {
 	if (!ui._Maggi) {
 		Maggi.UI.BaseFunctionality(ui,format);
