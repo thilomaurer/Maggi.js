@@ -181,11 +181,13 @@ Maggi.UI.input=function(ui,v,setv,format) {
 Maggi.UI.function=function(ui,v,setv,format) {
 	if (!ui._Maggi) {
 		Maggi.UI.BaseFunctionality(ui,format);
-		ui.text(format.label);
-		ui.click(function() {
-			v(ui._MaggiParent._Maggi);
-		});
-	} else ui._Maggi=true;
+		ui._Maggi=$('<button/>').text(format.label).appendTo(ui);
+		format.bind(function(k,v) { if (k=="label") ui._Maggi.text(v); });
+	}
+	ui._Maggi.off("click"); //remove old click handler
+	ui._Maggi.click(function() {
+		v(ui._MaggiParent._Maggi);
+	});
 };
 
 Maggi.UI.select=function(ui,v,setv,format) {
