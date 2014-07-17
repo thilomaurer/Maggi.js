@@ -131,26 +131,48 @@ Maggi.UI.iframe=function(ui,s,sets,format) {
 	}
 	var updateHead = function() {
 		var doc=ui._Maggi[0].contentWindow.document;
+		var removeChilds = function(myNode) {
+			while (myNode.firstChild) {
+			    myNode.removeChild(myNode.firstChild);
+			}
+		};
+		removeChilds(doc.head);
+/*
 		var headHTML="";
 		if (s.head) $.each(s.head,function(k,v) {
 			headHTML+=v+"\n";
 		});
-		if (s.scripts) $.each(s.scripts,function(k,v) {
-			var s=doc.createElement("script");
-			if (v==null) s.setAttribute("src",k); else s.setAttribute("id",k);
-			if (v) s.innerHTML=v;
-			doc.head.appendChild(s);
-		});
-		if (s.styles) $.each(s.styles,function(k,v) {
-			headHTML+="<style id=\""+k+"\">"+v+"</style>\n";
-		});
+*/
+		var e;
+		if (s.scripts) for (k in s.scripts) {
+			var v=s.scripts[k];
+			e=doc.createElement("script");
+			e.setAttribute("async",false);
+			if (v==null) e.setAttribute("src",k); else e.setAttribute("id",k);
+			if (v) e.innerHTML=v;
+			doc.head.appendChild(e);
+		};
+		if (s.styles) for (k in s.styles) {
+			var v=s.styles[k];
+			if (v==null) {
+				e=doc.createElement("link");
+				e.setAttribute("rel","stylesheet");
+				e.setAttribute("type","text/css");
+				e.setAttribute("href",k);
+			} else {
+				e=doc.createElement("script");
+				e.setAttribute("id",k);
+				e.innerHTML=v&&v.toString();
+			}
+			doc.head.appendChild(e);
+		};
 	}
 	s.bind(function(k,v) {
 		var k=k[0];
 		if (k=="scripts"||k=="head"||k=="styles") updateHead();
 	});
 	updateHead();
-	//ui._Maggi[0].contentWindow.document.body;
+	//ui._Maggi[0].contentWindow.document.body.setAttribute("onload","main()");
 };
 
 Maggi.UI.link=function(ui,v,setv,format) {

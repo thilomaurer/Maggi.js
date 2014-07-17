@@ -548,7 +548,9 @@ Maggi.UI.bool=function(ui,v,setv,format) {
 				data.iframe.scripts.add("jquery-2.0.3.js",null);
 				data.iframe.scripts.add("Maggi.js",null);
 				data.iframe.scripts.add("Maggi.UI.js",null);
+				v="var main=function() {\n"+v+"};";
 				data.iframe.scripts.add("demo.js",v);
+				data.iframe.scripts.add("main.js",null);
 /*
 				var func="__String2Function["+(__String2FunctionID)+"]=function(container) { " + v + " return({data:data,ui:ui}); };";
 				var err="";
