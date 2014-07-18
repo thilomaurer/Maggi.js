@@ -157,16 +157,9 @@ var doc = function() {
 		class:"property"
 	};
 
-	var removeFunction = function(v) {
-		var cont=v.toString();
-		var a=cont.indexOf("{")+1;
-		var b=cont.lastIndexOf("}")-1;
-		cont=cont.substr(a,b-a);
-		return "var container=$('body');\n"+cont;
-	}
-	var demoobj = function(code) {
+	var demoobj = function(js,css) {
 		return {
-			source: {js:removeFunction(code), css:null, html:null},
+			source: {js:"", css:"", html:null},
 			container: null,
 			iframe: {
 				name: null,
@@ -178,20 +171,30 @@ var doc = function() {
 	};
 
 	var d={
-		base:{head:"Base",desc:"Every UI-model, independently of its type, contains the following base properties.",props:baseprop,democontainer:demoobj(basecode)},
-		obj:{head:"Object",desc:"",props:objprop,democontainer:demoobj(objcode)},
-		txt:{head:"Text",desc:"",props:textprop,democontainer:demoobj(txtcode)},
-		html:{head:"HTML",desc:"",props:textprop,democontainer:demoobj(htmlcode)},
-		inp:{head:"Input",desc:"",props:inputprop,democontainer:demoobj(inpcode)},
-		fnc:{head:"Function",desc:"",props:inputprop,democontainer:demoobj(fnccode)},
-		lnk:{head:"Link",desc:"",props:linkprop,democontainer:demoobj(lnkcode)},
-		cbx:{head:"Checkbox (SHOULD NAME SWITCH?)",desc:"",props:checkboxprop,democontainer:demoobj(cbxcode)},
-		lst:{head:"List",desc:"",props:tabprop,democontainer:demoobj(lstcode)},
-		tab:{head:"Tabs",desc:"",props:tabprop,democontainer:demoobj(tabcode)},
-		dem:{head:"Password Calculator Demo",desc:"This simple example demos a SHA1 Password Calculator.",democontainer:demoobj(pwcalccode)}
+		base:{head:"Base",desc:"Every UI-model, independently of its type, contains the following base properties.",props:baseprop,democontainer:demoobj()},
+		object:{head:"Object",desc:"",props:objprop,democontainer:demoobj()},
+		text:{head:"Text",desc:"",props:textprop,democontainer:demoobj()},
+		html:{head:"HTML",desc:"",props:textprop,democontainer:demoobj()},
+		input:{head:"Input",desc:"",props:inputprop,democontainer:demoobj()},
+		function:{head:"Function",desc:"",props:inputprop,democontainer:demoobj()},
+		link:{head:"Link",desc:"",props:linkprop,democontainer:demoobj()},
+		checkbox:{head:"Checkbox (SHOULD NAME SWITCH?)",desc:"",props:checkboxprop,democontainer:demoobj()},
+		list:{head:"List",desc:"",props:tabprop,democontainer:demoobj()},
+		tabs:{head:"Tabs",desc:"",props:tabprop,democontainer:demoobj()},
+		pwcalc:{head:"Password Calculator Demo",desc:"This simple example demos a SHA1 Password Calculator.",democontainer:demoobj()}
 	};
+
 	$.each(d,function(k,v) {
 		d[k].democontainer.iframe.name=k;
+		$.get( "demos/"+k+".css", function(data) {
+			d[k].democontainer.source.css=data;
+		});
+	});
+
+	$.each(d,function(k,v) {
+		$.get( "demos/"+k+".js", null, function(data) {
+			d[k].democontainer.source.js=data;
+		},"text");
 	});
 
 	d.intro="<h2>Introduction</h2> <b>Maggi.js</b> is a Javascript framework that enables rapid development of object centric applications and their user-interfaces. The framework consists of two parts: <ul><li>The <b>Maggi.js</b> framework enables binding functions to events of object-properties.<li>The <b>Maggi.UI.js</b> framework is as user-interface framework that leverages the Maggi.js framework to bind to data- and ui-models in order to create and manage user-interfaces.</ul>";
@@ -206,7 +209,7 @@ var doc = function() {
 		if (!ui._Maggi) {
 			Maggi.UI.BaseFunctionality(ui,format);
 			
-			var data=Maggi({editor:null,annot:{}});
+			var data=Maggi({editor:"",annot:{}});
 			var fmt=Maggi({
 				type:"object",
 				children: {
@@ -237,7 +240,10 @@ var doc = function() {
 			});	
 			ui._Maggi=editor;
 		}
-		if (ui._Maggi.getValue()!=v) { ui._Maggi.setValue(v); ui._Maggi.clearSelection(); }
+		if (ui._Maggi.getValue()!=v) {
+			ui._Maggi.setValue(v); 
+			ui._Maggi.clearSelection();
+		}
 	};
 
 	var democontainer = {
@@ -261,14 +267,14 @@ var doc = function() {
 			data.iframe.scripts.add("demo.js","");
 			data.iframe.styles.add("demo.css","");
 
-			var buildjs=function(v) {
+			var buildjs=function() {
 				v="var main=function() {\n"+data.source.js+"};";
 				data.iframe.scripts.remove("demo.js");
 				data.iframe.scripts.add("demo.js",v);
 				data.iframe.scripts.remove("main.js");
 				data.iframe.scripts.add("main.js",null);
 			};
-			var buildcss=function(v) {
+			var buildcss=function() {
 				data.iframe.styles["demo.css"]=data.source.css;
 			};
 			data.source.bind(function(k,v) {
@@ -308,16 +314,16 @@ var doc = function() {
 			mag:"Maggi.js",
 			magui:"Maggi.UI.js",
 			base:"Base",
-			obj:"Object",
-			txt:"Text",
+			object:"Object",
+			text:"Text",
 			html:"HTML",
-			fnc:"Function",
-			inp:"Input",
-			lnk:"Link",
-			cbx:"Checkbox",
-			lst:"List",
-			tab:"Tabs",
-			dem:"Demo"
+			function:"Function",
+			input:"Input",
+			link:"Link",
+			checkbox:"Checkbox",
+			list:"List",
+			tabs:"Tabs",
+			pwcalc:"Demo"
 		},
 		selected:"intro",
 		childdefault:maketypeui,
