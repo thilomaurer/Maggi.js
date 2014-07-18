@@ -526,9 +526,6 @@ Maggi.UI.bool=function(ui,v,setv,format) {
 };
 */
 
-	var __String2FunctionID=0;
-	var __String2Function={};
-	var __String2FunctionArgs=[];
 	var democontainer = {
 		type:"object",
 		children:{
@@ -544,38 +541,25 @@ Maggi.UI.bool=function(ui,v,setv,format) {
 			iframe: {type:"iframe"}
 		},
 		builder: function(dom,data,ui) {
-			var build=function(v) {
-				data.iframe.scripts.add("jquery-2.0.3.js",null);
-				data.iframe.scripts.add("Maggi.js",null);
-				data.iframe.scripts.add("Maggi.UI.js",null);
-				v="var main=function() {\n"+v+"};";
+			data.iframe.scripts.add("jquery-2.0.3.js",null);
+			data.iframe.scripts.add("Maggi.js",null);
+			data.iframe.scripts.add("Maggi.UI.js",null);
+			data.iframe.scripts.add("demo.js","");
+			data.iframe.styles.add("demo.css","");
+
+			var buildjs=function(v) {
+				v="var main=function() {\n"+data.source.js+"};";
+				data.iframe.scripts.remove("demo.js");
 				data.iframe.scripts.add("demo.js",v);
+				data.iframe.scripts.remove("main.js");
 				data.iframe.scripts.add("main.js",null);
-/*
-				var func="__String2Function["+(__String2FunctionID)+"]=function(container) { " + v + " return({data:data,ui:ui}); };";
-				var err="";
-				var mm=null;
-				try {
-					eval(func);
-					var f=__String2Function[__String2FunctionID]; __String2FunctionID++;
-					dom.ui.container.removeClass();
-					mm=f(dom.ui.container);
-				} catch (e) {
-					if (e instanceof SyntaxError) {
-						err="SyntaxError: "+ e.message;
-					} else err=e.message;
-				}
-				data.source.jsErrors=err;
-				var updateHTML=function() {
-					data.source.html=html_beautify(dom.ui.container[0].outerHTML);
-				};
-				if (mm) {
-					if (mm.ui) mm.ui.bind(updateHTML);
-					if (mm.data) mm.data.bind(updateHTML);
-				}*/
+			};
+			var buildcss=function(v) {
+				data.iframe.styles["demo.css"]=data.source.css;
 			};
 			data.source.bind(function(k,v) {
-				if (k=="js") build(v);
+				if (k=="js") buildjs();
+				if (k=="css") buildcss();
 			});
 			// the following is a jquery-bind-thing
 			/*
@@ -583,7 +567,8 @@ Maggi.UI.bool=function(ui,v,setv,format) {
 				data.source.html=html_beautify(dom.ui.container[0].outerHTML);
 			});
 			*/
-			build(data.source.js);
+			buildjs();
+			buildcss();
 		}
 	};
 

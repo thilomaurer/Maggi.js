@@ -43,22 +43,25 @@ var Maggi=function(other) {
 			var oldv=d[key];
 			d[key]=value;
 			if (p.hasOwnProperty(key)) { 
-				console.log('Maggi: attempt to redefine property "'+key+'" of '+JSON.stringify(p)+'.');
+				console.log('Maggi: set by add for property "'+key+'" of '+JSON.stringify(p)+'.');
 				trigger("set",key,value,oldv);
 				return;
 			} else {
 				Object.defineProperty(p,key,prop);
 				//propage child events to parent
 				if (value&&value.bind) {
-					value.bind(["set","remove","add"],function(innerkey,v,oldv) {
+					var bubble=function(e,k,v,oldv) {
 						var bubblekey;
-						if (innerkey instanceof Array)
-							bubblekey=innerkey.slice(0);
+						if (k instanceof Array)
+							bubblekey=k.slice(0);
 						else 
-							bubblekey=[innerkey];
+							bubblekey=[k];
 
 						bubblekey.unshift(key);
-						trigger("set",bubblekey,v,oldv);
+						trigger(e,bubblekey,v,oldv);
+					};
+					["set","remove","add"].forEach(function(e) {
+						value.bind(e,function(k,v,oldv) { bubble(e,k,v,oldv) });
 					});
 				}
 				trigger("add",key,value);

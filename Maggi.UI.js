@@ -129,49 +129,73 @@ Maggi.UI.iframe=function(ui,s,sets,format) {
 		Maggi.UI.BaseFunctionality(ui,format);
 		ui._Maggi=$('<iframe>', {name:s.name}).appendTo(ui);
 	}
-	var updateHead = function() {
-		var doc=ui._Maggi[0].contentWindow.document;
-		var removeChilds = function(myNode) {
-			while (myNode.firstChild) {
-			    myNode.removeChild(myNode.firstChild);
-			}
-		};
-		removeChilds(doc.head);
-/*
-		var headHTML="";
-		if (s.head) $.each(s.head,function(k,v) {
-			headHTML+=v+"\n";
-		});
-*/
-		var e;
-		if (s.scripts) for (k in s.scripts) {
-			var v=s.scripts[k];
-			e=doc.createElement("script");
-			e.setAttribute("async",false);
-			if (v==null) e.setAttribute("src",k); else e.setAttribute("id",k);
-			if (v) e.innerHTML=v;
-			doc.head.appendChild(e);
-		};
-		if (s.styles) for (k in s.styles) {
-			var v=s.styles[k];
-			if (v==null) {
-				e=doc.createElement("link");
-				e.setAttribute("rel","stylesheet");
-				e.setAttribute("type","text/css");
-				e.setAttribute("href",k);
-			} else {
-				e=doc.createElement("script");
-				e.setAttribute("id",k);
-				e.innerHTML=v&&v.toString();
-			}
-			doc.head.appendChild(e);
-		};
+	var elscr={};
+	var elsty={};
+	var doc=ui._Maggi[0].contentWindow.document;
+	var makescr = function(k) {
+		var e=doc.createElement("script");
+		e.setAttribute("async",false);
+		elscr[k]=e;
+		doc.head.appendChild(e);
 	}
+	var upscr = function(k) {
+		var e=elscr[k];
+		var v=s.scripts[k];
+		if (v==null) e.setAttribute("src",k); else e.setAttribute("id",k);
+		if (v) e.innerHTML=v;
+	}
+	var makesty = function(k) {
+		var e;
+		var v=s.styles[k];
+		if (v==null) {
+			e=doc.createElement("link");
+			e.setAttribute("rel","stylesheet");
+			e.setAttribute("type","text/css");
+			e.setAttribute("href",k);
+		} else {
+			e=doc.createElement("style");
+			e.setAttribute("id",k);
+		}
+		elsty[k]=e;
+		doc.head.appendChild(e);
+	}
+	var upsty = function(k) {
+		var e=elsty[k];
+		var v=s.styles[k];
+		e.innerHTML=v&&v.toString();
+	}
+	var addsty = function(k) {
+		makesty(k);
+		upsty(k);
+	}
+	var addscr = function(k) {
+		makescr(k);
+		upscr(k);
+	}
+	var remsty = function(k) {
+		var e=elsty[k];
+		e.remove();
+		delete e;
+	}
+	var remscr = function(k) {
+		var e=elscr[k];
+		e.remove();
+		delete e;
+	}
+	if (s.scripts) for (k in s.scripts) addscr(k);
+	if (s.styles) for (k in s.styles) addsty(k);
 	s.bind(function(k,v) {
-		var k=k[0];
-		if (k=="scripts"||k=="head"||k=="styles") updateHead();
+		if (k[0]=="scripts") upscr(k[1]);
+		if (k[0]=="styles") upsty(k[1]);
 	});
-	updateHead();
+	s.bind("add", function(k,v) {
+		if (k[0]=="scripts") addscr(k[1]);
+		if (k[0]=="styles") addsty(k[1]);
+	});
+	s.bind("remove", function(k,v) {
+		if (k[0]=="scripts") remscr(k[1]);
+		if (k[0]=="styles") remsty(k[1]);
+	});
 	//ui._Maggi[0].contentWindow.document.body.setAttribute("onload","main()");
 };
 
@@ -311,7 +335,7 @@ Maggi.UI.object=function(ui,o,seto,format) {
 			}
 		}
 		var remove=function(k) {
-			delete chld[k].remove();
+			if (chld.hasOwnProperty(k)) delete chld[k].remove();
 		}
 		if (format.order) {
 			$.each(format.order, function(idx,v) { add(v); });
