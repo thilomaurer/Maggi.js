@@ -364,6 +364,13 @@ iframe {
 	padding:4px;
 }
 
+.code #annot > *:hover {
+	background:#ddd;
+}
+.code #annot > .selected {
+	background:#ddf;
+}
+
 .code #annot > * > * {
 	display:inline;
 }
@@ -373,6 +380,9 @@ iframe {
 }
 
 .code #annot > * > #column {
+	padding-right:8px;
+}
+.code #annot > * > #type {
 	padding-right:8px;
 }
 

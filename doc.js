@@ -157,220 +157,6 @@ var doc = function() {
 		class:"property"
 	};
 
-	var objcode=function(container) {
-var data=Maggi({
-	child1:"child 1",
-	child2:"child 2",
-	child3:{
-		child31:"child 3.1",
-		child32:"child 3.2"
-	}
-});
-
-var ui=Maggi({
-	type:"object",
-	childdefault:null,
-	children:{},
-	order:[	
-		"child3",
-		"child2",
-		"child1"
-	]
-});
-
-Maggi.UI(container,data,ui);
-	}
-
-	var basecode=function(container) {
-var data=Maggi({
-	child1:"element1",
-	child2:"element2",
-	child3:"element3"
-});
-
-var ui=Maggi({
-	type:"object",
-	visible:true,
-	enabled:false,
-	class:"myclass"
-});
-
-Maggi.UI(container,data,ui);
-	}
-
-	var txtcode=function(container) {
-var ui=Maggi({
-	type:"object",
-	children:{
-		o:{type:"text"}
-	}
-});
-
-var data=Maggi({o:"example-text"});
-
-Maggi.UI(container,data,ui);
-	}
-	
-	var htmlcode=function(container) {
-var ui=Maggi({
-	type:"object",
-	children:{
-		o:{type:"html"}
-	}
-});
-
-var data=Maggi({o:"<ol><li>First<li>Second</ol>"});
-
-Maggi.UI(container,data,ui);
-	}
-
-	var lnkcode=function(container) {
-var ui=Maggi({
-	type:"object",
-	children:{
-		o:{
-			type:"link",
-			label:"click here",
-			target:"_blank"
-		}
-	}
-});
-
-var data=Maggi({o:"http://www.google.com"});
-
-Maggi.UI(container,data,ui);
-	}
-
-	var cbxcode=function(container) {
-var ui=Maggi({
-	type:"object",
-	children:{
-		debug:{
-			type:"checkbox",
-			label:"debug mode"
-		}
-	}
-});
-
-var data=Maggi({debug:true});
-
-Maggi.UI(container,data,ui);
-	}
-
-	var fnccode=function(container) {
-var data=Maggi({
-	myfunc:function() { alert("alert"); }
-});
-
-var ui=Maggi({
-	type:"object",
-	children:{
-		myfunc:{
-			type:"function",
-			label:"label"
-		}
-	}
-});
-
-Maggi.UI(container,data,ui);
-	}
-
-	var inpcode=function(container) {
-var ui=Maggi({
-	type:"object",
-	children:{
-		username:{
-			type:"input",
-			placeholder:"name@domain",
-			kind:"email",
-			autosize:true,
-			onReturn:function(v) { alert(v); }
-		}
-	}
-});
-
-var data=Maggi({username:""});
-
-Maggi.UI(container,data,ui);
-	}
-
-	var lstcode=function(container) {
-var ui=Maggi({
-	type:"list",
-	select:"multi",
-	selected:{"child2":true}
-});
-
-var data=Maggi({
-	child1:"element1",
-	child2:"element2",
-	child3:"element3"
-});
-
-Maggi.UI(container,data,ui);
-	}
-	
-	var tabcode=function(container) {
-var ui=Maggi({
-	type:"tabs",
-	headerui:{type:"object"},
-	headerdata:{
-		child1:"Header 1",
-		child2:"Header 2",
-		child3:"Header 3"
-	},
-	selected:"child2"
-});
-
-var data=Maggi({
-	child1:"element1",
-	child2:"element2",
-	child3:"element3"
-});
-
-Maggi.UI(container,data,ui);
-	}
-	var pwcalccode=function(container) {
-var data=Maggi({
-	header:"Password Calculator",
-	alias:"",
-	secret:"",
-	password:""
-});
-
-data.bind(function(k,v) {
-	if (k=="alias"||k=="secret")
-		data.password=calcPassword(data.alias,data.secret);
-});
-
-var calcPassword = function(alias,secret) {
-	if (secret===""||alias==="") return "";
-	var array = Sha1.hash(secret + alias).match(/.{1,2}/g);
-	for (var i in array) array[i] = parseInt(array[i], 16);
-	return btoa(String.fromCharCode.apply(null, array));
-};
-
-var ui=Maggi({
-	type:"object",
-	childdefault: {type:"text"},
-	children: {
-		alias: {type:"input", placeholder:"alias",class:""},
-		secret: {type:"input", placeholder:"secret",class:""}
-	},
-	builder: function(dom,data,ui) {
-        var validate=function(k,v) {
-            if (k=="alias"||k=="secret")
-                ui.children[k].class=(data[k]==="")?"redborder":"";
-	    }
-	    data.bind(validate);
-	    validate("alias");
-	    validate("secret");
-	}
-});
-
-Maggi.UI(container,data,ui);
-	}
-
 	var removeFunction = function(v) {
 		var cont=v.toString();
 		var a=cont.indexOf("{")+1;
@@ -415,71 +201,6 @@ Maggi.UI(container,data,ui);
 	d=Maggi(d);
 	
 	var propui={ type:"list", listtype:"ordered", childdefault:propui};
-/*
-	var uiui={
-		type:"object",
-		children:{
-			visible:{type:"bool"},
-			enabled:{type:"bool"},
-			onReturn:{type:"input",kind:"txt",class:"code",autosize:true},
-			children:{type:"object",childdefault:{type:"uiui"},makechildlabels:true},
-			childdefault:{type:"object",childdefault:{type:"input",autosize:true,kind:"text",class:"text"},makechildlabels:true},
-			order:{type:"object",childdefault:{type:"input",autosize:true,kind:"text",class:"text"},makechildlabels:true},
-			headerui:{type:"uiui"},
-			headerdata:{type:"object",childdefault:{type:"input",autosize:true,kind:"text",class:"text"},makechildlabels:true}
-		},
-		childdefault:{type:"input",autosize:true,kind:"text",class:"text"},
-		class:"uimodel-ui",
-		makechildlabels:true
-	};
-	Maggi.UI.uiui=function(ui,v,setv,format) {
-		if (!ui._Maggi) { 
-			Maggi.UI(ui,v,uiui,setv);
-		}
-	}
-	var dataui={
-		type:"object",
-		class:"uimodel-ui",
-		childdefault:{type:"input",autosize:true,kind:"text",class:"text"},
-		makechildlabels:true
-	};
-	Maggi.UI.dataui=function(ui,v,setv,format) {
-		if (!ui._Maggi) { 
-			Maggi.UI(ui,v,dataui,setv);
-		}
-	}
-*/
-/*
-	Maggi.UI.code=function(ui,v,setv,format) {
-		var set = function(v) {
-			var cont=v.toString();
-			var a=cont.indexOf("{")+1;
-			var b=cont.lastIndexOf("}")-1;
-			cont=cont.substr(a,b-a);
-			ui._Maggi[0].value=cont;
-		}
-		if (!ui._Maggi) {
-			Maggi.UI.BaseFunctionality(ui,format);
-
-			var cont=v.toString();
-			var a=cont.indexOf("{")+1;
-			var b=cont.lastIndexOf("}")-1;
-			cont=cont.substr(a,b-a);
-			ui._Maggi=$('<textarea/>', { text: cont }).appendTo(ui)
-			  .on("input",function(event) { 
-				var func="function _Maggi_String2Function"+(_Maggi_String2Function++)+"(container) { "+this.value+ " };";
-				eval(func);
-				setv(func);
-				event.stopPropagation();
-			}).keydown(function(event) {
-				event.stopPropagation();
-			});
-			format.bind(function(k,v) {
-				if (k=="placeholder") ui._Maggi.attr("placeholder",v);
-			});
-		} else set(v);
-	};
-*/
 
 	Maggi.UI.code=function(ui,v,setv,format) {
 		if (!ui._Maggi) {
@@ -492,10 +213,12 @@ Maggi.UI(container,data,ui);
 					editor:{type:"text"},
 					annot:{
 						type:"list",
-						chlddefault:{
+						childdefault:{
 							type:"object",
 							order:["type","row","column","text"]
-						}, 
+						},
+						select:"single",
+						selected:null, 
 						class:"scroll"
 					}
 				}
@@ -516,15 +239,6 @@ Maggi.UI(container,data,ui);
 		}
 		if (ui._Maggi.getValue()!=v) { ui._Maggi.setValue(v); ui._Maggi.clearSelection(); }
 	};
-/*
-Maggi.UI.bool=function(ui,v,setv,format) {
-	if (!ui._Maggi) {
-		Maggi.UI.BaseFunctionality(ui,format);
-	ui.click(function() { setv(!v); });
-	} 
-	ui.text(v);
-};
-*/
 
 	var democontainer = {
 		type:"object",
