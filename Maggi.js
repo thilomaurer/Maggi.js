@@ -15,7 +15,8 @@ var Maggi=function(other) {
 	var trigger = function(e,key,value,oldv) {
 		var fns=events[e];
 		if (fns==null) return;
-		for (var i = fns.length-1; i >= 0; --i) {
+		//for (var i = fns.length-1; i >= 0; --i) { //why did I do this backward orginally?
+		for (var i=0; i<fns.length; i++) { //why did I do this backward orginally?
 			var f=fns[i];
 			f(key,value,oldv);
 		}
@@ -23,47 +24,60 @@ var Maggi=function(other) {
 
 	func = {
 		add: function(key,value) {
-			if (!(value instanceof Date)) if (!(value instanceof Function)) if (value instanceof Object) if (value._hasMaggi!=true) value=Maggi(value);
-			var prop={ 
-				get: function()  {
+			var get = function() {
 					var v=d[key];
 					trigger("get",key,v);
 					return v; 
-				},
-				set: function(v) {
-					if (!(v instanceof Date)) if (!(v instanceof Function)) if (v instanceof Object) if (v._hasMaggi!=true) v=Maggi(v);
-					var oldv=d[key];
-					if (v==oldv) return;
-					d[key]=v;
-					trigger("set",key,v,oldv);
-				},
-				enumerable: true,
-				configurable: true
 			};
-			var oldv=d[key];
-			d[key]=value;
-			if (p.hasOwnProperty(key)) { 
-				console.log('Maggi: set by add for property "'+key+'" of '+JSON.stringify(p)+'.');
-				trigger("set",key,value,oldv);
-				return;
-			} else {
-				Object.defineProperty(p,key,prop);
-				//propage child events to parent
-				if (value&&value.bind) {
-					var bubble=function(e,k,v,oldv) {
-						var bubblekey;
-						if (k instanceof Array)
-							bubblekey=k.slice(0);
-						else 
-							bubblekey=[k];
+			var set = function(v) {
+				if (!(v instanceof Date)) if (!(v instanceof Function)) if (v instanceof Object) if (v._hasMaggi!=true) v=Maggi(v);
+				var oldv=d[key];
+				if (v==oldv) return;
+				uninstallBubble(oldv);
+				installBubble(v);
+				d[key]=v;
+				trigger("set",key,v,oldv);
+			}
+			var bubbleEvents=["set","remove","add"];
+			var bubble=function(e,k,v,oldv) {
+				var bubblekey;
+				if (k instanceof Array)
+					bubblekey=k.slice(0);
+				else 
+					bubblekey=[k];
 
-						bubblekey.unshift(key);
-						trigger(e,bubblekey,v,oldv);
-					};
-					["set","remove","add"].forEach(function(e) {
-						value.bind(e,function(k,v,oldv) { bubble(e,k,v,oldv) });
+				bubblekey.unshift(key);
+				trigger(e,bubblekey,v,oldv);
+			};
+			var bubbleFuncs={};
+			bubbleEvents.forEach(function(e) {
+				bubbleFuncs[e]=function(k,v,oldv) { bubble(e,k,v,oldv) };
+			});
+			var installBubble=function(value) {
+				//propage child events to parent
+				if (value&&value._hasMaggi) {
+					bubbleEvents.forEach(function(e) {
+						value.bind(e,bubbleFuncs[e]);
 					});
 				}
+			}
+			var uninstallBubble=function(value) {
+				if (value&&value._hasMaggi) {
+					bubbleEvents.forEach(function(e) {
+						value.unbind(e,bubbleFuncs[e]);
+					});
+				}
+			}
+			if (p.hasOwnProperty(key)) { 
+				console.log('Maggi: set by add for property "'+key+'" of '+JSON.stringify(p)+'.');
+				set(value);
+				return;
+			} else {
+				if (!(value instanceof Date)) if (!(value instanceof Function)) if (value instanceof Object) if (value._hasMaggi!=true) value=Maggi(value);
+				d[key]=value;
+				var prop={get: get, set: set, enumerable: true, configurable: true};
+				Object.defineProperty(p,key,prop);
+				installBubble(value);
 				trigger("add",key,value);
 			}
 		},
@@ -102,7 +116,7 @@ var Maggi=function(other) {
 				var k=ks[ik];
 				if (events[k]) for (var i in fn) { 
 					var idx=events[k].indexOf(fn[i]);
-					if (idx>=0) events.splice(idx,1);
+					if (idx>=0) events[k].splice(idx,1);
 				}
 			}
 		},

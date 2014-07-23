@@ -157,9 +157,122 @@ var doc = function() {
 		class:"property"
 	};
 
-	var demoobj = function(js,css) {
-		return {
-			source: {js:"", css:"", html:null},
+	
+	var filesui=function() { 
+		return Maggi({ 
+			type:"list",
+			childdefault:fileui,
+			select:"single",
+			selected:""
+		});
+	};
+
+	var fileui=function() {
+		return Maggi({
+			type:"object",
+			children:{
+				type: {type:"image",urls:{js:"icons/js.svg",html:"icons/html5.svg",css:"icons/css3.svg"}},
+				name: {type:"text"},
+//				files: filesui
+			},
+			order:["type","name"],
+			class:"myfile",
+/*			builder:function(dom,data,ui) {
+				if (data.type=="directory") dom.click(function(e) {
+					ui.children.files.visible=!ui.children.files.visible;
+					return false; 
+				});
+			}*/
+		});
+	}
+
+	var files = function() {
+/*
+		var subdir=function(name,create) {
+			for (var n in data) {
+				var f=data[n];
+				if (f.type=="directory"&&f.name==name) return f.files;
+			}
+			if (create) {
+				var key=Object.keys(data).length.toString();
+				data.add(key,{name:name,type:"directory",files:{}});
+				return data[key].files;
+			}
+			return null;
+		}
+		var getfile=function(pathname) {
+			var path=pathname.split("/");
+			var N=path.length;
+			var p=data;
+			for (var i=0;i<N;i++) {
+				var name=path[i];
+				if (i!=N-1) {
+					p=p.subdir(name,true);
+				} else {
+					for (var n in p) {
+						var f=data[n];
+						if (f.type!="directory"&&f.name==name) return f.data;
+					}
+					return null;
+				}
+			}
+		}
+		var addfile=function(pathname,type,d) {
+			var path=pathname.split("/");
+			var N=path.length;
+			var p=data;
+			for (var i=0;i<N;i++) {
+				var name=path[i];
+				if (i!=N-1) {
+					p=p.subdir(name,true);
+				} else {
+					var key=Object.keys(p).length.toString();
+					p.add(key,{name:name,pathname:pathname,type:type,data:d});
+				}
+			}
+		};*/
+		var data=Maggi({
+/*			0: {name:"file0.js", type:"js", data:"(function() {})();"},
+			1: {name:"file1.css", type:"css", data:"#body"},
+			2: {name:"folder2", type:"directory", files: {
+				0: {name:"file4.js", type:"js"},
+				1: {name:"file5.js", type:"js"}
+			}},
+			3: {name:"file3.html", type:"html", data:"<HTML>"},
+			subdir: subdir,
+			addfile: addfile,
+			getfile: getfile*/
+		});
+
+		return data;
+	}
+
+	var demoobj = function() {
+		var f=files();
+		["demos/pwcalc.js","demos/pwcalc.css"].forEach(function(k) {
+			$.get( k, null, function(data) {
+				var parts=k.split(".");
+				var type="text";
+				if (parts.length>0) type=parts[parts.length-1];
+				//f.addfile(k,type,data);
+				var key=Object.keys(f).length.toString();
+				f.add(key,{name:k,type:type,data:data});
+			},"text");
+		});
+
+		var viewtemplate=function() {
+			return {file:{name:"<unnamed>"},filenamepopup:f,editor:""};
+		}
+
+		var data=Maggi({
+			files: f,
+			source: {
+				0:viewtemplate(),
+				addview:function() {
+					var n=Object.keys(data.source).length-1;
+					data.source.add(n.toString(),viewtemplate());
+				}
+			},
 			container: null,
 			iframe: {
 				name: null,
@@ -167,7 +280,8 @@ var doc = function() {
 				styles: {}, 
 				scripts: {}
 			}
-		};
+		});
+		return data;
 	};
 
 	var d={
@@ -183,7 +297,7 @@ var doc = function() {
 		tabs:{head:"Tabs",desc:"",props:tabprop,democontainer:demoobj()},
 		pwcalc:{head:"Password Calculator Demo",desc:"This simple example demos a SHA1 Password Calculator.",democontainer:demoobj()}
 	};
-
+/*
 	$.each(d,function(k,v) {
 		d[k].democontainer.iframe.name=k;
 		$.get( "demos/"+k+".css", function(data) {
@@ -196,7 +310,7 @@ var doc = function() {
 			d[k].democontainer.source.js=data;
 		},"text");
 	});
-
+*/
 	d.intro="<h2>Introduction</h2> <b>Maggi.js</b> is a Javascript framework that enables rapid development of object centric applications and their user-interfaces. The framework consists of two parts: <ul><li>The <b>Maggi.js</b> framework enables binding functions to events of object-properties.<li>The <b>Maggi.UI.js</b> framework is as user-interface framework that leverages the Maggi.js framework to bind to data- and ui-models in order to create and manage user-interfaces.</ul>";
 	d.mag="<h2>Maggi.js</h2> Maggi.js is a Javascript framework that enables rapid development of object centric applications, by \"maggically\" adding bubbling property-events to any object. Binding functions to these events allows for a triggering for dependent updates.<BR>This is a demo for an object <I>data</I> that manages a shopping-cart:<BR>";
 	d.magui='<h2>Maggi.UI.js</h2> Maggi.UI.js is a Javascript UI framework that enables rapid development of user-interfaces for object centric applications. It reliefs you from the burden of writing and managing the DOM tree of your web-application. Everything is managed under the hood, controlled though simple objects that define the UI. You don\'t need to see any HTML any longer. Maggi.UI steps beyond the MVC (model, view, controller) software architecture pattern: It drives applications using the MM (model, model) pattern: Maggi.UI creates (and updates) views and controllers fully automatically from two models: the data-model, an object that contains the data that is to be displayed (or not), and a second ui-model, an object that defines the layout and functionality of the UI for the data to be displayed. <BR><BR>          A UI-model may contains a number of properties that define the functionality of the UI element.<BR>             There are 3 types of specifing a UI-model:              <ol>                    <li>                    Direct specification using a Javascipt object variable<BR>                      <div class="preformatted">ui={<BR>  prop1:value1,<BR>  prop2:value2,<BR>  ...<BR>}</div>                        If any property is not set, its default value is implied.<BR>                   <li>                    If the UI-Model is a function, the function\'s return value will be used as UI model.                   <div class="preformatted">ui=function() { return {prop1:value1,prop2:value2,...}; }</div>          <li>                    Specifing the UI-Model as a string, is equivalent to setting the string for the type property of a model object:                      <div class="preformatted">ui=string<BR>ui={type:string}</div>           </ol>           The specification of the UI-model properties follows. Note, every UI-model contains the properties of base.   ';
@@ -205,11 +319,11 @@ var doc = function() {
 	
 	var propui={ type:"list", listtype:"ordered", childdefault:propui};
 
-	Maggi.UI.code=function(ui,v,setv,format) {
-		if (!ui._Maggi) {
-			Maggi.UI.BaseFunctionality(ui,format);
+	Maggi.UI.code=function(dom,data,setv,ui) {
+		if (!dom._Maggi) {
+			Maggi.UI.BaseFunctionality(dom,ui);
 			
-			var data=Maggi({editor:"",annot:{}});
+			var d=Maggi({editor:"",annot:{}});
 			var fmt=Maggi({
 				type:"object",
 				children: {
@@ -226,86 +340,141 @@ var doc = function() {
 					}
 				}
 			});
-			Maggi.UI(ui,data,fmt);
+			Maggi.UI(dom,d,fmt);
 			
-			var editor = ace.edit(ui.ui.editor[0]);
+			var editor = ace.edit(dom.ui.editor[0]);
 
+			function updateMode() {
+				var mode="text";
+				if (ui.mode=="js") mode="javascript";
+				if (ui.mode=="css") mode="css";
+				if (ui.mode=="html") mode="html";
+				editor.getSession().setMode("ace/mode/"+mode);
+			}
+
+			ui.bind(function(k,v) {
+				if (k=="mode") updateMode();
+			});
 			editor.setTheme("ace/theme/xcode");
-			editor.getSession().setMode("ace/mode/"+format.mode);
+			updateMode();
 			editor.on("change", function(e) {
 				setv(editor.getValue());
 	 		});
 			editor.getSession().on("changeAnnotation", function() {
-				data.annot = editor.getSession().getAnnotations();
+				d.annot = editor.getSession().getAnnotations();
 			});	
-			ui._Maggi=editor;
+			dom._Maggi=editor;
 		}
-		if (ui._Maggi.getValue()!=v) {
-			ui._Maggi.setValue(v); 
-			ui._Maggi.clearSelection();
+		if (dom._Maggi.getValue()!=data) {
+			dom._Maggi.setValue(data); 
+			dom._Maggi.clearSelection();
 		}
 	};
 
-	var democontainer = {
-		type:"object",
-		children:{
-			source: { 
-				type:"object",
-				children: {
-					js: {type:"code",mode:"javascript",showErrors:true},
-					css: {type:"code",mode:"css"},
-					//html: {type:"code",mode:"html"},
-				}
+
+	var codeviewui = function() {
+		var fui=filesui();
+		fui.add("popup",true);
+		fui.add("popuptrigger","file");
+		return Maggi({
+			type:"object",
+			children:{
+				file:fileui,
+				filenamepopup:fui,
+				editor: {type:"code",mode:""}
 			},
-			//container: null,
-			iframe: {type:"iframe"}
-		},
-		builder: function(dom,data,ui) {
-			data.iframe.scripts.add("jquery-2.0.3.js",null);
-			data.iframe.scripts.add("Maggi.js",null);
-			data.iframe.scripts.add("Maggi.UI.js",null);
-			data.iframe.scripts.add("demo.js","");
-			data.iframe.styles.add("demo.css","");
+			builder:function(dom,data,ui) {
+				ui.children.filenamepopup.bind(function(k,v) {
+					var openfile = function(file) {
+						if (file.type!="directory") {
+							data.file=file;
+							data.editor=file.data;
+							ui.children.editor.mode=file.type;
+							ui.children.filenamepopup.visible=false;
+						}
+					};
+					if (k instanceof Array) {
+						var N=k.length;
+						if (k[N-1]!="selected") return;
+						var root=data.filenamepopup;
+						for (var i=1;i<N-1;i+=2) root=root[k[i]];
+						openfile(root[v]);
+					}
+					if (k=="selected") openfile(data.filenamepopup[v]);
+				});
+			}
+		});
+	}
+	
 
-			var buildjs=function() {
-				v="var main=function() {\n"+data.source.js+"};";
-				data.iframe.scripts.remove("demo.js");
-				data.iframe.scripts.add("demo.js",v);
-				data.iframe.scripts.remove("main.js");
-				data.iframe.scripts.add("main.js",null);
-			};
-			var buildcss=function() {
-				data.iframe.styles["demo.css"]=data.source.css;
-			};
-			data.source.bind(function(k,v) {
-				if (k=="js") buildjs();
-				if (k=="css") buildcss();
-			});
-			// the following is a jquery-bind-thing
-			/*
-			dom.ui.container.bind("DOMSubtreeModified", function() {
-				data.source.html=html_beautify(dom.ui.container[0].outerHTML);
-			});
-			*/
-			buildjs();
-			buildcss();
-		}
-	};
-
-	var maketypeui = {
-		type:"object",
-		children:{
-			head:{
-				type:"format",
-				format:"Properties of %s"
+	var democontainerui = function() {
+		return {
+			type:"object",
+			children:{
+				files: filesui,
+				source: { 
+					type:"object",
+					childdefault: codeviewui,
+					children: {
+						addview: {type:"function",label:"Add Code View"}
+					},
+					order: ["0","1","2","3","4","5","6","7","8","9","addview"]
+				},
+				iframe: {type:"iframe"}
 			},
-			desc:{type:"text"},
-			props:propui,
-			democontainer: democontainer
-		},
-		order:["head","desc","democontainer","props"],
-		class:"typeui"
+			builder: function(dom,data,ui) {
+				data.iframe.scripts.add("jquery-2.0.3.js",null);
+				data.iframe.scripts.add("Maggi.js",null);
+				data.iframe.scripts.add("Maggi.UI.js",null);
+				data.iframe.scripts.add("demo.js","");
+				data.iframe.styles.add("demo.css","");
+
+				var buildjs=function() {
+					v="var main=function() {\n"+data.source.js+"};";
+					data.iframe.scripts.remove("demo.js");
+					data.iframe.scripts.add("demo.js",v);
+					data.iframe.scripts.remove("main.js");
+					data.iframe.scripts.add("main.js",null);
+				};
+				var buildcss=function() {
+					data.iframe.styles["demo.css"]=data.source.css;
+				};
+				data.source.bind(function(k,v) {
+					if (k=="js") buildjs();
+					if (k=="css") buildcss();
+				});
+				ui.children.files.bind(function(k,v) {
+					//console.log(JSON.stringify(k));
+				});
+				// the following is a jquery-bind-thing
+				/*
+				dom.ui.container.bind("DOMSubtreeModified", function() {
+					data.source.html=html_beautify(dom.ui.container[0].outerHTML);
+				});
+				*/
+				buildjs();
+				buildcss();
+			}
+		};
 	};
+
+	var maketypeui = function() {
+		return {
+			type:"object",
+			children:{
+				head:{
+					type:"format",
+					format:"Properties of %s"
+				},
+				desc:{type:"text"},
+				props:propui,
+				democontainer: democontainerui
+			},
+			order:["head","desc","democontainer","props"],
+			class:"typeui"
+		};
+	};
+
 	var ui={
 		type:"tabs",
 		headerui:{type:"object"},

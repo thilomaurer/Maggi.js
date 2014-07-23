@@ -52,33 +52,6 @@ table {
 	border-spacing:0px;
 }
 
-.scroll {
-	overflow:auto;
-	-webkit-overflow-scrolling: touch;
-}
-
-.scroll::-webkit-scrollbar-track
-{
-	display:none;
-}
-
-.scroll::-webkit-scrollbar
-{
-	width: 4px;
-	height: 4px;
-	background-color: transparent;
-}
-
-.scroll::-webkit-scrollbar-thumb
-{
-	border-radius: 2px;
-	background-color: #888;
-}
-
-.scroll::-webkit-scrollbar-corner {
-	display:none;
-}
-
 div.button {
 	text-align:center;
 	vertical-align:middle;
@@ -151,10 +124,6 @@ svg g#positions polyline#relgain5 {
 
 .popup .scroll {
 	height:400px;
-}
-
-.invisible {
-	display: none !important;
 }
 
 #content.tabs > #_Maggi_UI_TabView_Header > * {
@@ -240,7 +209,6 @@ h2 {
 #democontainer > #source > * {
 	display:inline-block;
 	text-align:left;
-	border:1px solid gray;
 }
 
 #container {
@@ -493,6 +461,6 @@ iframe {
 
 
 #democontainer .list .selected {
-	color:blue;
+//	color:blue;
 }
 
