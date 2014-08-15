@@ -16,7 +16,6 @@
 
 .list > .myfile > #name {
 	border-bottom:1px solid gray;
-	padding:6px;
 	padding-left:0;
 }
 .list > .myfile:last-child > #name {
@@ -45,13 +44,13 @@
 }
 
 .myfile > #type {
+	vertical-align: bottom;
 	width:24px;
-	padding:6px;
 }
 
 .myfile > * {
-	display:table-cell;
-	vertical-align:middle;
+	display:inline-block;
+	padding:6px;
 }
 
 .myfile.directory > #type {

@@ -141,21 +141,7 @@ Maggi.UI.iframe=function(ui,s,sets,format) {
 		Maggi.UI.BaseFunctionality(ui,format);
 		ui._Maggi=$('<iframe>', {name:s.name}).appendTo(ui);
 	}
-	var elscr={};
-	var elsty={};
-	var doc=ui._Maggi[0].contentWindow.document;
-	var makescr = function(k) {
-		var e=doc.createElement("script");
-		e.setAttribute("async",false);
-		elscr[k]=e;
-		doc.head.appendChild(e);
-	}
-	var upscr = function(k) {
-		var e=elscr[k];
-		var v=s.scripts[k];
-		if (v==null) e.setAttribute("src",k); else e.setAttribute("id",k);
-		if (v) e.innerHTML=v;
-	}
+/*
 	var makesty = function(k) {
 		var e;
 		var v=s.styles[k];
@@ -171,44 +157,74 @@ Maggi.UI.iframe=function(ui,s,sets,format) {
 		elsty[k]=e;
 		doc.head.appendChild(e);
 	}
-	var upsty = function(k) {
-		var e=elsty[k];
-		var v=s.styles[k];
-		e.innerHTML=v&&v.toString();
-	}
-	var addsty = function(k) {
-		makesty(k);
-		upsty(k);
-	}
-	var addscr = function(k) {
-		makescr(k);
-		upscr(k);
-	}
-	var remsty = function(k) {
-		var e=elsty[k];
-		e.remove();
-		delete e;
-	}
-	var remscr = function(k) {
-		var e=elscr[k];
-		e.remove();
-		delete e;
-	}
-	if (s.scripts) for (k in s.scripts) addscr(k);
-	if (s.styles) for (k in s.styles) addsty(k);
-	s.bind(function(k,v) {
-		if (k[0]=="scripts") upscr(k[1]);
-		if (k[0]=="styles") upsty(k[1]);
+*/
+	var ElementOfFile={};
+	var makedocument = function() {
+		ElementOfFile={};
+		var doc=document.implementation.createHTMLDocument();
+		doc.open();
+		if (s.file) if (s.file.type=="html") {
+			doc.write(s.file.data);
+			var scripts=doc.scripts;
+			for (var sidx=0;sidx<scripts.length;sidx++) {
+				var scr=scripts[sidx];
+				for (var fidx in s.files) {
+					var name=s.files[fidx].name;
+					if (document.URL+name==scr.src) {
+						ElementOfFile[name]=scr;
+						scr.removeAttribute("src");
+						scr.id=name;
+						scr.innerHTML=s.files[fidx].data;
+					}
+				}
+			}
+			var styles=[];
+			for(var els = doc.getElementsByTagName ('link'), i = els.length; i--;) {
+				var sty=els[i];
+				if (sty.rel  == "stylesheet") {
+					for (var fidx in s.files) {
+						var name=s.files[fidx].name;
+						if (document.URL+name==sty.href) {
+							ElementOfFile[name]=sty;
+							var x=document.createElement("style");
+							x.id=name;
+							x.type=sty.type;
+							x.innerHTML=s.files[fidx].data;
+							doc.head.insertBefore(x,sty);
+							sty.remove();
+						}
+					}
+				
+	   			}
+			}
+
+			for (var sidx=0;sidx<styles.length;sidx++) {
+				var scr=styles[sidx];
+			}
+		}
+		doc.close();
+
+		var d=ui._Maggi[0].contentWindow.document;
+		d.open();
+		d.write(doc.documentElement.outerHTML);
+		d.close();
+	};
+
+	var updateFile = function(file) {
+		var el=ElementOfFile[file.name];
+		if (!el) return;
+		el.innerHTML=file.data;
+		//but el is in shadow document, not the live one.
+		//just fully renew the live one for now
+		makedocument();
+	};
+
+	makedocument();
+	s.bind("add", makedocument);
+	s.bind("set", function(k,v) { 
+		if (k[0]=="file"||k=="file"||k=="files") makedocument();
+		if (k[0]=="files") updateFile(s.files[k[1]]);
 	});
-	s.bind("add", function(k,v) {
-		if (k[0]=="scripts") addscr(k[1]);
-		if (k[0]=="styles") addsty(k[1]);
-	});
-	s.bind("remove", function(k,v) {
-		if (k[0]=="scripts") remscr(k[1]);
-		if (k[0]=="styles") remsty(k[1]);
-	});
-	//ui._Maggi[0].contentWindow.document.body.setAttribute("onload","main()");
 };
 
 Maggi.UI.link=function(ui,v,setv,format) {
@@ -369,7 +385,7 @@ Maggi.UI.object=function(ui,o,seto,format) {
 			}
 		}
 		var remove=function(k) {
-			if (chld.hasOwnProperty(k)) delete chld[k].remove();
+			if (chld.hasOwnProperty(k)) { chld[k].remove(); delete chld[k]; }
 		}
 		if (format.order) {
 			$.each(format.order, function(idx,v) { add(v); });
@@ -383,13 +399,17 @@ Maggi.UI.object=function(ui,o,seto,format) {
 		o.bind("set", update);
 		o.bind("add", add);
 		o.bind("remove", remove);
-		if (format.builder) format.builder(ui,o,format);
-		format.bind("set",function(k,v) {
-			if (k[0]=="order"||k=="order") {
-				$.each(chld, function(k,v) { v.remove(); });
-				$.each(format.order, function(idx,v) { if (chld[v]) chld[v].appendTo(ui); });
+		format.bind("set",function(k,newv,oldv) {
+			var hasPropValue = function(o,v) {
+				for (var k in o) { if (o[k]==v) return true; }
+				return false;
+			};
+			if (k=="order"||k[0]=="order") {
+				$.each(oldv, function(idx,v) { if (!hasPropValue(newv,v)) remove(v); });
+				$.each(newv, function(idx,k) { if (chld[k]) chld[k].appendTo(ui); else add(k); });
 			}
 		});
+		if (format.builder) format.builder(ui,o,format);
 	}
 };
 
