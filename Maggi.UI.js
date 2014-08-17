@@ -137,28 +137,7 @@ Maggi.UI.html=function(ui,s,sets,format) {
 };
 
 Maggi.UI.iframe=function(ui,s,sets,format) {
-	if (!ui._Maggi) {
-		Maggi.UI.BaseFunctionality(ui,format);
-		ui._Maggi=$('<iframe>', {name:s.name}).appendTo(ui);
-	}
-/*
-	var makesty = function(k) {
-		var e;
-		var v=s.styles[k];
-		if (v==null) {
-			e=doc.createElement("link");
-			e.setAttribute("rel","stylesheet");
-			e.setAttribute("type","text/css");
-			e.setAttribute("href",k);
-		} else {
-			e=doc.createElement("style");
-			e.setAttribute("id",k);
-		}
-		elsty[k]=e;
-		doc.head.appendChild(e);
-	}
-*/
-	var ElementOfFile={};
+	var ElementOfFile;
 	var makedocument = function() {
 		ElementOfFile={};
 		var doc=document.implementation.createHTMLDocument();
@@ -219,12 +198,24 @@ Maggi.UI.iframe=function(ui,s,sets,format) {
 		makedocument();
 	};
 
+	var sethandler=function(k,v) {
+                if (k[0]=="file"||k=="file"||k=="files") makedocument();
+                if (k[0]=="files") updateFile(s.files[k[1]]);
+	};
+
+	if (!ui._Maggi) {
+		Maggi.UI.BaseFunctionality(ui,format);
+		ui._Maggi=$('<iframe>', {name:s.name}).appendTo(ui);
+		s.bind("set", sethandler); 
+		s.bind("add", makedocument);
+		var unbind = function() {
+			s.unbind("set",sethandler);
+			s.unbind("add",makedocument);
+		}
+		ui._MaggiUnbind=unbind;
+	}
+
 	makedocument();
-	s.bind("add", makedocument);
-	s.bind("set", function(k,v) { 
-		if (k[0]=="file"||k=="file"||k=="files") makedocument();
-		if (k[0]=="files") updateFile(s.files[k[1]]);
-	});
 };
 
 Maggi.UI.link=function(ui,v,setv,format) {
@@ -385,7 +376,7 @@ Maggi.UI.object=function(ui,o,seto,format) {
 			}
 		}
 		var remove=function(k) {
-			if (chld.hasOwnProperty(k)) { chld[k].remove(); delete chld[k]; }
+			if (chld.hasOwnProperty(k)) { chld[k].remove(); if (chld[k]._MaggiUnbind) chld[k]._MaggiUnbind(); delete chld[k]; }
 		}
 		if (format.order) {
 			$.each(format.order, function(idx,v) { add(v); });
