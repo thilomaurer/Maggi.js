@@ -126,96 +126,15 @@ Maggi.UI.parentclass=function(ui,s,sets,format) {
 	ui._Maggi=true;
 }
 
-Maggi.UI.text=function(ui,s,sets,format) {
-	Maggi.UI.BaseFunctionality(ui,format);
-	ui.text(s&&s.toString());
+Maggi.UI.text=function(dom,data,sets,ui) {
+	Maggi.UI.BaseFunctionality(dom,ui);
+	dom.text(data&&data.toString());
+	//return {dom:dom,data:data,ui:ui}
 };
 
 Maggi.UI.html=function(ui,s,sets,format) {
 	Maggi.UI.BaseFunctionality(ui,format);
 	ui.html(s&&s.toString());
-};
-
-Maggi.UI.iframe=function(ui,s,sets,format) {
-	var ElementOfFile;
-	var makedocument = function() {
-		ElementOfFile={};
-		var doc=document.implementation.createHTMLDocument();
-		doc.open();
-		if (s.file) if (s.file.type=="html") {
-			doc.write(s.file.data);
-			var scripts=doc.scripts;
-			for (var sidx=0;sidx<scripts.length;sidx++) {
-				var scr=scripts[sidx];
-				for (var fidx in s.files) {
-					var name=s.files[fidx].name;
-					if (document.URL+name==scr.src) {
-						ElementOfFile[name]=scr;
-						scr.removeAttribute("src");
-						scr.id=name;
-						scr.innerHTML=s.files[fidx].data;
-					}
-				}
-			}
-			var styles=[];
-			for(var els = doc.getElementsByTagName ('link'), i = els.length; i--;) {
-				var sty=els[i];
-				if (sty.rel  == "stylesheet") {
-					for (var fidx in s.files) {
-						var name=s.files[fidx].name;
-						if (document.URL+name==sty.href) {
-							ElementOfFile[name]=sty;
-							var x=document.createElement("style");
-							x.id=name;
-							x.type=sty.type;
-							x.innerHTML=s.files[fidx].data;
-							doc.head.insertBefore(x,sty);
-							sty.remove();
-						}
-					}
-				
-	   			}
-			}
-
-			for (var sidx=0;sidx<styles.length;sidx++) {
-				var scr=styles[sidx];
-			}
-		}
-		doc.close();
-
-		var d=ui._Maggi[0].contentWindow.document;
-		d.open();
-		d.write(doc.documentElement.outerHTML);
-		d.close();
-	};
-
-	var updateFile = function(file) {
-		var el=ElementOfFile[file.name];
-		if (!el) return;
-		el.innerHTML=file.data;
-		//but el is in shadow document, not the live one.
-		//just fully renew the live one for now
-		makedocument();
-	};
-
-	var sethandler=function(k,v) {
-                if (k[0]=="file"||k=="file"||k=="files") makedocument();
-                if (k[0]=="files") updateFile(s.files[k[1]]);
-	};
-
-	if (!ui._Maggi) {
-		Maggi.UI.BaseFunctionality(ui,format);
-		ui._Maggi=$('<iframe>', {name:s.name}).appendTo(ui);
-		s.bind("set", sethandler); 
-		s.bind("add", makedocument);
-		var unbind = function() {
-			s.unbind("set",sethandler);
-			s.unbind("add",makedocument);
-		}
-		ui._MaggiUnbind=unbind;
-	}
-
-	makedocument();
 };
 
 Maggi.UI.link=function(ui,v,setv,format) {
@@ -340,7 +259,6 @@ Maggi.UI.object=function(ui,o,seto,format) {
 			if (format.children[k]) return;
 			var ui=null;
 			if (format.childdefault) { 
-				//format.children[k]=cookui(format.childdefault);
 				format.children.add(k,format.childdefault);
 				return;
 			} 
