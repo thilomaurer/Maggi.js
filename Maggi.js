@@ -102,6 +102,7 @@ var Maggi=function(other) {
 			}
 		},
 		unbind: function(ks,fn) {
+			if (typeof ks === 'function') { fn=ks; ks=["set"]; }
 			if (typeof ks === "string") ks=[ks];
 			if (fn==null) {
 				//remove all bindings for each keys in ks

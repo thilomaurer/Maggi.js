@@ -23,7 +23,7 @@ Maggi.UI=function(dom,data,ui,setdata,id) {
 	dom.addClass(ui.type);
 	var f;
 	if (ui.type=="user") f=ui.user;	else f=Maggi.UI[ui.type];
-	if (f) f(dom,data,setdata,ui); else console.log("Maggi.UI: unknown ui.type "+ui.type);
+	if (f) return f(dom,data,setdata,ui); else console.log("Maggi.UI: unknown ui.type "+ui.type);
 	//return {dom:dom,data:data,ui:ui};
 };
 
@@ -103,13 +103,17 @@ Maggi.UI.BaseFunctionality=function(ui,format) {
 		});
 		updateClass(format.visible==false,ui,"invisible");
 	}
-	format.bind("set", function(k,v,oldv) {
+	var sethandler = function(k,v,oldv) {
 		if (k=="enabled") updateClass(v,ui,"disabled");
 		if (k=="class") { ui.removeClass(oldv); ui.addClass(v); }
-	});
+	};
+	format.bind(sethandler);
 	updateClass(format.enabled==false,ui,"disabled");
 	if (format.class) 
 		ui.addClass(format.class);
+	return function() {
+		format.unbind(sethandler);
+	};
 }
 
 Maggi.UI.parentclass=function(ui,s,sets,format) {
@@ -137,15 +141,17 @@ Maggi.UI.html=function(ui,s,sets,format) {
 	ui.html(s&&s.toString());
 };
 
-Maggi.UI.link=function(ui,v,setv,format) {
-	if (!ui._Maggi) {
-		Maggi.UI.BaseFunctionality(ui,format);
-		ui._Maggi=$('<a>', {href:v,text:format.label,target:format.target}).appendTo(ui);
-		format.bind("set",function(k,v) {
-			if (k=="label") ui._Maggi.text(v);
-			if (k=="target") ui._Maggi.attr("target",v);
-		});
-	} else ui._Maggi.attr("href",v);
+Maggi.UI.link=function(dom,data,setdata,ui) {
+	if (!dom._Maggi) {
+		unbase=Maggi.UI.BaseFunctionality(dom,ui);
+		dom._Maggi=$('<a>', {href:data,text:ui.label,target:ui.target}).appendTo(dom);
+		var sethandler=function(k,v) {
+			if (k=="label") dom._Maggi.text(v);
+			if (k=="target") dom._Maggi.attr("target",v);
+		};
+		ui.bind(sethandler);
+		return function() { ui.unbind(sethandler); unbase(); delete dom._Maggi;}
+	} else dom._Maggi.attr("href",data);
 };
 
 Maggi.UI.image=function(ui,v,setv,format) {
@@ -245,12 +251,16 @@ Maggi.UI.format=function(ui,v,setv,format) {
 };
 
 Maggi.UI.object=function(ui,o,seto,format) {
-	if (o==null||typeof o != "object") { ui.empty(); return; }
+	if (o==null||typeof o != "object") { 
+		ui.empty(); 
+		return;
+	 }
 	if (!(ui._Maggi===o)) {
 		ui.empty();
 		Maggi.UI.BaseFunctionality(ui,format);
 		ui._Maggi=o;
 		var chld={};
+		var backbuild={};
 		ui.ui=chld;
 
 		var updateFormat=function(k) {
@@ -277,7 +287,11 @@ Maggi.UI.object=function(ui,o,seto,format) {
 			updateFormat(k);
 			var f=cookui(format.children[k]);
 			format.children[k]=f;
-			Maggi.UI(chld[k],o[k],format.children[k],function(v) { o[k]=v; });
+			if (backbuild[k]) {
+				alert("backbuild on update");
+				backbuild[k]();
+			}
+			backbuild[k]=Maggi.UI(chld[k],o[k],format.children[k],function(v) { o[k]=v; });
 		};
 		var make=function(k) {
 			chld[k]=$("<"+(format.childHTMLElement||"div")+">",{id:k}).appendTo(ui); 
@@ -294,7 +308,14 @@ Maggi.UI.object=function(ui,o,seto,format) {
 			}
 		}
 		var remove=function(k) {
-			if (chld.hasOwnProperty(k)) { chld[k].remove(); if (chld[k]._MaggiUnbind) chld[k]._MaggiUnbind(); delete chld[k]; }
+			if (chld.hasOwnProperty(k)) { 
+				chld[k].remove(); 
+				if (backbuild[k]) {
+					backbuild[k](); 
+					delete backbuild[k];
+				}
+				delete chld[k]; 
+			}
 		}
 		if (format.order) {
 			$.each(format.order, function(idx,v) { add(v); });
