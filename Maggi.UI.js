@@ -29,15 +29,8 @@ Maggi.UI=function(dom,data,ui,setdata,id) {
 
 //non-object UI handlers
 //
-function assert(x) {
-	if (x==null)
-		console.log("null assertion");
-}
-
 
 Maggi.UI.BaseFunctionality=function(ui,format) {
-	assert(ui);
-
 	var updateClass = function(v, ui, cls) {
 		if (v) ui.addClass(cls); else ui.removeClass(cls); 
 	}
@@ -77,7 +70,7 @@ Maggi.UI.BaseFunctionality=function(ui,format) {
 			deco.css("top",trigger_bottom);
 			deco.css("left",trigger_left+o.width/2-spacing);
 		}
-		format.bind("set",function(k,v) {
+		var vissethandler=function(k,v) {
 			if (k=="visible") {
 				if (v) { 
 					deco.removeClass("hidden"); 
@@ -93,26 +86,28 @@ Maggi.UI.BaseFunctionality=function(ui,format) {
 					ui.addClass("hidden"); 
 				}
 			}
-		});
+		};
 		if (!format.hasOwnProperty("visible")) format.add("visible",false); 
 		if (format.visible==true) place();
 		if (format.visible==false) { ui.addClass("hidden"); deco.addClass("hidden"); }
 	} else {
-		format.bind("set",function(k,v) {
+		var vissethandler=function(k,v) {
 			if (k=="visible") updateClass(v==false,ui,"invisible");
-		});
+		};
 		updateClass(format.visible==false,ui,"invisible");
 	}
 	var sethandler = function(k,v,oldv) {
 		if (k=="enabled") updateClass(v,ui,"disabled");
 		if (k=="class") { ui.removeClass(oldv); ui.addClass(v); }
 	};
+	format.bind(vissethandler);
 	format.bind(sethandler);
 	updateClass(format.enabled==false,ui,"disabled");
 	if (format.class) 
 		ui.addClass(format.class);
 	return function() {
 		format.unbind(sethandler);
+		format.unbind(vissethandler);
 	};
 }
 
@@ -251,72 +246,82 @@ Maggi.UI.format=function(ui,v,setv,format) {
 };
 
 Maggi.UI.object=function(ui,o,seto,format) {
+	ui.empty();
 	if (o==null||typeof o != "object") { 
-		ui.empty(); 
-		return;
-	 }
-	if (!(ui._Maggi===o)) {
-		ui.empty();
-		Maggi.UI.BaseFunctionality(ui,format);
-		ui._Maggi=o;
-		var chld={};
-		var backbuild={};
-		ui.ui=chld;
+		console.log("Maggi.UI.object: data is null or not an object."); 
+	}
+	var backbuild_base=Maggi.UI.BaseFunctionality(ui,format);
+	var chld={};
+	var backbuild={};
+	ui.ui=chld;
 
-		var updateFormat=function(k) {
-			if (!format.children) format.add("children",{});
-			if (k instanceof Array) { k=k[0]; if (!(format.children[k]&&format.children[k].bubbleupdate)) return; }
-			if (format.children[k]) return;
-			var ui=null;
-			if (format.childdefault) { 
-				format.children.add(k,format.childdefault);
-				return;
-			} 
-			//default formatting
-			console.log("Maggi.UI: default formating.");
-			var fmt="text";
-			if ((o[k] instanceof Object)&&(!(o[k] instanceof Date))) fmt="object";
-			if (((o[k] instanceof Object)&&(!(o[k] instanceof Date))&&(!(typeof o[k] == "function")))&&(fmt.type=="text"||fmt.type=="input")) {
-				fmt={type:"object",childdefault:format.childdefault,makechildlabels:format.makechildlabels};
-			}
-			//format.children[k]=fmt; 
-			format.children.add(k,fmt);
+	var updateFormat=function(k) {
+		if (!format.children) format.add("children",{});
+		if (k instanceof Array) { k=k[0]; if (!(format.children[k]&&format.children[k].bubbleupdate)) return; }
+		if (format.children[k]) return;
+		var ui=null;
+		if (format.childdefault) { 
+			format.children.add(k,format.childdefault);
+			return;
+		} 
+		//default formatting
+		console.log("Maggi.UI: default formating.");
+		var fmt="text";
+		if ((o[k] instanceof Object)&&(!(o[k] instanceof Date))) fmt="object";
+		if (((o[k] instanceof Object)&&(!(o[k] instanceof Date))&&(!(typeof o[k] == "function")))&&(fmt.type=="text"||fmt.type=="input")) {
+			fmt={type:"object",childdefault:format.childdefault,makechildlabels:format.makechildlabels};
 		}
+		//format.children[k]=fmt; 
+		format.children.add(k,fmt);
+	}
 
-		var update=function(k) { 
-			updateFormat(k);
-			var f=cookui(format.children[k]);
-			format.children[k]=f;
+	var update=function(k) { 
+		updateFormat(k);
+		var f=cookui(format.children[k]);
+		format.children[k]=f;
+		if (backbuild[k]) 
+			backbuild[k]();
+		backbuild[k]=Maggi.UI(chld[k],o[k],format.children[k],function(v) { o[k]=v; });
+	};
+	var make=function(k) {
+		chld[k]=$("<"+(format.childHTMLElement||"div")+">",{id:k}).appendTo(ui); 
+		if (format.makechildlabels) { 
+			$("<div>",{"class":"label",text:k}).appendTo(chld[k]); 
+			chld[k]=$("<div>").appendTo(chld[k]); 
+		}
+		chld[k]._MaggiParent=ui;  //ugly hack to enable access to parent 
+	}
+	var add=function(k) {
+		if (o.hasOwnProperty(k)) {
+			make(k);
+			update(k);
+		}
+	};
+	var remove=function(k) {
+		if (chld.hasOwnProperty(k)) { 
+			chld[k].remove(); 
 			if (backbuild[k]) {
-				alert("backbuild on update");
-				backbuild[k]();
+				backbuild[k](); 
+				delete backbuild[k];
 			}
-			backbuild[k]=Maggi.UI(chld[k],o[k],format.children[k],function(v) { o[k]=v; });
+			delete chld[k]; 
+		}
+	};
+	var removeall=function() {
+		for (var k in chld) remove(k);
+	};
+	var formatsethandler=function(k,newv,oldv) {
+		var hasPropValue = function(o,v) {
+			for (var k in o) { if (o[k]==v) return true; }
+			return false;
 		};
-		var make=function(k) {
-			chld[k]=$("<"+(format.childHTMLElement||"div")+">",{id:k}).appendTo(ui); 
-			if (format.makechildlabels) { 
-				$("<div>",{"class":"label",text:k}).appendTo(chld[k]); 
-				chld[k]=$("<div>").appendTo(chld[k]); 
-			}
-			chld[k]._MaggiParent=ui;  //ugly hack to enable access to parent 
+		if (k=="order"||k[0]=="order") {
+			$.each(oldv, function(idx,v) { if (!hasPropValue(newv,v)) remove(v); });
+			$.each(newv, function(idx,k) { if (chld[k]) chld[k].appendTo(ui); else add(k); });
 		}
-		var add=function(k) {
-			if (o.hasOwnProperty(k)) {
-				make(k);
-				update(k);
-			}
-		}
-		var remove=function(k) {
-			if (chld.hasOwnProperty(k)) { 
-				chld[k].remove(); 
-				if (backbuild[k]) {
-					backbuild[k](); 
-					delete backbuild[k];
-				}
-				delete chld[k]; 
-			}
-		}
+	};
+
+	if (o) {
 		if (format.order) {
 			$.each(format.order, function(idx,v) { add(v); });
 		} else if (format.childdefault) {
@@ -329,18 +334,21 @@ Maggi.UI.object=function(ui,o,seto,format) {
 		o.bind("set", update);
 		o.bind("add", add);
 		o.bind("remove", remove);
-		format.bind("set",function(k,newv,oldv) {
-			var hasPropValue = function(o,v) {
-				for (var k in o) { if (o[k]==v) return true; }
-				return false;
-			};
-			if (k=="order"||k[0]=="order") {
-				$.each(oldv, function(idx,v) { if (!hasPropValue(newv,v)) remove(v); });
-				$.each(newv, function(idx,k) { if (chld[k]) chld[k].appendTo(ui); else add(k); });
-			}
-		});
-		if (format.builder) format.builder(ui,o,format);
 	}
+	format.bind("set",formatsethandler);
+	var backbuild_builder;
+	if (format.builder) backbuild_builder=format.builder(ui,o,format);
+	return function() {
+		if (backbuild_builder) backbuild_builder();
+		if (o) {
+			o.unbind("set",update);
+			o.unbind("add", add);
+			o.unbind("remove", remove);
+		}
+		format.unbind(formatsethandler);
+		backbuild_base();
+		removeall();
+	};
 };
 
 Maggi.UI.tabs=function(ui,o,seto,format) {
@@ -378,47 +386,54 @@ Maggi.UI.tabs=function(ui,o,seto,format) {
 };
 
 Maggi.UI.list=function(ui,o,seto,format) {
-	if (o==null) {ui.empty(); return; }
-	if (!(ui._Maggi===o)) {
-		var childHTMLElement="div";
-		var listContainerHTMLElement="div";
-		if (format.listtype=="ordered") listContainerHTMLElement="ol";
-		if (format.listtype=="unordered") listContainerHTMLElement="ul";
-		if (format.listtype) { ui.empty(); format.childHTMLElement="li"; ui=$('<'+listContainerHTMLElement+'>').appendTo(ui); }
-		Maggi.UI.object(ui,o,seto,format);
-		ui._Maggi=o;
-		var installClick = function(k,v) {
-			v.click(function() { select(k); return false; });
-		}
-		if (ui.ui) $.each(ui.ui,installClick);
-		var chld=ui.ui;
-		var select=function(k) {
-			if (format.select=="single") format.selected=k;
-			if (format.select=="multi") {
-				format.selected.add(k,!format.selected[k]);
-			}
-		}
-		var updateSingleSelection = function(newv,oldv) {
-			if (oldv) if (chld[oldv]) chld[oldv].removeClass("selected");
-			if (newv) if (chld[newv]) chld[newv].addClass("selected");
-		};
-		var updateMultiSelection = function(k,v) {
-			var c=chld[k];
-			if (c) if (v) c.addClass("selected"); else c.removeClass("selected");
-		};
-		if (format.select=="single") updateSingleSelection(format.selected,null);
-		if (format.select=="multi") $.each(format.selected, updateMultiSelection);
-		format.bind("set",function(k,newv,oldv) {
-			if (k=="selected") updateSingleSelection(newv,oldv);
-			if (k[0]=="selected") updateMultiSelection(k[1],newv,oldv);
-			if (k=="select") {
-				if (newv=="single") format.selected=null;
-				if (newv=="multi") format.selected={};
-			}
-		});
-		o.bind("add",function(k,v) {
-			if (typeof k == "string") installClick(k,ui.ui[k]);	
-		});
+	ui.empty();
+	if (o==null||typeof o != "object") { 
+		console.log("Maggi.UI.list: data is null or not an object."); 
 	}
+	var childHTMLElement="div";
+	var listContainerHTMLElement="div";
+	if (format.listtype=="ordered") listContainerHTMLElement="ol";
+	if (format.listtype=="unordered") listContainerHTMLElement="ul";
+	if (format.listtype) { ui.empty(); format.childHTMLElement="li"; ui=$('<'+listContainerHTMLElement+'>').appendTo(ui); }
+	var backbuild_object=Maggi.UI.object(ui,o,seto,format);
+	var installClick = function(k,v) {
+		v.click(function() { select(k); return false; });
+	}
+	if (ui.ui) $.each(ui.ui,installClick);
+	var chld=ui.ui;
+	var select=function(k) {
+		if (format.select=="single") format.selected=k;
+		if (format.select=="multi") {
+			format.selected.add(k,!format.selected[k]);
+		}
+	}
+	var updateSingleSelection = function(newv,oldv) {
+		if (oldv) if (chld[oldv]) chld[oldv].removeClass("selected");
+		if (newv) if (chld[newv]) chld[newv].addClass("selected");
+	};
+	var updateMultiSelection = function(k,v) {
+		var c=chld[k];
+		if (c) if (v) c.addClass("selected"); else c.removeClass("selected");
+	};
+	if (format.select=="single") updateSingleSelection(format.selected,null);
+	if (format.select=="multi") $.each(format.selected, updateMultiSelection);
+	var formatsethandler=function(k,newv,oldv) {
+		if (k=="selected") updateSingleSelection(newv,oldv);
+		if (k[0]=="selected") updateMultiSelection(k[1],newv,oldv);
+		if (k=="select") {
+			if (newv=="single") format.selected=null;
+			if (newv=="multi") format.selected={};
+		}
+	};
+	dataaddhandler=function(k,v) {
+		if (typeof k == "string") installClick(k,ui.ui[k]);	
+	};
+	format.bind("set",formatsethandler);
+	o.bind("add",dataaddhandler);
+	return function() {
+		backbuild_object();
+		format.unbind("set",formatsethandler);
+		o.unbind("add",dataaddhandler);
+	};
 };
 
