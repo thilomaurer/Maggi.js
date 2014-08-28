@@ -127,8 +127,7 @@ Maggi.UI.parentclass=function(ui,s,sets,format) {
 
 Maggi.UI.text=function(dom,data,sets,ui) {
 	Maggi.UI.BaseFunctionality(dom,ui);
-	dom.text(data&&data.toString());
-	//return {dom:dom,data:data,ui:ui}
+	if (data!=null) dom.text(data.toString());
 };
 
 Maggi.UI.html=function(ui,s,sets,format) {
@@ -426,7 +425,7 @@ Maggi.UI.list=function(ui,o,seto,format) {
 		}
 	};
 	dataaddhandler=function(k,v) {
-		if (typeof k == "string") installClick(k,ui.ui[k]);	
+		if (!(k instanceof Array)) installClick(k,ui.ui[k]);	
 	};
 	format.bind("set",formatsethandler);
 	o.bind("add",dataaddhandler);
