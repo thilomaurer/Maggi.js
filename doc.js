@@ -157,111 +157,50 @@ var doc = function() {
 		class:"property"
 	};
 
-	
-	var filesui=function() { 
-		return Maggi({ 
-			type:"list",
-			childdefault:fileui,
-			select:"single",
-			selected:""
-		});
-	};
-
-	var fileui=function() {
-		return Maggi({
-			type:"object",
-			children:{
-				type: {type:"image",urls:{js:"icons/js.svg",html:"icons/html5.svg",css:"icons/css3.svg"}},
-				name: {type:"text"},
-			},
-			order:["type","name"],
-			class:"myfile",
-		});
-	}
-
 	var files = function() {
 		var data=Maggi({});
 		return data;
 	}
 
-	var demoobj = function() {
-		var f=files();
-		var sources=["jquery-2.0.3.js",
-		 "Maggi.js",
-		 "Maggi.UI.js",
-		 "demos/pwcalc.js",
-		 "demos/pwcalc.css","demos/pwcalc.html"];
-		 var loadNextSource = function() {
-			if (sources.length==0) return;
-			var k=sources[0];
-			sources.shift();
-			$.get( k, null, function(data) {
-				var parts=k.split(".");
-				var type="text";
-				if (parts.length>0) type=parts[parts.length-1];
-				var key=Object.keys(f).length.toString();
-				f.add(key,{name:k,type:type,data:data});
-				loadNextSource();
-			},"text");
-		};
-		loadNextSource();
 
-		var panedata=function() {
-			var p=Maggi({
-				file:{name:"<unnamed>"},
-				filepopup:f,
-				mode:"code",
-				editor:"",
-				menu:"☰",
-				actions: {},
-				preview: {
-					name: null,
-					html: null,
-					head: {},
-					styles: {}, 
-					scripts: {},
-					file: null,
-					files: f
-				}
-			});
-			p.actions.add("renamefile",function() {
-				var f=p.file;
-				var newname=prompt("Please enter new name for file '"+p.file.name+"'", p.file.name);
-				p.file.name=newname;
-				//p.actions.visible
-			});
-			return p;
-		}
+	var projects=Maggi({});
+	var sources=[
+		{name:"Base", srcs: ["demos/base.js"]},
+		{name:"Object", srcs: ["demos/object.js"]},
+		{name:"Text", srcs: ["demos/text.js"]},
+		{name:"HTML", srcs: ["demos/html.js"]},
+		{name:"Function", srcs: ["demos/function.js"]},
+		{name:"Input", srcs: ["demos/input.js"]},
+		{name:"Link", srcs: ["demos/link.js"]},
+		{name:"Checkbox", srcs: ["demos/checkbox.js"]},
+		{name:"List", srcs: ["demos/list.js"]},
+		{name:"Tabs", srcs: ["demos/tabs.js"]},
+		{name:"Password Calculator", srcs: ["demos/pwcalc.js","demos/pwcalc.css","demos/pwcalc.html"]},
+	];
+	var lp=function(idx,name,srcs) {
+		var sources=["ide/jquery-2.0.3.js","ide/Maggi.js","ide/Maggi.UI.js"];
+		if (srcs) sources=srcs.concat(sources);
 
-		var addpane=function() {
-			var n=Object.keys(data.panes).length;
-			data.panes.add(n,panedata());
-		};
-
-		var data=Maggi({
-			addpane: addpane,
-			panes: {}
+		initproject("Thilo Maurer","username@domain",name,sources,function(project) {
+			projects.add(idx,project);
 		});
-		data.panes.bind("add",function(k,v) {
-			if (k instanceof Array) return;
-			v.actions.add("closepane",function() {data.panes.remove(k);});
-		});
-		addpane();
-		return data;
-	};
+	}
+	$.each(sources,function(k,v) {
+		lp(k,v.name,v.srcs);
+	});
 
 	var d={
-		base:{head:"Base",desc:"Every UI-model, independently of its type, contains the following base properties.",props:baseprop,democontainer:demoobj()},
-		object:{head:"Object",desc:"",props:objprop,democontainer:demoobj()},
-		text:{head:"Text",desc:"",props:textprop,democontainer:demoobj()},
-		html:{head:"HTML",desc:"",props:textprop,democontainer:demoobj()},
-		input:{head:"Input",desc:"",props:inputprop,democontainer:demoobj()},
-		function:{head:"Function",desc:"",props:inputprop,democontainer:demoobj()},
-		link:{head:"Link",desc:"",props:linkprop,democontainer:demoobj()},
-		checkbox:{head:"Checkbox (SHOULD NAME SWITCH?)",desc:"",props:checkboxprop,democontainer:demoobj()},
-		list:{head:"List",desc:"",props:tabprop,democontainer:demoobj()},
-		tabs:{head:"Tabs",desc:"",props:tabprop,democontainer:demoobj()},
-		pwcalc:{head:"Password Calculator Demo",desc:"This simple example demos a SHA1 Password Calculator.",democontainer:demoobj()}
+		base:{head:"Base",desc:"Every UI-model, independently of its type, contains the following base properties.",props:baseprop,democontainer:projects},
+		object:{head:"Object",desc:"",props:objprop,democontainer:projects},
+		text:{head:"Text",desc:"",props:textprop,democontainer:projects},
+		html:{head:"HTML",desc:"",props:textprop,democontainer:projects},
+		input:{head:"Input",desc:"",props:inputprop,democontainer:projects},
+		function:{head:"Function",desc:"",props:inputprop,democontainer:projects},
+		link:{head:"Link",desc:"",props:linkprop,democontainer:projects},
+		checkbox:{head:"Checkbox (SHOULD NAME SWITCH?)",desc:"",props:checkboxprop,democontainer:projects},
+		list:{head:"List",desc:"",props:tabprop,democontainer:projects},
+		tabs:{head:"Tabs",desc:"",props:tabprop,democontainer:projects},
+		pwcalc:{head:"Password Calculator Demo",desc:"This simple example demos a SHA1 Password Calculator.",democontainer:projects}
 	};
 
 
@@ -273,186 +212,6 @@ var doc = function() {
 	
 	var propui={ type:"list", listtype:"ordered", childdefault:propui};
 
-	Maggi.UI.code=function(dom,data,setv,ui) {
-		if (!dom._Maggi) {
-			Maggi.UI.BaseFunctionality(dom,ui);
-			
-			var d=Maggi({editor:"",annot:{}});
-			var fmt=Maggi({
-				type:"object",
-				children: {
-					editor:{type:"text"},
-					annot:{
-						type:"list",
-						childdefault:{
-							type:"object",
-							order:["type","row","column","text"]
-						},
-						select:"single",
-						selected:null, 
-						class:"scroll"
-					}
-				}
-			});
-			Maggi.UI(dom,d,fmt);
-			
-			var editor = ace.edit(dom.ui.editor[0]);
-
-			function updateMode() {
-				var mode="text";
-				if (ui.mode=="js") mode="javascript";
-				if (ui.mode=="css") mode="css";
-				if (ui.mode=="html") mode="html";
-				editor.getSession().setMode("ace/mode/"+mode);
-			}
-
-			ui.bind(function(k,v) {
-				if (k=="mode") updateMode();
-			});
-			editor.setTheme("ace/theme/xcode");
-			updateMode();
-			editor.on("change", function(e) {
-				if (!dom._MaggiDisableEvents) setv(editor.getValue());
-	 		});
-			editor.getSession().on("changeAnnotation", function() {
-				d.annot = editor.getSession().getAnnotations();
-			});	
-			dom._Maggi=editor;
-			dom._MaggiDisableEvents=false; //hack to work around ACE issue.
-		}
-		if (dom._Maggi.getValue()!=data) {
-			dom._MaggiDisableEvents=true; //hack to work around ACE issue.
-			var pos=dom._Maggi.getCursorPosition();
-//			dom._Maggi.clearSelection();
-			dom._Maggi.setValue(data);
-			dom._Maggi.moveCursorToPosition(pos);
-			dom._MaggiDisableEvents=false;
-		}
-	};
-
-
-	var paneui = function() {
-		var fui=filesui();
-		fui.add("popup",true);
-		fui.add("popuptrigger","file");
-		return Maggi({
-			type:"object",
-			children:{
-				file:fileui,
-				filepopup:fui,
-				mode:{type:"select",choices:["code","preview"],class:"items2"},
-				menu:{type:"text"},
-				actions: {
-					type:"object",
-					popup:"true", popuptrigger:"menu",
-					children: {
-						closepane:{type:"function",label:"close pane"},
-						renamefile:{type:"function",label:"rename file"}
-					}
-				},
-				closepane:{type:"function",label:"X"},
-				editor: {type:"code",mode:""},
-				preview: {type:"iframe"}
-			},
-			order:[],
-			class:"pane",
-			builder:function(dom,data,ui) {
-				ui.children.filepopup.bind(function(k,v) {
-					var openfile = function(file) {
-						if (file.type!="directory") {
-							data.file=file;
-							ui.children.filepopup.visible=false;
-						}
-					};
-					if (k instanceof Array) {
-						var N=k.length;
-						if (k[N-1]!="selected") return;
-						var root=data.filepopup;
-						for (var i=1;i<N-1;i+=2) root=root[k[i]];
-						openfile(root[v]);
-					}
-					if (k=="selected") openfile(data.filepopup[v]);
-				});
-				var modeorder={
-					code:["file","filepopup","mode","menu","actions","editor"],
-					preview:["file","filepopup","mode","menu","actions","preview"]
-				};
-				var updateFileData = function() {
-					var d=data.file.data;
-					data.editor=d;
-					//if (data.file.type=="html") 
-					//	data.preview.html=d;
-				};
-				var updateFile = function() {
-					ui.children.editor.mode=data.file.type;
-					data.preview.file=data.file;
-					updateFileData();
-				};
-				data.bind(function(k,v) {
-					if (k=="file") updateFile();
-					if (k[0]=="file"&&k[1]=="data") updateFileData();
-					if (k=="editor") data.file.data=v;
-					if (k=="mode") ui.order=modeorder[v];
-				});
-				ui.order=modeorder[data.mode];
-			}
-		});
-	}
-	
-
-	var democontainerui = function() {
-		return {
-			type:"object",
-			children:{
-				//files: filesui,
-				addpane: {type:"function",label:"Add Pane"},
-				panes: { 
-					type:"object",
-					childdefault: paneui,
-				}
-			},
-			builder: function(dom,data,ui) {
-/*	
-				data.iframe.scripts.add("require.js",null);
-				//"<script data-main="scripts/main" src="scripts/require.js"></script>
-				var runmain=function() {
-					data.iframe.scripts.remove("main.js");
-					data.iframe.scripts.add("main.js",'require(["helper/util"],main);');
-				}
-*/
-/*
-				var buildjs=function() {
-					v="var main=function() {\n"+data.source.js+"};";
-					data.iframe.scripts.remove("demo.js");
-					data.iframe.scripts.add("demo.js",v);
-				};
-				var addfile=function(k,v) {
-					var file=data.files[k];
-					if (file.type=="js")
-						data.iframe.scripts.add(file.name,file.data);
-					if (file.type=="css")
-						data.iframe.styles.add(file.name,file.data);
-				}
-				var removefile=function(k,v) {
-					var file=data.files[k];
-					if (file.type=="js")
-						data.iframe.scripts.remove(file.name);
-					if (file.type=="css")
-						data.iframe.styles.remove(file.name);
-				}
-				data.files.bind("add",addfile);
-				data.files.bind("remove",removefile);
-				data.files.bind(function(k,v) {
-					removefile(k[0]);
-					addfile(k[0]);
-					runmain();
-				});
-				for (var k in data.files) addfile(k);
-				runmain();*/
-			}
-		};
-	};
-
 	var maketypeui = function() {
 		return {
 			type:"object",
@@ -463,7 +222,7 @@ var doc = function() {
 				},
 				desc:{type:"text"},
 				props:propui,
-				democontainer: democontainerui
+				democontainer: {type:"user", user:ide }
 			},
 			order:["head","desc","democontainer","props"],
 			class:"typeui"

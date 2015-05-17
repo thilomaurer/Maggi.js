@@ -89,30 +89,6 @@ div.button.inactive, div.button.disabled {
 	box-shadow: none;
 }
 
-svg g#positions polyline.evenline {
-	 stroke-width:1;
-	 stroke:yellow;
-}
-
-svg g#positions polyline#relgain-5 {
-	 stroke:#11f;
-}
-svg g#positions polyline#relgain-1 {
-	 stroke:#33f;
-}
-svg g#positions polyline#relgain0 {
-	 stroke:#55f;
-}
-svg g#positions polyline#relgain1 {
-	 stroke:#88f;
-}
-svg g#positions polyline#relgain5 {
-	 stroke:#ccf;
-}
-
-.table {
-//	display:table;
-}
 
 .table > * {
 	display:table-row;
@@ -191,14 +167,7 @@ h2 {
 	color:blue;
 }
 
-
-
-#democontainer > * {
-	display:inline-block;
-	vertical-align:top;
-	margin:10px;
-}
-
+/*
 #panes {
 	display:table;
 	width:100%;
@@ -226,18 +195,20 @@ h2 {
 }
 .pane #mode {
 	display:inline-table;
+	margin-left:10px;
+	margin-right:10px;
 }
 .pane #menu {
-	padding-left:4px;
-	padding-right:4px;
+	padding-left:10px;
+	padding-right:10px;
 	display:inline-block;
 }
 
 .pane #menu:hover {
 	background:#ddd;
 }
-
-
+*/
+/*
 #container {
 	text-align: center;
 	border:1px solid gray;
@@ -274,7 +245,7 @@ h2 {
 	padding:4px;
 	background:#ccc;
 }
-
+*/
 .doc {
 	margin:10px;
 }
@@ -335,7 +306,7 @@ h2 {
 .uimodel-ui {
 	white-space: pre; font-family: "Courier New", monospace; background: #fff;
 }
-
+/*
 .code {
 	font-family: "Courier New", monospace; 
 	font-size:16px;
@@ -378,7 +349,8 @@ iframe {
 .code #annot > * > #type {
 	padding-right:8px;
 }
-
+*/
+/*
 .uimodel-ui > * { display:block;}
 .uimodel-ui > * > * { display:inline;}
 .uimodel-ui .object > * { display:block;}
@@ -418,7 +390,8 @@ iframe {
 
 .myclass { color:red;}
 .disabled { color:gray;}
-
+*/
+/*
 #dem #container:before {
 	content:"";
 	white-space:pre;
@@ -483,8 +456,8 @@ iframe {
 	color:red;
 	white-space: pre; font-family: "Courier New", monospace;
 }
-
-
+*/
+/*
 .select {
 	display:table;
 	border:1px solid black;
@@ -516,7 +489,6 @@ iframe {
 	border-bottom-right-radius:3px;
 }
 
-/*
 .select.items4 label  {
 	width:25%;
 }
@@ -528,8 +500,9 @@ iframe {
 .select.items2 label {
 	width:50%;
 }
-*/
+
 .select input:checked + label {
 	background:black;
 	color:white;
 }
+*/
