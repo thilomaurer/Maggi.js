@@ -1,0 +1,77 @@
+
+body, h1, h2, h3, h4 {
+	margin: 0;
+	padding: 0;
+	cursor: default;
+}
+
+@font-face {
+	font-family: 'Open Sans';
+	font-style: normal;
+	font-weight: 400;
+	src: local('Open Sans'), local('OpenSans'), url(cJZKeOuBrn4kERxqtaUH3T8E0i7KZn-EPnyo3HZu7kw.woff) format('woff'), url(https://themes.googleusercontent.com/static/fonts/opensans/v8/cJZKeOuBrn4kERxqtaUH3T8E0i7KZn-EPnyo3HZu7kw.woff) format('woff');
+}
+
+input {
+	font-family: 'Open Sans', sans-serif;
+	box-sizing: border-box;
+	font-size: 16px;
+	padding: 0px;
+	margin: 0px;
+}
+input::-moz-selection {
+	background:#29a1d3;
+}
+input::selection {
+	background:#29a1d3;
+}
+
+body {
+	font-family: 'Open Sans', sans-serif;
+}
+
+#console {
+	height:200px;
+}
+
+#console input {
+	font-size:16px;
+	border:0px;
+	white-space: pre; font-family: "Courier New", monospace;
+	width:100%;
+	outline:0;
+	background: #eee;
+}
+
+.preformatted {
+	outline: 1px solid #ccc; padding: 5px; margin: 5px; white-space: pre; font-family: "Courier New", monospace; background: #fff;
+}
+
+h1 {
+	background:linear-gradient(#fff, #eee);
+	box-shadow:0px 0px 10px #aaa;
+	text-shadow: 0px 1px 0px white;
+}
+
+#cart {
+	width: 400px;
+}
+
+h2 {
+	margin-bottom:10px;
+}
+
+.link:hover {
+	text-decoration: underline;
+	color:blue;
+}
+
+.doc {
+	margin:10px;
+}
+
+.string { color: green; }
+.number { color: darkorange; }
+.boolean { color: blue; }
+.null { color: magenta; }
+.key { color: red; }

@@ -24,10 +24,3 @@ function syntaxHighlight(json) {
 		return '<span class="' + cls + '">' + match + '</span>';
 	});
 }
-
-function spinner(text)
-{
-	var spinner = $('<div/>', {'class':'spinner'});
-	for (i=1;i<13;i++) spinner.append($('<div/>', {'class':'bar'+i}));
-	return(spinner);
-}
