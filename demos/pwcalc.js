@@ -26,7 +26,5 @@ var pwcalc=function(dom) {
 		}
 	});
 
-	Maggi.UI($('body'),data,ui);
+	Maggi.UI(dom,data,ui);
 };
-
-main=pwcalc;

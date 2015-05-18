@@ -9,7 +9,11 @@ var base=function(dom) {
 		type:"object",
 		visible:true,
 		enabled:false,
-		class:"myclass"
+		class:"myclass",
+		builder:function(dom,data,ui) {
+		    dom.append($('<div>',{text:"dfsdf"}));
+		    data.child1="ELEMENT1";
+		}
 	});
 
 	Maggi.UI(dom,data,ui);

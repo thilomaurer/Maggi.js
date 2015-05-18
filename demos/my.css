@@ -1,0 +1,13 @@
+.disabled {
+    color:gray;
+}
+
+.selected {
+    color:red;
+}
+
+.myclass > * {
+    border:1px solid;
+}
+
+

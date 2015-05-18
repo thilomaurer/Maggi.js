@@ -175,7 +175,7 @@ var doc = function() {
 		{key:"checkbox",name:"Checkbox", srcs: ["demos/checkbox.js","demos/my.css"]},
 		{key:"list",name:"List", srcs: ["demos/list.js","demos/my.css"]},
 		{key:"tabs",name:"Tabs", srcs: ["demos/tabs.js","demos/my.css"]},
-		{key:"demo",name:"Password Calculator", srcs: ["demos/pwcalc.js","demos/pwcalc.css","demos/pwcalc.html"]},
+		{key:"demo",name:"Password Calculator", srcs: ["demos/pwcalc.js","demos/pwcalc.css","demos/pwcalc.html","demos/utils.js"]},
 	];
 	var lp=function(idx,v) {
 		var files=["ide/jquery-2.0.3.js","ide/Maggi.js","ide/Maggi.UI.js"];
