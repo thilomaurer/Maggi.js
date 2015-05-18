@@ -165,28 +165,29 @@ var doc = function() {
 
 	var projects=Maggi({});
 	var sources=[
-		{name:"Base", srcs: ["demos/base.js"]},
-		{name:"Object", srcs: ["demos/object.js"]},
-		{name:"Text", srcs: ["demos/text.js"]},
-		{name:"HTML", srcs: ["demos/html.js"]},
-		{name:"Function", srcs: ["demos/function.js"]},
-		{name:"Input", srcs: ["demos/input.js"]},
-		{name:"Link", srcs: ["demos/link.js"]},
-		{name:"Checkbox", srcs: ["demos/checkbox.js"]},
-		{name:"List", srcs: ["demos/list.js"]},
-		{name:"Tabs", srcs: ["demos/tabs.js"]},
-		{name:"Password Calculator", srcs: ["demos/pwcalc.js","demos/pwcalc.css","demos/pwcalc.html"]},
+		{key:"base",name:"Base", srcs: ["demos/base.js"]},
+		{key:"object",name:"Object", srcs: ["demos/object.js"]},
+		{key:"text",name:"Text", srcs: ["demos/text.js"]},
+		{key:"html",name:"HTML", srcs: ["demos/html.js"]},
+		{key:"function",name:"Function", srcs: ["demos/function.js"]},
+		{key:"input",name:"Input", srcs: ["demos/input.js"]},
+		{key:"link",name:"Link", srcs: ["demos/link.js"]},
+		{key:"checkbox",name:"Checkbox", srcs: ["demos/checkbox.js"]},
+		{key:"list",name:"List", srcs: ["demos/list.js"]},
+		{key:"tabs",name:"Tabs", srcs: ["demos/tabs.js"]},
+		{key:"demo",name:"Password Calculator", srcs: ["demos/pwcalc.js","demos/pwcalc.css","demos/pwcalc.html"]},
 	];
-	var lp=function(idx,name,srcs) {
-		var sources=["ide/jquery-2.0.3.js","ide/Maggi.js","ide/Maggi.UI.js"];
-		if (srcs) sources=srcs.concat(sources);
+	var lp=function(idx,v) {
+		var files=["ide/jquery-2.0.3.js","ide/Maggi.js","ide/Maggi.UI.js"];
+		if (v.srcs) files=v.srcs.concat(files);
 
-		initproject("Thilo Maurer","username@domain",name,sources,function(project) {
+		initproject("Thilo Maurer","username@domain",v.name,files,function(project) {
 			projects.add(idx,project);
+			ui.children[v.key].children.democontainer.projectid=idx;
 		});
 	}
 	$.each(sources,function(k,v) {
-		lp(k,v.name,v.srcs);
+		lp(k,v);
 	});
 
 	var d={
@@ -205,7 +206,7 @@ var doc = function() {
 
 
 	d.intro="<h2>Introduction</h2> <b>Maggi.js</b> is a Javascript framework that enables rapid development of object centric applications and their user-interfaces. The framework consists of two parts: <ul><li>The <b>Maggi.js</b> framework enables binding functions to events of object-properties.<li>The <b>Maggi.UI.js</b> framework is as user-interface framework that leverages the Maggi.js framework to bind to data- and ui-models in order to create and manage user-interfaces.</ul>";
-	d.mag="<h2>Maggi.js</h2> Maggi.js is a Javascript framework that enables rapid development of object centric applications, by \"maggically\" adding bubbling property-events to any object. Binding functions to these events allows for a triggering for dependent updates.<BR>This is a demo for an object <I>data</I> that manages a shopping-cart:<BR>";
+	d.mag="<h2>Maggi.js</h2> Maggi.js is a Javascript framework that enables rapid development of object centric applications, by \"maggically\" adding bubbling property-events to any object. Binding functions to these events allows for a triggering of dependent updates.<BR>This is a demo for an object <I>data</I> that manages a shopping-cart:<BR>";
 	d.magui='<h2>Maggi.UI.js</h2> Maggi.UI.js is a Javascript UI framework that enables rapid development of user-interfaces for object centric applications. It reliefs you from the burden of writing and managing the DOM tree of your web-application. Everything is managed under the hood, controlled though simple objects that define the UI. You don\'t need to see any HTML any longer. Maggi.UI steps beyond the MVC (model, view, controller) software architecture pattern: It drives applications using the MM (model, model) pattern: Maggi.UI creates (and updates) views and controllers fully automatically from two models: the data-model, an object that contains the data that is to be displayed (or not), and a second ui-model, an object that defines the layout and functionality of the UI for the data to be displayed. <BR><BR>          A UI-model may contains a number of properties that define the functionality of the UI element.<BR>             There are 3 types of specifing a UI-model:              <ol>                    <li>                    Direct specification using a Javascipt object variable<BR>                      <div class="preformatted">ui={<BR>  prop1:value1,<BR>  prop2:value2,<BR>  ...<BR>}</div>                        If any property is not set, its default value is implied.<BR>                   <li>                    If the UI-Model is a function, the function\'s return value will be used as UI model.                   <div class="preformatted">ui=function() { return {prop1:value1,prop2:value2,...}; }</div>          <li>                    Specifing the UI-Model as a string, is equivalent to setting the string for the type property of a model object:                      <div class="preformatted">ui=string<BR>ui={type:string}</div>           </ol>           The specification of the UI-model properties follows. Note, every UI-model contains the properties of base.   ';
 
 	d=Maggi(d);
@@ -222,14 +223,14 @@ var doc = function() {
 				},
 				desc:{type:"text"},
 				props:propui,
-				democontainer: {type:"user", user:ide }
+				democontainer: {type:"user", user:ide, panesonly:true,projectid:null}
 			},
-			order:["head","desc","democontainer","props"],
+			order:["head","desc","props","democontainer"],
 			class:"typeui"
 		};
 	};
 
-	var ui={
+	var ui=Maggi({
 		type:"tabs",
 		headerui:{type:"object"},
 		headerdata:{
@@ -253,9 +254,20 @@ var doc = function() {
 		children: {
 			intro:{type:"html"},
 			mag:{type:"html"},
-			magui:{type:"html"}
+			magui:{type:"html"},
+			base:maketypeui(),
+			object:maketypeui(),
+			text:maketypeui(),
+			html:maketypeui(),
+			function:maketypeui(),
+			input:maketypeui(),
+			link:maketypeui(),
+			checkbox:maketypeui(),
+			list:maketypeui(),
+			tabs:maketypeui(),
+			demo:maketypeui(),
 		}
-	};
+	});
 
 
 	//Maggi
@@ -296,11 +308,17 @@ var doc = function() {
 		d.mag.console.prompt="";
 	};
 
-	HighlightedJS=function(ui,v,setv,format) { 
-		Maggi.UI.BaseFunctionality(ui,format);
-		var message=syntaxHighlight(v);
-		if (format.prepend) message=format.prepend+message;
-		ui.html(message);
+	HighlightedJS=function(dom,data,setdata,ui,datachange) { 
+		var backbuild=Maggi.UI.BaseFunctionality(dom,ui);
+		var build=function() {
+			var message=syntaxHighlight(data);
+			if (ui.prepend) message=ui.prepend+message;
+			dom.html(message);
+		}
+		//datachange(build);
+		build();
+		data.bind("set",build);
+		return backbuild;
 	};
 
 	var MaggiDemoUI=Maggi({
