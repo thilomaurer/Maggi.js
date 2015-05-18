@@ -1,10 +1,13 @@
-var ui=Maggi({
-	type:"object",
-	children:{
-		o:{type:"text"}
-	}
-});
+var text=function(dom) {
 
-var data=Maggi({o:"example-text"});
+	var ui=Maggi({
+		type:"object",
+		children:{
+			o:{type:"text"}
+		}
+	});
 
-Maggi.UI($('body'),data,ui);
+	var data=Maggi({o:"example-text"});
+
+	Maggi.UI(dom,data,ui);
+};

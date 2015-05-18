@@ -165,16 +165,16 @@ var doc = function() {
 
 	var projects=Maggi({});
 	var sources=[
-		{key:"base",name:"Base", srcs: ["demos/base.js"]},
-		{key:"object",name:"Object", srcs: ["demos/object.js"]},
-		{key:"text",name:"Text", srcs: ["demos/text.js"]},
-		{key:"html",name:"HTML", srcs: ["demos/html.js"]},
-		{key:"function",name:"Function", srcs: ["demos/function.js"]},
-		{key:"input",name:"Input", srcs: ["demos/input.js"]},
-		{key:"link",name:"Link", srcs: ["demos/link.js"]},
-		{key:"checkbox",name:"Checkbox", srcs: ["demos/checkbox.js"]},
-		{key:"list",name:"List", srcs: ["demos/list.js"]},
-		{key:"tabs",name:"Tabs", srcs: ["demos/tabs.js"]},
+		{key:"base",name:"Base", srcs: ["demos/base.js","demos/my.css"]},
+		{key:"object",name:"Object", srcs: ["demos/object.js","demos/my.css"]},
+		{key:"text",name:"Text", srcs: ["demos/text.js","demos/my.css"]},
+		{key:"html",name:"HTML", srcs: ["demos/html.js","demos/my.css"]},
+		{key:"function",name:"Function", srcs: ["demos/func.js","demos/my.css"]},
+		{key:"input",name:"Input", srcs: ["demos/input.js","demos/my.css"]},
+		{key:"link",name:"Link", srcs: ["demos/link.js","demos/my.css"]},
+		{key:"checkbox",name:"Checkbox", srcs: ["demos/checkbox.js","demos/my.css"]},
+		{key:"list",name:"List", srcs: ["demos/list.js","demos/my.css"]},
+		{key:"tabs",name:"Tabs", srcs: ["demos/tabs.js","demos/my.css"]},
 		{key:"demo",name:"Password Calculator", srcs: ["demos/pwcalc.js","demos/pwcalc.css","demos/pwcalc.html"]},
 	];
 	var lp=function(idx,v) {
@@ -201,7 +201,7 @@ var doc = function() {
 		checkbox:{head:"Checkbox (SHOULD NAME SWITCH?)",desc:"",props:checkboxprop,democontainer:projects},
 		list:{head:"List",desc:"",props:tabprop,democontainer:projects},
 		tabs:{head:"Tabs",desc:"",props:tabprop,democontainer:projects},
-		pwcalc:{head:"Password Calculator Demo",desc:"This simple example demos a SHA1 Password Calculator.",democontainer:projects}
+		demo:{head:"Password Calculator Demo",desc:"This simple example demos a SHA1 Password Calculator.",democontainer:projects}
 	};
 
 
@@ -247,7 +247,7 @@ var doc = function() {
 			checkbox:"Checkbox",
 			list:"List",
 			tabs:"Tabs",
-			pwcalc:"Demo"
+			demo:"Demo"
 		},
 		selected:"intro",
 		childdefault:maketypeui,
