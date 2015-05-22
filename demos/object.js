@@ -12,8 +12,8 @@ var object=function(dom) {
 
 	var ui=Maggi({
 		type:"object",
-		childdefault:null,
-		children:{},
+		//childdefault:"text",
+		//children:{child1:"text",child2:"input"},
 		order:[	
 			"child3",
 			"child2",

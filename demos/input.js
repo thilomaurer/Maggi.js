@@ -8,7 +8,7 @@ var input=function(dom) {
 				placeholder:"name@domain",
 				kind:"email",
 				autosize:true,
-				onReturn:function(v) { alert(v); }
+				onReturnKey:function(v) { alert(v); }
 			}
 		}
 	});

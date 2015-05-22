@@ -6,6 +6,7 @@ var doc = function() {
 			propname:"type",
 			proptype:"string",
 			default:null,
+			example:'type: "text"',
 			description: "This property defines the type of the UI element. There is a number of predefined types. For each type there is a list of additional (non-base) properties. The predefined types are: text, format, object, input, function, select, list, format, link, tabs and user." 
 		},
 		vis:{
@@ -13,6 +14,7 @@ var doc = function() {
 			propname:"visible",
 			proptype:"boolean",
 			default:true,
+			example:"visible: false",
 			description: "This property defines whether the UI element is visible (true) or invisible (false). The style class \"invisible\" is set for the DOM element when not visible. The default CSS style for objects of the class invisible is visibility:hidden, such that the UI element does not occupy any space."
 		},
 		ena:{
@@ -20,6 +22,7 @@ var doc = function() {
 			propname:"enabled",
 			proptype:"boolean",
 			default:true,
+			example:"enabled: false",
 			description: "This property defines whether the UI element is enabled (true) or disabled (false). The style class \"disabled\" is set for the DOM element when not enabled."
 		},
 		class:{
@@ -35,6 +38,7 @@ var doc = function() {
 			propname:"builder",
 			proptype:"function(dom, data, ui)",
 			default:'null',
+			example:"function(dom, data, ui) { ui.visible=false; }",
 			description: "This property provides a function that is executed after the UI element dom has been created according to the defined properties in ui. The function arguments dom (the HTML element), data (the data-model) and ui (the ui-model) are provided. The function may be used to attach bindings to data or ui, or to further customize the UI element dom. A return object is still to be defined."
 		},
 		popup:{
@@ -43,23 +47,36 @@ var doc = function() {
 			proptype:"object",
 			default:'null',
 			description: "This property defines the UI element as the content of a popup. The UI element that acts as a trigger may be specified using the sub-property trigger, and needs to be a sister UI element of the local UI element. The UI element to focus before the popup with UI element becomes visible when triggered may be specified using the subelement focus, and needs to be a child element of the local UI element (grand-child-notation may be used)",
-			example:'popup:{trigger:"triggerelement",focus:"focuselement"}'
+			example:'popup:{trigger:<triggerelement>,focus:<focuselement>}'
 		}
 	});
 
 	var textprop=Maggi({
+		Format:{
+			name:"Formatting",
+			propname:"format",
+			proptype:"string",
+			default:null,
+			description: "This property defines the formatting of the text string to be displayed using printf formatting.",
+			example:'format:"more than %4.4f years"'
+		},
+	});
+	var htmlprop=Maggi({
 	});
 	
 	var tabprop=Maggi({
 	});
 
+	var funcprop=Maggi({
+	});
+
 	var objprop=Maggi({
 		chlddflt:{
-			name:"Default for Children",
+			name:"Default Model for Children",
 			propname:"childdefault",
 			proptype:"object",
 			default:null,
-			description: "This property defines the default UI-model for each child. The default is that no default UI-model is defined.",
+			description: "This property defines the default UI-model for each child. The default is that no default UI-model is defined. If the ui-model is given as a function, the model for each child is independent beeing returned from the function. If the UI-model is a object, all childen are modelled in lock-step to the same ui-model.",
 			example:'childdefault:{type:"input"}'
 		},
 		chld:{
@@ -67,7 +84,7 @@ var doc = function() {
 			propname:"children",
 			proptype:"object",
 			default:null,
-			description: "This property defines specific UI-models for each child of the UI element. For each property in the object 'children', an UI element is created for the corresponding data-model using the value of the property as its UI-model. Properties of the data-model that are not properties of 'children' will be formatted using the childdefault-format, if defined . In the example, the UI-model 'ui1' defines the UI of the data-model 'data1'. If the value of 'children' is null, any child (except functions) of the data-model is shown, using type \"text\" when the data-model is a string or number, using type \"object\" when the data-model is an object.",
+			description: "This property defines specific UI-models for each child of the UI element. For each property in the object 'children', an UI element is created for the corresponding data-model using the value of the property as its UI-model. Properties of the data-model that are not properties of 'children' will be formatted using the childdefault-format, if such is defined. In the example, the UI-model 'ui1' defines the UI of the data-model 'data1'. If the value of 'children' is null (the default value), any child (except functions) of the data-model is shown, using type \"text\" when the data-model is a string or number, using type \"object\" when the data-model is an object.",
 			example:'children:{data1:ui1,data2:ui2}'
 		},
 		ordr:{
@@ -132,6 +149,9 @@ var doc = function() {
 			example:'target:"_blank"'
 		}
 	});
+	
+	var selectprop=Maggi({
+	});
 
 	var checkboxprop=Maggi({
 		label:{
@@ -154,7 +174,7 @@ var doc = function() {
 			example:{type:"text"},
 			description:{type:"text"}
 		},
-		class:"property"
+		class:"property",order:["name","description","example","propname","proptype","default"]
 	};
 
 	var files = function() {
@@ -167,7 +187,7 @@ var doc = function() {
 	var sources=[
 		{key:"base",name:"Base", srcs: ["demos/base.js","demos/my.css"]},
 		{key:"object",name:"Object", srcs: ["demos/object.js","demos/my.css"]},
-		{key:"text",name:"Text", srcs: ["demos/text.js","demos/my.css"]},
+		{key:"text",name:"Text", srcs: ["demos/text.js","demos/my.css","ide/sprintf.js"]},
 		{key:"html",name:"HTML", srcs: ["demos/html.js","demos/my.css"]},
 		{key:"function",name:"Function", srcs: ["demos/func.js","demos/my.css"]},
 		{key:"input",name:"Input", srcs: ["demos/input.js","demos/my.css"]},
@@ -175,6 +195,7 @@ var doc = function() {
 		{key:"checkbox",name:"Checkbox", srcs: ["demos/checkbox.js","demos/my.css"]},
 		{key:"list",name:"List", srcs: ["demos/list.js","demos/my.css"]},
 		{key:"tabs",name:"Tabs", srcs: ["demos/tabs.js","demos/my.css"]},
+		{key:"select",name:"Select", srcs: ["demos/select.js","demos/my.css"]},
 		{key:"demo",name:"Password Calculator", srcs: ["demos/pwcalc.js","demos/pwcalc.css","demos/pwcalc.html","demos/utils.js"]},
 	];
 	var lp=function(idx,v) {
@@ -194,10 +215,11 @@ var doc = function() {
 		base:{head:"Base",desc:"Every UI-model, independently of its type, contains the following base properties.",props:baseprop,democontainer:projects},
 		object:{head:"Object",desc:"",props:objprop,democontainer:projects},
 		text:{head:"Text",desc:"",props:textprop,democontainer:projects},
-		html:{head:"HTML",desc:"",props:textprop,democontainer:projects},
+		html:{head:"HTML",desc:"",props:htmlprop,democontainer:projects},
 		input:{head:"Input",desc:"",props:inputprop,democontainer:projects},
-		function:{head:"Function",desc:"",props:inputprop,democontainer:projects},
+		function:{head:"Function",desc:"",props:funcprop,democontainer:projects},
 		link:{head:"Link",desc:"",props:linkprop,democontainer:projects},
+		select:{head:"Select",desc:"",props:selectprop,democontainer:projects},
 		checkbox:{head:"Checkbox (SHOULD NAME SWITCH?)",desc:"",props:checkboxprop,democontainer:projects},
 		list:{head:"List",desc:"",props:tabprop,democontainer:projects},
 		tabs:{head:"Tabs",desc:"",props:tabprop,democontainer:projects},
@@ -207,7 +229,7 @@ var doc = function() {
 
 	d.intro="<h2>Introduction</h2> <b>Maggi.js</b> is a Javascript framework that enables rapid development of object centric applications and their user-interfaces. The framework consists of two parts: <ul><li>The <b>Maggi.js</b> framework enables binding functions to events of object-properties.<li>The <b>Maggi.UI.js</b> framework is as user-interface framework that leverages the Maggi.js framework to bind to data- and ui-models in order to create and manage user-interfaces.</ul>";
 	d.mag="<h2>Maggi.js</h2> Maggi.js is a Javascript framework that enables rapid development of object centric applications, by \"maggically\" adding bubbling property-events to any object. Binding functions to these events allows for a triggering of dependent updates.<BR>This is a demo for an object <I>data</I> that manages a shopping-cart:<BR>";
-	d.magui='<h2>Maggi.UI.js</h2> Maggi.UI.js is a Javascript UI framework that enables rapid development of user-interfaces for object centric applications. It reliefs you from the burden of writing and managing the DOM tree of your web-application. Everything is managed under the hood, controlled though simple objects that define the UI. You don\'t need to see any HTML any longer. Maggi.UI steps beyond the MVC (model, view, controller) software architecture pattern: It drives applications using the MM (model, model) pattern: Maggi.UI creates (and updates) views and controllers fully automatically from two models: the data-model, an object that contains the data that is to be displayed (or not), and a second ui-model, an object that defines the layout and functionality of the UI for the data to be displayed. <BR><BR>          A UI-model may contains a number of properties that define the functionality of the UI element.<BR>             There are 3 types of specifing a UI-model:              <ol>                    <li>                    Direct specification using a Javascipt object variable<BR>                      <div class="preformatted">ui={<BR>  prop1:value1,<BR>  prop2:value2,<BR>  ...<BR>}</div>                        If any property is not set, its default value is implied.<BR>                   <li>                    If the UI-Model is a function, the function\'s return value will be used as UI model.                   <div class="preformatted">ui=function() { return {prop1:value1,prop2:value2,...}; }</div>          <li>                    Specifing the UI-Model as a string, is equivalent to setting the string for the type property of a model object:                      <div class="preformatted">ui=string<BR>ui={type:string}</div>           </ol>           The specification of the UI-model properties follows. Note, every UI-model contains the properties of base.   ';
+	d.magui='<h2>Maggi.UI.js</h2> Maggi.UI.js is a Javascript UI framework that enables rapid development of user-interfaces for object centric applications. It reliefs you from the burden of writing and managing the DOM tree of your web-application. Everything is managed under the hood, controlled though simple objects that define the UI. You don\'t need to see any HTML any longer. Maggi.UI steps beyond the MVC (model, view, controller) software architecture pattern: It drives applications using the MM (model, model) pattern: Maggi.UI creates (and updates) views and controllers fully automatically from two models: the data-model, an object that contains the data that is to be displayed (or not), and a second ui-model, an object that defines the layout and functionality of the UI for the data to be displayed. <BR><BR>          A UI-model may contains a number of properties that define the functionality of the UI element.<BR>             There are 3 ways to specify a UI-model:              <ol>                    <li>                    Direct specification using a Javascipt object variable<BR>                      <div class="preformatted">ui={<BR>  prop1:value1,<BR>  prop2:value2,<BR>  ...<BR>}</div><BR>                   <li>                    If the UI-Model is a function, the function\'s return value will be used as UI model.                   <div class="preformatted">ui=function() { return {prop1:value1,prop2:value2,...}; }</div>          <li>                    Specifing the UI-Model by a string is equivalent to using a object with the type property set to that string:                      <div class="preformatted">ui=string<BR>ui={type:string}</div>           </ol>           A specification of the predefined UI-models follows.  ';
 
 	d=Maggi(d);
 	
@@ -225,7 +247,7 @@ var doc = function() {
 				props:propui,
 				democontainer: {type:"user", user:ide, panesonly:true,projectid:null}
 			},
-			order:["head","desc","props","democontainer"],
+			order:["head","desc","democontainer","props"],
 			class:"typeui"
 		};
 	};
@@ -245,6 +267,7 @@ var doc = function() {
 			input:"Input",
 			link:"Link",
 			checkbox:"Checkbox",
+			select:"Select",
 			list:"List",
 			tabs:"Tabs",
 			demo:"Demo"
@@ -263,6 +286,7 @@ var doc = function() {
 			input:maketypeui(),
 			link:maketypeui(),
 			checkbox:maketypeui(),
+			select:maketypeui(),
 			list:maketypeui(),
 			tabs:maketypeui(),
 			demo:maketypeui(),
