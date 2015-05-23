@@ -3,7 +3,8 @@ var list=function(dom) {
 	var ui=Maggi({
 		type:"list",
 		select:"multi",
-		selected:{"child2":true}
+		selected:{"child2":true},
+		class:"mui selectable"
 	});
 
 	var data=Maggi({

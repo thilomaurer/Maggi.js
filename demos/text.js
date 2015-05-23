@@ -12,7 +12,8 @@ var text=function(dom) {
 				format:"first %d, then %d, last %d"
 			}
 
-		}
+		},
+		class:"mui"
 	});
 
 	var data=Maggi({

@@ -1,18 +1,16 @@
 var base=function(dom) {
 	var data=Maggi({
-		child1:"element1",
-		child2:"element2",
-		child3:"element3"
+		child:"child-content",
 	});
 
 	var ui=Maggi({
 		type:"object",
 		visible:true,
 		enabled:false,
-		class:"myclass",
+		class:"mui",
 		builder:function(dom,data,ui) {
-		    dom.append($('<div>',{text:"dfsdf"}));
-		    data.child1="ELEMENT1";
+		    dom.prepend($('<div>',{text:"prepended"}));
+		    data.child="child-content-modified";
 		}
 	});
 

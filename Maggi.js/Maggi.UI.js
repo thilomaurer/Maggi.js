@@ -8,7 +8,7 @@
  */
 
 
-Maggi.UI=function(dom,data,ui,setdata,datachange) {
+Maggi.UI=function(dom,data,ui,setdata,onDataChange) {
 	function cookui(ui) {
 		if (!ui) return;
 		if (typeof ui === "function") ui=ui();
@@ -22,7 +22,7 @@ Maggi.UI=function(dom,data,ui,setdata,datachange) {
 	var f;
 	if (ui.type=="user") f=ui.user;	else f=Maggi.UI[ui.type];
 	if (f) 
-		return f(dom,data,setdata,ui,datachange); 
+		return f(dom,data,setdata,ui,onDataChange); 
 	else 
 		console.log("Maggi.UI: unknown ui.type "+ui.type);
 };
@@ -30,7 +30,7 @@ Maggi.UI=function(dom,data,ui,setdata,datachange) {
 //non-object UI handlers
 //
 
-Maggi.UI.BaseFunctionality=function(dom,format) {
+Maggi.UI.BaseFunctionality=function(dom,data,setdata,format,onDataChange) {
 	var updateClass = function(v, dom, cls) {
 		if (v) dom.addClass(cls); else dom.removeClass(cls); 
 	}
@@ -135,10 +135,10 @@ Maggi.UI.BaseFunctionality=function(dom,format) {
 	};
 }
 
-Maggi.UI.parentclass=function(dom,s,sets,format) {
+Maggi.UI.parentclass=function(dom,data,setdata,format,onDataChange) {
 	if (!dom._Maggi) {
 		var p=dom._MaggiParent;
-		p.addClass(s);
+		p.addClass(data);
 		p._Maggi.bind("set",function(k,newv,oldv) { 
 			if (k=="state") {
 				p.removeClass(oldv);
@@ -149,9 +149,9 @@ Maggi.UI.parentclass=function(dom,s,sets,format) {
 	dom._Maggi=true;
 }
 
-Maggi.UI.text=function(dom,data,sets,ui,onDataChange) {
+Maggi.UI.text=function(dom,data,setdata,ui,onDataChange) {
 	//same for all?
-	var unbase=Maggi.UI.BaseFunctionality(dom,ui);
+	var unbase=Maggi.UI.BaseFunctionality(dom,data,setdata,ui,onDataChange);
 
 	var build=function(data) {
 		var s="(null)";
@@ -181,9 +181,9 @@ Maggi.UI.text=function(dom,data,sets,ui,onDataChange) {
 	};
 };
 
-Maggi.UI.label=function(dom,data,sets,ui,onDataChange) {
+Maggi.UI.label=function(dom,data,setdata,ui,onDataChange) {
 	//same for all?
-	var unbase=Maggi.UI.BaseFunctionality(dom,ui);
+	var unbase=Maggi.UI.BaseFunctionality(dom,data,setdata,ui,onDataChange);
 
 	var build=function(k,label) {
 		dom.text(label);
@@ -201,14 +201,15 @@ Maggi.UI.label=function(dom,data,sets,ui,onDataChange) {
 	};
 };
 
-Maggi.UI.html=function(ui,s,sets,format) {
-	Maggi.UI.BaseFunctionality(ui,format);
-	ui.html(s&&s.toString());
+Maggi.UI.html=function(dom,data,setdata,ui,onDataChange) {
+	var unbase=Maggi.UI.BaseFunctionality(dom,data,setdata,ui,onDataChange);
+	dom.html(data&&data.toString());
+	return unbase;
 };
 
-Maggi.UI.link=function(dom,data,setdata,ui) {
+Maggi.UI.link=function(dom,data,setdata,ui,onDataChange) {
 	if (!dom._Maggi) {
-		var unbase=Maggi.UI.BaseFunctionality(dom,ui);
+		var unbase=Maggi.UI.BaseFunctionality(dom,data,setdata,ui,onDataChange);
 		dom._Maggi=$('<a>', {href:data,text:ui.label,target:ui.target}).appendTo(dom);
 		var sethandler=function(k,v) {
 			if (k=="label") dom._Maggi.text(v);
@@ -219,37 +220,37 @@ Maggi.UI.link=function(dom,data,setdata,ui) {
 	} else dom._Maggi.attr("href",data);
 };
 
-Maggi.UI.image=function(dom,data,setdata,ui,ondatachange) {
+Maggi.UI.image=function(dom,data,setdata,ui,onDataChange) {
 	var update = function() {
 		var url=data;
 		if (ui.urls!=null) url=ui.urls[data];
 		img.attr("src",url);
 	};
-	var unbase=Maggi.UI.BaseFunctionality(dom,ui);
+	var unbase=Maggi.UI.BaseFunctionality(dom,data,setdata,ui,onDataChange);
 	var img=$('<img>').appendTo(dom);
 	dom._Maggi=img;
-	ondatachange(update);
+	onDataChange(update);
 	ui.bind("set","urls",update);
 	update();
 };
 
-Maggi.UI.checkbox=function(ui,v,setv,format) {
-	if (!ui._Maggi) {
-		Maggi.UI.BaseFunctionality(ui,format);
+Maggi.UI.checkbox=function(dom,data,setdata,ui,onDataChange) {
+	if (!dom._Maggi) {
+		var unbase=Maggi.UI.BaseFunctionality(dom,data,setdata,ui,onDataChange);
 		var name="maggi_"+Maggi.UI.select.counter.toString(); Maggi.UI.select.counter++;
 		var id=name+"_id";
-		ui._Maggi=$("<input>",{name:name,id:id,type:"checkbox"}).appendTo(ui).change(function() {
+		dom._Maggi=$("<input>",{name:name,id:id,type:"checkbox"}).appendTo(dom).change(function() {
 			if (setv) setv(this.checked);
 		});
-		$("<label>",{for:id,text:format.label}).appendTo(ui);
+		$("<label>",{for:id,text:ui.label}).appendTo(dom);
 	} 
-	//if (v) ui._Maggi[0].setAttribute("checked","checked"); else ui._Maggi[0].removeAttribute("checked");
-	ui._Maggi[0].checked=v;
+	//if (data) dom._Maggi[0].setAttribute("checked","checked"); else dom._Maggi[0].removeAttribute("checked");
+	dom._Maggi[0].checked=data;
 };
 
-Maggi.UI.input=function(dom,data,setv,format,onChange) {
+Maggi.UI.input=function(dom,data,setdata,ui,onDataChange) {
 	var autolength=function(o,v) {
-		if (format.autosize) {
+		if (ui.autosize) {
 			if (v==null) v="";
 			v=v.toString();
 			var l=v.length;
@@ -257,31 +258,31 @@ Maggi.UI.input=function(dom,data,setv,format,onChange) {
 			o.attr("size",l);
 		}
 	}
-	var unbase=Maggi.UI.BaseFunctionality(dom,format);
+	var unbase=Maggi.UI.BaseFunctionality(dom,data,setdata,ui,onDataChange);
 	dom.empty();
 	var prefix=$("<span>",{id:"prefix"}).appendTo(dom);
 	var postfix=$("<span>",{id:"postfix"}).appendTo(dom);
 	var midfix=$("<span>",{id:"midfix"}).appendTo(dom);
 	
 	var updatePrefix=function() {
-		prefix.text(format.prefix);
+		prefix.text(ui.prefix);
 	}
-	format.bind("set","prefix",updatePrefix);
+	ui.bind("set","prefix",updatePrefix);
 	updatePrefix();
 	
 	var updatePostfix=function() {
-		postfix.text(format.postfix);
+		postfix.text(ui.postfix);
 	}
-	format.bind("set","postfix",updatePostfix);
+	ui.bind("set","postfix",updatePostfix);
 	updatePostfix();
 
-	var i=$('<input/>', { type: format.kind, placeholder:format.placeholder }).appendTo(midfix)
+	var i=$('<input/>', { type: ui.kind, placeholder:ui.placeholder }).appendTo(midfix)
 	  .on("input",function(event) { 
 		autolength(i,this.value);
 		setv(this.value);
 		event.stopPropagation();
 	}).on("keypress",function(event) { 
-		if (event.keyCode == '13') { if (format.onReturnKey) format.onReturnKey(this.value); }
+		if (event.keyCode == '13') { if (ui.onReturnKey) ui.onReturnKey(this.value); }
 		event.stopPropagation();
 	}).keydown(function(event) {
 		event.stopPropagation();
@@ -290,25 +291,25 @@ Maggi.UI.input=function(dom,data,setv,format,onChange) {
 	}).blur(function() {
 		dom.removeClass('focused');
 	});
-	format.bind("set","placeholder",i.attr);
+	ui.bind("set","placeholder",i.attr);
 	var datachange=function(data) {
 		var newvalue=data&&data.toString();
 		if (i[0].value!=newvalue) i[0].value=newvalue;
 		autolength(i,newvalue);
 	};
-	onChange(datachange);
+	onDataChange(datachange);
 	datachange(data);
 	dom.click(function() {i.focus();});
 	dom._Maggi=i; //deprecated?
 	return function() {
-		format.unbind("set",i.attr);
+		ui.unbind("set",i.attr);
 		dom._Maggi=null;
 		unbase();
 	};
 };
 
-Maggi.UI.function=function(dom,data,setdata,ui,datachange) {
-	var unbase=Maggi.UI.BaseFunctionality(dom,ui);
+Maggi.UI.function=function(dom,data,setdata,ui,onDataChange) {
+	var unbase=Maggi.UI.BaseFunctionality(dom,data,setdata,ui,onDataChange);
 	var update=function() {
 		if (ui.label!=null) dom.text(ui.label);
 	};
@@ -324,8 +325,8 @@ Maggi.UI.function=function(dom,data,setdata,ui,datachange) {
 	}
 };
 
-Maggi.UI.select=function(dom,data,setdata,ui,datachange) {
-	var unbase=Maggi.UI.BaseFunctionality(dom,ui);
+Maggi.UI.select=function(dom,data,setdata,ui,onDataChange) {
+	var unbase=Maggi.UI.BaseFunctionality(dom,data,setdata,ui,onDataChange);
 	var name="maggi_radiogroup_"+Maggi.UI.select.counter.toString(); Maggi.UI.select.counter++;
 	var chld={};
 	dom._Maggi=chld;
@@ -338,7 +339,7 @@ Maggi.UI.select=function(dom,data,setdata,ui,datachange) {
 		$("<label>",{for:id,text:value.label,style:style}).appendTo(dom);
 	});
 
-	datachange(function(data) {
+	onDataChange(function(data) {
 		chld[data].prop('checked', true);
 	});
 
@@ -355,7 +356,7 @@ Maggi.UI.select=function(dom,data,setdata,ui,datachange) {
 
 Maggi.UI.select.counter=0;
 
-Maggi.UI.object=function(dom,data,setdata,ui,datachange) {
+Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 	var chld={};
 	var backbuild={};
 	var sethandler={};
@@ -465,7 +466,7 @@ Maggi.UI.object=function(dom,data,setdata,ui,datachange) {
 	var backbuild_base;
 
 	var build=function() {
-		backbuild_base=Maggi.UI.BaseFunctionality(dom,ui);
+		backbuild_base=Maggi.UI.BaseFunctionality(dom,data,setdata,ui,onDataChange);
 		if (data==null||typeof data != "object") return;
 		dom._Maggi=data;
 		
@@ -504,7 +505,7 @@ Maggi.UI.object=function(dom,data,setdata,ui,datachange) {
 	
 	ui.bind("set",formatsethandler);
 	
-	if (datachange) datachange(rebuild);
+	if (onDataChange) onDataChange(rebuild);
 	build();
 
 	return function() {
@@ -513,10 +514,10 @@ Maggi.UI.object=function(dom,data,setdata,ui,datachange) {
 	};
 };
 
-Maggi.UI.tabs=function(ui,o,seto,format) {
+Maggi.UI.tabs=function(ui,o,seto,format,onDataChange) {
 	if (o==null) {ui.empty(); return; }
 	if (!(ui._Maggi===o)) {
-		Maggi.UI.BaseFunctionality(ui,format);
+		var unbase=Maggi.UI.BaseFunctionality(ui,o,seto,format,onDataChange);
 		ui._Maggi=o;
 		ui.empty();
 		ui.head=$("<div>",{id:"_Maggi_UI_TabView_Header"}).appendTo(ui); 
@@ -547,7 +548,7 @@ Maggi.UI.tabs=function(ui,o,seto,format) {
 	}
 };
 
-Maggi.UI.list=function(dom,data,setdata,ui,datachange) {
+Maggi.UI.list=function(dom,data,setdata,ui,onDataChange) {
 	var chld={};
 	var installClick = function(k,v) {
 		if (ui.select=="single"||ui.select=="multi")
@@ -625,7 +626,7 @@ Maggi.UI.list=function(dom,data,setdata,ui,datachange) {
 	
 	ui.bind("set",formatsethandler);
 	
-	if (datachange) datachange(rebuild);
+	if (onDataChange) onDataChange(rebuild);
 	build();
 
 	return function() {

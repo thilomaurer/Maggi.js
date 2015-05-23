@@ -1,13 +1,6 @@
-.disabled {
-    color:gray;
+.showhierarchy  * {
+    border:1px solid lightgray;
+    margin:4px;
+    padding:4px;
 }
-
-.selected {
-    color:red;
-}
-
-.myclass > * {
-    border:1px solid;
-}
-
 

@@ -8,7 +8,8 @@ var tabs=function(dom) {
 			child2:"Header 2",
 			child3:"Header 3"
 		},
-		selected:"child2"
+		selected:"child2",
+		class:"mui"
 	});
 
 	var data=Maggi({

@@ -6,7 +6,8 @@ var checkbox=function(dom) {
 				type:"checkbox",
 				label:"debug mode"
 			}
-		}
+		},
+		class:"mui"
 	});
 
 	var data=Maggi({debug:true});

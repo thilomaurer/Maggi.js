@@ -199,7 +199,7 @@ var doc = function() {
 		{key:"demo",name:"Password Calculator", srcs: ["demos/pwcalc.js","demos/pwcalc.css","demos/pwcalc.html","demos/utils.js"]},
 	];
 	var lp=function(idx,v) {
-		var files=["ide/jquery-2.0.3.js","ide/Maggi.js","ide/Maggi.UI.js"];
+		var files=["Maggi.js/jquery-2.0.3.js","Maggi.js/Maggi.js","Maggi.js/Maggi.UI.js","Maggi.js/Maggi.UI.css","Maggi.js/Maggi.UI.input.css","Maggi.js/Maggi.UI.select.css"];
 		if (v.srcs) files=v.srcs.concat(files);
 
 		initproject("Thilo Maurer","username@domain",v.name,files,function(project) {
@@ -333,7 +333,7 @@ var doc = function() {
 	};
 
 	HighlightedJS=function(dom,data,setdata,ui,datachange) { 
-		var backbuild=Maggi.UI.BaseFunctionality(dom,ui);
+		var backbuild=Maggi.UI.BaseFunctionality(dom,data,setdata,ui,datachange);
 		var build=function() {
 			var message=syntaxHighlight(data);
 			if (ui.prepend) message=ui.prepend+message;

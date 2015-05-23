@@ -1,5 +1,5 @@
-Maggi.UI.editor=function(dom,data,setdata,ui) {
-	backbuild_base=Maggi.UI.BaseFunctionality(dom,ui);
+Maggi.UI.editor=function(dom,data,setdata,ui,onDataChange) {
+	backbuild_base=Maggi.UI.BaseFunctionality(dom,data,setdata,ui,onDataChange);
 	var d=Maggi({editor:"",annot:{}});
 	var fmt=Maggi({
 		type:"object",

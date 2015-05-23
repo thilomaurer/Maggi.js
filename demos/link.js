@@ -8,7 +8,8 @@ var link=function(dom) {
 				label:"click here",
 				target:"_blank"
 			}
-		}
+		},
+		class:"mui"
 	});
 
 	var data=Maggi({o:"http://www.google.com"});

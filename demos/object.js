@@ -18,7 +18,8 @@ var object=function(dom) {
 			"child3",
 			"child2",
 			"child1"
-		]
+		],
+		class:"mui showhierarchy"
 	});
 
 	Maggi.UI(dom,data,ui);

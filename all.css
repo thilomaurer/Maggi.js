@@ -102,14 +102,19 @@ div.button.inactive, div.button.disabled {
 	height:400px;
 }
 
+#content.tabs {
+	box-shadow:0px 4px 10px #aaa;
+	border-radius:6px;
+	overflow:hidden;
+	padding:2px;
+	background: #24252a;
+}
+
 #content.tabs > #_Maggi_UI_TabView_Header > * {
 	font-weight:bold;
 	display: inline-block;
 	padding:8px;
-	border-top-left-radius:8px;
-	border-top-right-radius:8px;
 	color:#888;
-	
 }
 
 #content.tabs > #_Maggi_UI_TabView_Header > .selected {
@@ -118,15 +123,14 @@ div.button.inactive, div.button.disabled {
 }
 
 #content.tabs > #_Maggi_UI_TabView_Header {
-	margin-left:10px;
 	display:block;
 }
 
 #content.tabs > #_Maggi_UI_TabView_Container {
-	border-radius:10px;
 	background:#eee;
 	padding:10px;
-	box-shadow:0px 4px 10px #aaa;
+	border-bottom-left-radius:4px;
+	border-bottom-right-radius:4px;
 }
 
 .tabs > #_Maggi_UI_TabView_Container > * {
@@ -150,7 +154,7 @@ div.button.inactive, div.button.disabled {
 
 h1 {
 	background:linear-gradient(#fff, #eee);
-	box-shadow:0px 0px 10px #aaa;
+	box-shadow:0px -4px 20px #000;
 	text-shadow: 0px 1px 0px white;
 }
 

@@ -7,7 +7,7 @@
  * 
  */
 
-Maggi.UI.iframe=function(ui,s,sets,format) {
+Maggi.UI.iframe=function(ui,s,sets,format,onDataChange) {
 
 	var jshtml="<!DOCTYPE html><html lang=\"en\"><head><title></title><meta charset=\"utf-8\"></head><body></body></html>";
 
@@ -120,7 +120,7 @@ Maggi.UI.iframe=function(ui,s,sets,format) {
 		if (k[0]=="files"&&k[2]=="data") updateFile(s.files[k[1]]);
 	};
 
-	backbuild_base=Maggi.UI.BaseFunctionality(ui,format);
+	backbuild_base=Maggi.UI.BaseFunctionality(ui,s,sets,format,onDataChange);
 	var iframe=$('<iframe>', {name:s.name}).appendTo(ui);
 
 	s.bind("set", sethandler); 

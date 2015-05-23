@@ -95,12 +95,27 @@
 	padding-right: 10px;
 }
 
+
+@font-face {
+	font-family: 'Open Sans';
+	font-style: normal;
+	font-weight: 400;
+	src: local('Open Sans'), local('OpenSans'), url(cJZKeOuBrn4kERxqtaUH3T8E0i7KZn-EPnyo3HZu7kw.woff) format('woff'), url(https://themes.googleusercontent.com/static/fonts/opensans/v8/cJZKeOuBrn4kERxqtaUH3T8E0i7KZn-EPnyo3HZu7kw.woff) format('woff');
+}
+
 .mui {
+	color:white;
+	font-family: 'Open Sans', sans-serif;
 	background:hsla(224, 8%, 30%, 1); //var(--mui-normal-color);
 	font-size: 18px;
 	font-weight: normal;
 	text-shadow: none;
 	text-align: left;
+}
+
+.mui.disabled,
+.mui .disabled {
+	color:gray;
 }
 
 .mui.popup > #title {
@@ -140,6 +155,22 @@
 }
 
 
+.mui.list.selectable > .selected,
+.mui .list.selectable > .selected {
+	background:#29a1d3; 
+	color:inherit;
+}
+
+.mui.list.selectable > .selected:hover,
+.mui .list.selectable > .selected:hover {
+	background:#29a1d3; 
+}
+
+.mui.list.selectable > *:hover,
+.mui .list.selectable > *:hover{
+	background:#525864;
+}
+
 .mui .table.list > .list > * {
 	border:0;
 	padding:0px 5px 0px 5px;
@@ -157,3 +188,41 @@
 .mui .checkbox > label {
 	padding-left:5px;
 }
+
+.tabs > #_Maggi_UI_TabView_Header > * {
+        display: inline-block;
+        padding:4px;
+        padding-left:10px;
+        padding-right:10px;
+        border-top-left-radius:4px;
+        border-top-right-radius:4px;
+        color:#454954
+}
+
+.tabs > #_Maggi_UI_TabView_Header > *:hover {
+        color:white;
+}
+
+.tabs > #_Maggi_UI_TabView_Header > .selected {
+        background: #454954;
+        color:white;
+}
+
+.tabs > #_Maggi_UI_TabView_Header {
+        background: #24252a;
+        border-top-left-radius:4px;
+        border-top-right-radius:4px;
+}
+
+.tabs > #_Maggi_UI_TabView_Container {
+        height:100%;
+}
+.tabs > #_Maggi_UI_TabView_Container > * {
+        display: none;
+        height:800px;
+}
+
+.tabs > #_Maggi_UI_TabView_Container > .selected {
+        display: block;
+}
+

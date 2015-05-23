@@ -4,7 +4,8 @@ var html=function(dom) {
 		type:"object",
 		children:{
 			o:{type:"html"}
-		}
+		},
+		class:"mui"
 	});
 
 	var data=Maggi({o:"<ol><li>First<li>Second</ol>"});

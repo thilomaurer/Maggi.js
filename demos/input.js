@@ -10,7 +10,8 @@ var input=function(dom) {
 				autosize:true,
 				onReturnKey:function(v) { alert(v); }
 			}
-		}
+		},
+		class:"mui"
 	});
 
 	var data=Maggi({username:""});

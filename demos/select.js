@@ -6,14 +6,17 @@ var select=function(dom) {
 				type:"select",
 				choices:{
 					on:{label:"On"},
-					tri:{label:"Middle"},
-					off:{label:"right"}
+					tri:{label:"Tri-State"},
+					off:{label:"Off"}
 				}
 			}
-		}
+		},
+		class:"mui"
 	});
 
-	var data=Maggi({mode:"on"});
+	var data=Maggi({
+		mode:"on"
+	});
 
 	Maggi.UI(dom,data,ui);
 };
