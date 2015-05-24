@@ -240,7 +240,7 @@ Maggi.UI.checkbox=function(dom,data,setdata,ui,onDataChange) {
 		var name="maggi_"+Maggi.UI.select.counter.toString(); Maggi.UI.select.counter++;
 		var id=name+"_id";
 		dom._Maggi=$("<input>",{name:name,id:id,type:"checkbox"}).appendTo(dom).change(function() {
-			if (setv) setv(this.checked);
+			if (setdata) setdata(this.checked);
 		});
 		$("<label>",{for:id,text:ui.label}).appendTo(dom);
 	} 
@@ -279,7 +279,7 @@ Maggi.UI.input=function(dom,data,setdata,ui,onDataChange) {
 	var i=$('<input/>', { type: ui.kind, placeholder:ui.placeholder }).appendTo(midfix)
 	  .on("input",function(event) { 
 		autolength(i,this.value);
-		setv(this.value);
+		setdata(this.value);
 		event.stopPropagation();
 	}).on("keypress",function(event) { 
 		if (event.keyCode == '13') { if (ui.onReturnKey) ui.onReturnKey(this.value); }

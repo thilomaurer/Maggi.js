@@ -20,10 +20,11 @@ var pwcalc=function(dom) {
 		type:"object",
 		children: {
 			header: {type:"label", label:"Password Calculator"},
-			alias:  {type:"input", placeholder:"alias"},
+			alias:  {type:"input", placeholder:"alias", class:"first"},
 			secret: {type:"input", placeholder:"secret", kind:"password"},
 			password: "text"
-		}
+		},
+		class:"mui"
 	});
 
 	Maggi.UI(dom,data,ui);

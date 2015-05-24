@@ -9,9 +9,11 @@ var func=function(dom) {
 		children:{
 			myfunc:{
 				type:"function",
-				label:"label"
+				label:"label",
+				class:"button red"
 			}
-		}
+		},
+		class:"mui"
 	});
 
 	Maggi.UI(dom,data,ui);

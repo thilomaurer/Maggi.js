@@ -56,7 +56,7 @@ div.button {
 	text-align:center;
 	vertical-align:middle;
 	cursor:pointer;
-	border-radius:4px;
+	border-radius:5px;
 	background:#525864;
 	padding:5px;
 	color:white;
@@ -103,7 +103,7 @@ div.button.inactive, div.button.disabled {
 }
 
 #content.tabs {
-	box-shadow:0px 4px 10px #aaa;
+	box-shadow:0px 5px 10px #aaa;
 	border-radius:6px;
 	overflow:hidden;
 	padding:2px;
@@ -120,6 +120,8 @@ div.button.inactive, div.button.disabled {
 #content.tabs > #_Maggi_UI_TabView_Header > .selected {
 	color:black;
 	background:linear-gradient(#ddd, #eee);
+	border-top-left-radius:5px;
+	border-top-right-radius:5px;
 }
 
 #content.tabs > #_Maggi_UI_TabView_Header {
@@ -128,9 +130,8 @@ div.button.inactive, div.button.disabled {
 
 #content.tabs > #_Maggi_UI_TabView_Container {
 	background:#eee;
-	padding:10px;
-	border-bottom-left-radius:4px;
-	border-bottom-right-radius:4px;
+	border-bottom-left-radius:5px;
+	border-bottom-right-radius:5px;
 }
 
 .tabs > #_Maggi_UI_TabView_Container > * {
@@ -154,7 +155,7 @@ div.button.inactive, div.button.disabled {
 
 h1 {
 	background:linear-gradient(#fff, #eee);
-	box-shadow:0px -4px 20px #000;
+	box-shadow:0px -5px 20px #000;
 	text-shadow: 0px 1px 0px white;
 }
 
