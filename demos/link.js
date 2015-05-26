@@ -1,7 +1,6 @@
 var link=function(dom) {
 
 	var ui=Maggi({
-		type:"object",
 		children:{
 			o:{
 				type:"link",

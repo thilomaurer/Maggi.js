@@ -7,12 +7,24 @@
  * 
  */
 
+Maggi.UI_devel=function(dom) {
+	var a=Maggi({data:null,ui:null});
+	var backbuild=null;
+	a.bind(function(k) {
+		if (k instanceof Array) return;
+		if (backbuild) backbuild();
+		backbuild=Maggi.UI(dom,a.data,a.ui);
+	});
+	return a;
+}
 
 Maggi.UI=function(dom,data,ui,setdata,onDataChange) {
 	function cookui(ui) {
-		if (!ui) return;
+		if (ui===null) return ui;
 		if (typeof ui === "function") ui=ui();
 		if (typeof ui === "string") ui={type:ui};
+		if (!ui.hasOwnProperty("type")) ui.type="object";
+		if (ui.type === null) ui.type="object";
 		ui=Maggi(ui);
 		return ui;
 	}
@@ -24,7 +36,7 @@ Maggi.UI=function(dom,data,ui,setdata,onDataChange) {
 	if (f) 
 		return f(dom,data,setdata,ui,onDataChange); 
 	else 
-		console.log("Maggi.UI: unknown ui.type "+ui.type);
+		console.log("Maggi.UI: unknown ui.type '"+ui.type+"'");
 };
 
 //non-object UI handlers

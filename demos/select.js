@@ -1,6 +1,5 @@
 var select=function(dom) {
 	var ui=Maggi({
-		type:"object",
 		children:{
 			mode:{
 				type:"select",

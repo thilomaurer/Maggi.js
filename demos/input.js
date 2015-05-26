@@ -1,7 +1,6 @@
 var input=function(dom) {
 	
 	var ui=Maggi({
-		type:"object",
 		children:{
 			username:{
 				type:"input",

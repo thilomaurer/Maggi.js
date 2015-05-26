@@ -1,7 +1,6 @@
 var object=function(dom) {
 
 	var data=Maggi({
-
 		child1:"child 1",
 		child2:"child 2",
 		child3:{
@@ -11,7 +10,6 @@ var object=function(dom) {
 	});
 
 	var ui=Maggi({
-		type:"object",
 		//childdefault:"text",
 		//children:{child1:"text",child2:"input"},
 		order:[	

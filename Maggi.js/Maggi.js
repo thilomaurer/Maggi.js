@@ -89,17 +89,35 @@ var Maggi=function(other) {
 			trigger("remove",key,value); //fire remove last time
 			p.unbind(key);               //before removing all bindings for key
 		},
-		bind: function(ks,keys,fn) {
-			if (!fn) { fn=keys; keys=null; }
-			if (typeof keys === "string" || typeof keys === "number") keys=[keys];
-			if (typeof ks === 'function') { fn=ks; ks=["set"]; }
-			if (!(fn instanceof Array)) fn=[fn];
-			if (typeof ks === "string") ks=[ks];
-			for (var ik in ks) {
-				var k=ks[ik];
+		bind: function() {
+			var ts,ks,fn;
+			var arg=arguments;
+			var n=arg.length;
+			var makeArray = function(idx) {
+				var a=arg[idx];
+				if (a instanceof Array) return a;
+				return [a];
+			}
+			if (n>=3) {
+				ts=makeArray(0);	
+				ks=makeArray(1);	
+				fn=makeArray(2);	
+			}
+			if (n==2) {
+				ts=makeArray(0);	
+				ks=null;	
+				fn=makeArray(1);	
+			}
+			if (n==1) {
+				ts=["set"];	
+				ks=null;	
+				fn=makeArray(0);	
+			}
+			for (var ik in ts) {
+				var k=ts[ik];
 				if (events[k]==null) events[k]=[];
 				for (var i in fn) {
-					events[k].push({fn:fn[i],keys:keys});
+					events[k].push({fn:fn[i],keys:ks});
 				}
 			}
 		},

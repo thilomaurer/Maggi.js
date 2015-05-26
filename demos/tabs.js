@@ -2,7 +2,7 @@ var tabs=function(dom) {
 
 	var ui=Maggi({
 		type:"tabs",
-		headerui:{type:"object"},
+		headerui:{},
 		headerdata:{
 			child1:"Header 1",
 			child2:"Header 2",

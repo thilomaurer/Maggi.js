@@ -1,6 +1,5 @@
 var checkbox=function(dom) {
 	var ui=Maggi({
-		type:"object",
 		children:{
 			debug:{
 				type:"checkbox",

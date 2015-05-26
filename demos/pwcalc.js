@@ -1,4 +1,37 @@
 var pwcalc=function(dom) {
+	m=Maggi.UI_devel(dom);
+
+	m.data={
+		alias:"",
+		secret:"",
+		password:""
+	};
+
+	m.data.bind("set",["alias","secret"],function(k,v) {
+		m.data.password=calcPassword(m.data.alias,m.data.secret);
+	});
+
+	var calcPassword = function(alias,secret) {
+		if (secret===""||alias==="") return "";
+		var array = Sha1.hash(secret + alias).match(/.{1,2}/g);
+		for (var i in array) array[i] = parseInt(array[i], 16);
+		return btoa(String.fromCharCode.apply(null, array));
+	};
+
+	m.ui={
+		children: {
+			header: {type:"label", label:"Password Calculator"},
+			alias:  {type:"input", placeholder:"alias", class:"first"},
+			secret: {type:"input", placeholder:"secret", kind:"password"},
+			password: "text"
+		},
+		class:"mui"
+	};
+
+};
+
+/*
+var pwcalc=function(dom) {
 	var data=Maggi({
 		alias:"",
 		secret:"",
@@ -17,7 +50,7 @@ var pwcalc=function(dom) {
 	};
 
 	var ui=Maggi({
-		type:"object",
+		X,
 		children: {
 			header: {type:"label", label:"Password Calculator"},
 			alias:  {type:"input", placeholder:"alias", class:"first"},
@@ -29,3 +62,4 @@ var pwcalc=function(dom) {
 
 	Maggi.UI(dom,data,ui);
 };
+*/

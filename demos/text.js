@@ -1,7 +1,6 @@
 var text=function(dom) {
 
 	var ui=Maggi({
-		type:"object",
 		children:{
 			pi:{
 				type:"text",

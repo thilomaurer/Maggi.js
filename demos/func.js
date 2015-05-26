@@ -5,7 +5,6 @@ var func=function(dom) {
 	});
 
 	var ui=Maggi({
-		type:"object",
 		children:{
 			myfunc:{
 				type:"function",

@@ -4,7 +4,6 @@ var base=function(dom) {
 	});
 
 	var ui=Maggi({
-		type:"object",
 		visible:true,
 		enabled:false,
 		class:"mui",
