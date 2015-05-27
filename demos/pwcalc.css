@@ -1,8 +1,15 @@
-#header {
-	margin-bottom:5px;
+.pwcalc > * {
+    margin:10px;
 }
 
 #password {
-	margin-top:5px;
+	text-align:center;
 	font-family:monospace;
+	color:lightgreen;
+	font-size:20px;
 }
+
+#len {
+    display:inline-block;
+}
+

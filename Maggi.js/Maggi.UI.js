@@ -344,11 +344,14 @@ Maggi.UI.select=function(dom,data,setdata,ui,onDataChange) {
 	dom._Maggi=chld;
 	var style="width:"+(100/Object.keys(ui.choices).length).toString()+"%";
 	$.each(ui.choices,function(key,value) {
+		console.log(key+ " " + value);
 		var id=name+"_"+key.toString();
 		chld[key]=$("<input>",{name:name,id:id,value:key,type:"radio",checked:key==data}).appendTo(dom).change(function() {
 			if (this.checked) setdata(key);
 		});
-		$("<label>",{for:id,text:value.label,style:style}).appendTo(dom);
+		var text=value.label;
+		if (text==null) text=value;
+		$("<label>",{for:id,text:text,style:style}).appendTo(dom);
 	});
 
 	onDataChange(function(data) {
