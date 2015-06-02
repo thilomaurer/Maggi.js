@@ -328,7 +328,7 @@ Maggi.UI.function=function(dom,data,setdata,ui,onDataChange) {
 	update();
 	ui.bind("set","label",update);
 	dom.click(function() {
-		data(dom._MaggiParent._Maggi);
+		if (data) data(dom._MaggiParent._Maggi);
 		return false;
 	});
 	return function() {
@@ -344,7 +344,7 @@ Maggi.UI.select=function(dom,data,setdata,ui,onDataChange) {
 	dom._Maggi=chld;
 	var style="width:"+(100/Object.keys(ui.choices).length).toString()+"%";
 	$.each(ui.choices,function(key,value) {
-		console.log(key+ " " + value);
+		//console.log(key+ " " + value);
 		var id=name+"_"+key.toString();
 		chld[key]=$("<input>",{name:name,id:id,value:key,type:"radio",checked:key==data}).appendTo(dom).change(function() {
 			if (this.checked) setdata(key);
@@ -443,7 +443,8 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 		if (ui.childdefault==null) if (ui.hasOwnProperty("children")) if (ui.children[k]==null) shown=false;
 		if (!shown) return;
 		make(k);
-		if (ui.children) ui.children.bind(["add","set","remove"],k,make);
+		//if (ui.children) ui.children.bind(["add","set","remove"],k,make);
+		if (ui.children) ui.children.bind("set",k,make);
 		if (hasExplicitFormat(k)) {
 			var ef=ui.children[k];
 			if (ef instanceof Object)
@@ -494,18 +495,26 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 		} else {
 			$.each(data, add);
 		}
-		if (ui.builder) backbuild_builder=ui.builder(dom,data,ui);
 		data.bind("set", update);
 		data.bind("add", add);
 		data.bind("remove", remove);
+		if (ui.children!=null) {
+			ui.children.bind("add", add);
+			ui.children.bind("remove", remove);
+		}
+		if (ui.builder) backbuild_builder=ui.builder(dom,data,ui); //must be last in build
 	};
 	
 	var backbuild=function() {
-		if (backbuild_builder) backbuild_builder();
+		if (backbuild_builder) backbuild_builder(); //must be first in backbuild
 		if (data) {
 			data.unbind("set", update);
 			data.unbind("add", add);
 			data.unbind("remove", remove);
+			if (ui.children!=null) {
+				ui.children.unbind("add");
+				ui.children.unbind("remove");
+			}
 		}
 		if (backbuild_base) backbuild_base();
 		removeall();

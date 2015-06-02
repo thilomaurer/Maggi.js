@@ -7,7 +7,7 @@
  * 
  */
 
-Maggi.UI.iframe=function(ui,s,sets,format,onDataChange) {
+Maggi.UI.iframe=function(dom,s,sets,ui,onDataChange) {
 
 	var jshtml="<!DOCTYPE html><html lang=\"en\"><head><title></title><meta charset=\"utf-8\"></head><body></body></html>";
 
@@ -98,12 +98,10 @@ Maggi.UI.iframe=function(ui,s,sets,format,onDataChange) {
 			delete d[n];
 		}
 	}
+
 	var makedocument = function() {
-		//if (iframe!=null) iframe.remove();
-		//iframe=$('<iframe>', {name:s.name}).appendTo(ui);
-		var cw=iframe[0].contentWindow;
-		purge(cw);
-		builddoc(cw.document);
+		purge(w);
+		builddoc(w.document);
 	};
 
 	var updateFile = function(file) {
@@ -120,17 +118,34 @@ Maggi.UI.iframe=function(ui,s,sets,format,onDataChange) {
 		if (k[0]=="files"&&k[2]=="data") updateFile(s.files[k[1]]);
 	};
 
-	backbuild_base=Maggi.UI.BaseFunctionality(ui,s,sets,format,onDataChange);
-	var iframe=$('<iframe>', {name:s.name}).appendTo(ui);
+	backbuild_base=Maggi.UI.BaseFunctionality(dom,s,sets,ui,onDataChange);
+	var iframe=$('<iframe>', {name:s.name}).appendTo(dom);
+
+	var w=iframe[0].contentWindow;
+	var setdetach=function(k,v) {
+		if (v==true) {
+			w.document.write("detached");
+			w=window.open();
+		} else {
+			if (w) w.close();
+			w=iframe[0].contentWindow;
+		}
+		makedocument();
+	};
 
 	s.bind("set", sethandler); 
 	s.bind("add", makedocument);
+	ui.bind("set","detach",setdetach);
+
+	if (ui.detach==null) ui.add("detach",false);
+	setdetach("detach",ui.detach);
+
 	var unbind = function() {
-		s.unbind("set",sethandler);
-		s.unbind("add",makedocument);
+		s.unbind(sethandler);
+		s.unbind(makedocument);
+		ui.unbind(setdetach);
 		backbuild_base();
 	}
-	makedocument();
 	return unbind;
 };
 

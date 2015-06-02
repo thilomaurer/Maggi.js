@@ -132,6 +132,7 @@ div.button.inactive, div.button.disabled {
 	background:#eee;
 	border-bottom-left-radius:5px;
 	border-bottom-right-radius:5px;
+	padding:8px;
 }
 
 .tabs > #_Maggi_UI_TabView_Container > * {
