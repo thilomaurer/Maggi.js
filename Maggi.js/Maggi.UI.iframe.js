@@ -124,10 +124,12 @@ Maggi.UI.iframe=function(dom,s,sets,ui,onDataChange) {
 	var w=iframe[0].contentWindow;
 	var setdetach=function(k,v) {
 		if (v==true) {
-			w.document.write("detached");
+			if (w) iframe.remove();
+//			w.document.write("This frame is detached.");
 			w=window.open();
 		} else {
 			if (w) w.close();
+			iframe.appendTo(dom);
 			w=iframe[0].contentWindow;
 		}
 		makedocument();
