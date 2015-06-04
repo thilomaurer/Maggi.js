@@ -144,6 +144,7 @@ Maggi.UI.iframe=function(dom,s,sets,ui,onDataChange) {
 		s.unbind(sethandler);
 		s.unbind(makedocument);
 		ui.unbind(setdetach);
+		w.close();
 		backbuild_base();
 	}
 	return unbind;
