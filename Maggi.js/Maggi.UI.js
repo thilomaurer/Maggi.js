@@ -33,8 +33,13 @@ Maggi.UI=function(dom,data,ui,setdata,onDataChange) {
 	if (!ui) return;
 	var f;
 	if (ui.type=="user") f=ui.user;	else f=Maggi.UI[ui.type];
-	if (f) 
+	if (f) {
+		if (ui.wrap==true)  {
+			dom.addClass("wrap");
+			dom=$("<div>").appendTo(dom);
+		}
 		return f(dom,data,setdata,ui,onDataChange); 
+	}
 	else 
 		console.log("Maggi.UI: unknown ui.type '"+ui.type+"'");
 };
@@ -377,9 +382,6 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 	var sethandler={};
 	dom.ui=chld;
 
-	//override data
-	if (ui.data!=null) data=ui.data;
-
 	var hasExplicitFormat=function(k) {
 		if (ui.children) if (ui.children[k]) return true;
 		return false;
@@ -422,8 +424,15 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 
 		if (chld[k])
 			chld[k].replaceWith(c);	
-		else 
-			c.appendTo(dom); 
+		else {
+			if (ui.wrapchildren) {
+				console.log("wrapping");
+				var w=$("<div>",{"class":"wrap"}).appendTo(dom);
+				c.appendTo(w);
+			} else {
+				c.appendTo(dom); 
+			}
+		}
 
 		chld[k]=c;
 		backbuild[k]=Maggi.UI(chld[k],data[k],getFormat(k),function(v) { 
@@ -481,7 +490,10 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 	var backbuild_builder;
 	var backbuild_base;
 
-	var build=function() {
+	var build=function(newdata) {
+		data=newdata;
+		if (ui.data!=null) data=ui.data;
+
 		backbuild_base=Maggi.UI.BaseFunctionality(dom,data,setdata,ui,onDataChange);
 		if (data==null||typeof data != "object") return;
 		dom._Maggi=data;
@@ -523,14 +535,16 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 
 	var rebuild=function(newdata) {
 		backbuild();
-		data=newdata;
-		build();
+		build(newdata);
 	};
 	
 	ui.bind("set",formatsethandler);
-	
+	ui.bind(["add","set"],"data",function(k,v) {
+		rebuild(v);
+	});
+
 	if (onDataChange) onDataChange(rebuild);
-	build();
+	build(data);
 
 	return function() {
 		backbuild();
