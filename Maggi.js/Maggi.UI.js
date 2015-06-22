@@ -464,7 +464,7 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 	};
 	var remove=function(k) {
 		if (chld.hasOwnProperty(k)) { 
-			chld[k].remove(); 
+			if (ui.wrapchildren==true) chld[k].parents()[0].remove(); else chld[k].remove(); 
 			if (backbuild[k]) {
 				backbuild[k](); 
 				delete backbuild[k];
@@ -539,6 +539,7 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 	};
 	
 	ui.bind("set",formatsethandler);
+	ui.bind("add","order",formatsethandler);
 	ui.bind(["add","set"],"data",function(k,v) {
 		rebuild(v);
 	});
@@ -590,15 +591,17 @@ Maggi.UI.list=function(dom,data,setdata,ui,onDataChange) {
 	var chld={};
 	var installClick = function(k,v) {
 		if (ui.select=="single"||ui.select=="multi")
-			v.click(function() { select(k) }); 
+			v.click(function() { 
+				select(k) 
+			}); 
 	};
 	var select=function(k) {
 		if (ui.select=="single") ui.selected=k;
 		else ui.selected.add(k,!ui.selected[k]);
 	};
 	var updateSingleSelection = function(newv,oldv) {
-		if (oldv) if (chld[oldv]) chld[oldv].removeClass("selected");
-		if (newv) if (chld[newv]) chld[newv].addClass("selected");
+		if (oldv!=null) if (chld[oldv]) chld[oldv].removeClass("selected");
+		if (newv!=null) if (chld[newv]) chld[newv].addClass("selected");
 	};
 	var updateMultiSelection = function(k,v) {
 		var c=chld[k];

@@ -17,8 +17,11 @@ var Maggi=function(other) {
 		if (fns==null) return;
 		for (var i=0; i<fns.length; i++) {
 			var f=fns[i];
-			if (!f.keys||(f.keys.indexOf(key)>-1))
+			if (!f.keys||(f.keys.indexOf(key)>-1)) {
+				if (Maggi.log==true) 
+					console.log("trigger "+e+" for "+JSON.stringify(key));
 				f.fn(key,value,oldv);
+			}
 		}
 	}
 
