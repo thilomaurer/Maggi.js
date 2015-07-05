@@ -1,0 +1,11 @@
+{
+  "name": "Maggi.js",
+  "version": "0.0.1",
+  "description": "Allows for binding to bubbling property-events",
+  "main": "Maggi.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Thilo Maurer",
+  "license": "Closed"
+}

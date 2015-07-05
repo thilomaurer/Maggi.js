@@ -20,7 +20,7 @@ var Maggi=function(other) {
 			if (!f.keys||(f.keys.indexOf(key)>-1)) {
 				if (Maggi.log==true) 
 					console.log("trigger "+e+" for "+JSON.stringify(key));
-				f.fn(key,value,oldv);
+				f.fn(key,value,oldv,e);
 			}
 		}
 	}
@@ -177,5 +177,74 @@ var Maggi=function(other) {
 	myeach(other,p.add);
 
 	return p;
-}
+};
 
+Maggi.apply = function(data,d) {
+	var e=d.e; var k=d.k; var v=d.v;
+	if (Maggi.log) console.log("Maggi.apply: e="+e+", k="+k);
+	if (k==null) {
+		for (var k in v) 
+			data.add(k,v[k]);
+	} else if (k instanceof Array) {
+		var k0=k.shift();
+		var d0=data[k0];
+		if (d0==null) {
+			var o;
+			var oo=v;
+			for (var i=k.length-1;i>=0;i--) {
+				o={}; o[k[i]]=oo;
+				oo=o;
+			}
+			data.add(k0,oo);
+		} else {
+			if (k.length==1) d.k=k[0];
+			Maggi.apply(d0,d);
+		}
+	} else {
+		if (e=="set")
+			data[k]=v;
+		if (e=="remove")
+			data.remove(k);
+		if (e=="add")
+			data.add(k,v);
+	}
+};
+
+Maggi.sync = function(socket,data) {
+	var off=false;
+	var handler=function(k,v,oldv,e) {
+		if (off) return;
+		var d={e:e,k:k,v:v};
+		if (Maggi.log) console.log(socket.id +" send: Maggi "+d.e+" "+JSON.stringify(d.k));
+		socket.emit("Maggi",JSON.stringify(d));
+	};
+	data.bind(["set","add","remove"],handler);
+	socket.on('Maggi', function(json) {
+		var d=JSON.parse(json);
+		if (Maggi.log) console.log(socket.id +" recv: Maggi "+d.e+" "+JSON.stringify(d.k));
+		off=true;
+		Maggi.apply(data,d);
+		off=false;
+	});
+	socket.on('disconnect',function() {
+		data.unbind(handler);
+		console.log("disconnected");
+	});
+};
+
+Maggi.serve = function(socket,data) {
+	console.log("Maggi.serve for " + socket.id);
+	Maggi.sync(socket,data);
+	socket.on('Maggi.connect', function(json) {
+		if (Maggi.log) console.log(socket.id +" Maggi.connect");
+		socket.emit("Maggi",JSON.stringify({e:"add",k:null,v:data}));
+	});
+};
+
+Maggi.client = function(socket,data) {
+	Maggi.sync(socket,data);
+	socket.emit("Maggi.connect");
+};
+
+if (typeof module !== 'undefined')
+	module.exports = Maggi;
