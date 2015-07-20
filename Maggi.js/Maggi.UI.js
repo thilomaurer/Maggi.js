@@ -381,6 +381,7 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 	var backbuild={};
 	var sethandler={};
 	dom.ui=chld;
+	var wrap={};
 
 	var hasExplicitFormat=function(k) {
 		if (ui.children) if (ui.children[k]) return true;
@@ -410,6 +411,30 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 				sethandler[k](v);
 		}*/
 	};
+
+	var order=function() {
+		if (ui.order) {
+			return Object.keys(ui.order).sort().map(function(k) { return ui.order[k]; });
+		} else if (ui.childdefault) {
+			return Object.keys(data);
+		} else if (ui.children) {
+			return Object.keys(ui.children);
+		} else {
+			return Object.keys(data);
+		}
+	}
+
+	var place=function(k) {
+		var w=wrap[k];
+		var o=order();
+		var idx=o.indexOf(k);
+		var beforek=o[idx-1];
+		if (beforek==null||wrap[beforek]==null)
+			w.appendTo(dom); 
+		else 
+			w.insertAfter(wrap[beforek]);
+	};
+
 	var make=function(k) {
 		if (backbuild[k]) 
 			backbuild[k]();
@@ -422,19 +447,25 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 		}
 		c._MaggiParent=dom;  //ugly hack to enable access to parent
 
+/*
 		if (chld[k])
 			chld[k].replaceWith(c);	
 		else {
 			if (ui.wrapchildren) {
-				console.log("wrapping");
-				var w=$("<div>",{"class":"wrap"}).appendTo(dom);
+				var w=$("<div>",{"class":"wrap"});
 				c.appendTo(w);
+				w.appendTo(dom);
 			} else {
 				c.appendTo(dom); 
 			}
 		}
-
+*/
+		var w=c;
+		if (ui.wrapchildren)
+			w=$("<div>",{"class":"wrap"}).append(c);
 		chld[k]=c;
+		wrap[k]=w;
+		place(k);	
 		backbuild[k]=Maggi.UI(chld[k],data[k],getFormat(k),function(v) { 
 			data[k]=v; 
 		}, function(fn) { 
@@ -443,16 +474,14 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 	};
 	var add=function(k) {
 		if (k instanceof Array) return;
-		var shown=true;//data.hasOwnProperty(k);
+		var shown=true;
 		if (ui.order) {
 			shown=false;
 			for (kk in ui.order) if (ui.order[kk]==k) shown=true;
-			//if (Object.keys(ui.order).indexOf(k)==-1) shown=false;
 		}
 		if (ui.childdefault==null) if (ui.hasOwnProperty("children")) if (ui.children[k]==null) shown=false;
 		if (!shown) return;
 		make(k);
-		//if (ui.children) ui.children.bind(["add","set","remove"],k,make);
 		if (ui.children) ui.children.bind("set",k,make);
 		if (hasExplicitFormat(k)) {
 			var ef=ui.children[k];
@@ -463,27 +492,32 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 		}
 	};
 	var remove=function(k) {
-		if (chld.hasOwnProperty(k)) { 
-			if (ui.wrapchildren==true) chld[k].parents()[0].remove(); else chld[k].remove(); 
+		if (wrap.hasOwnProperty(k)) { 
+			wrap[k].remove(); 
 			if (backbuild[k]) {
 				backbuild[k](); 
 				delete backbuild[k];
 			}
 			delete chld[k]; 
+			delete wrap[k]; 
 		}
 	};
 	var removeall=function() {
-		for (var k in chld) remove(k);
+		for (var k in wrap) remove(k);
 	};
 	var formatsethandler=function(k,newv,oldv) {
 		var hasPropValue = function(o,v) {
 			for (var k in o) { if (o[k]==v) return true; }
 			return false;
 		};
-		if (k=="order"||k[0]=="order") {
+		if (k[0]=="order") {
+			v=newv;
+			if (wrap[v]) place(v); else add(v);
+		}
+		if (k=="order") {
 			if (oldv==null) oldv=Object.keys(chld); 
 			$.each(oldv, function(idx,k) { if (!hasPropValue(newv,k)) remove(k); });
-			$.each(newv, function(idx,k) { if (chld[k]) chld[k].appendTo(dom); else add(k); });
+			$.each(order(),function(idx,k) { if (wrap[k]) place(k); else add(k); });
 		}
 	};
 
