@@ -3,6 +3,7 @@
 	--mui-gray-color: hsla(224, 8%, 22%, 1);
 	--mui-normal-color: hsla(224, 8%, 30%, 1);
 	--mui-light-color: hsla(224, 8%, 36%, 1);
+	--mui-lighter-color: hsla(224, 8%, 50%, 1);
 }
 
 .scroll {
@@ -61,8 +62,8 @@
 	transition: opacity 200ms ease-in, visibility 0s linear 200ms;
 }
 
-.popup.mui > .popup-triangle-wrapper {
-	//position: fixed;
+.mui-light .popup > .popup-triangle-wrapper,
+.mui .popup > .popup-triangle-wrapper {
 	overflow: hidden;
 	height:17px;
 	margin: 0px;
@@ -70,29 +71,26 @@
 	padding: 0px;
 }
 
-.popup.mui > .popup-triangle-wrapper > .popup-triangle-inner {
+.mui-light .popup > .popup-triangle-wrapper > .popup-triangle-inner,
+.mui .popup > .popup-triangle-wrapper > .popup-triangle-inner {
 	margin:5.142135624px;
 	width: 22.627px;
 	height: 22.627px;
-	border: 1px solid white;
 	transform: rotate(45deg);
 	transform-origin: 50% 50%;
+	background: white;
+}
+
+.mui-light .popup > .popup-triangle-wrapper > .popup-triangle-inner,
+.mui-light.popup > .popup-triangle-wrapper > .popup-triangle-inner {
+	border: 1px solid gray;
+	background: white;
+}
+
+.mui .popup > .popup-triangle-wrapper > .popup-triangle-inner,
+.mui.popup > .popup-triangle-wrapper > .popup-triangle-inner {
+	border: 1px solid hsla(224, 8%, 15%, 1);
 	background: hsla(224, 8%, 30%, 1); //var(--mui-normal-color);
-}
-
-.popup.mui > * {
-	margin:10px;
-}
-
-.popup.mui.list  {
-	border-top:1px solid white;
-	border-bottom:1px solid white;
-}
-
-.popup.mui.list > * {
-	margin:0px;
-	padding-left: 10px;
-	padding-right: 10px;
 }
 
 
@@ -113,6 +111,16 @@
 	text-align: left;
 }
 
+.mui-light {
+	color:black;
+	font-family: 'Open Sans', sans-serif;
+	background:white;
+	font-size: 18px;
+	font-weight: normal;
+	text-shadow: none;
+	text-align: left;
+}
+
 .mui.disabled,
 .mui .disabled {
 	color:gray;
@@ -125,11 +133,40 @@
 	background: hsla(224, 8%, 36%, 1);
 }
 
+.mui .popup > * {
+	margin:5px;
+}
+
+.mui-light .popup > * {
+	margin:5px;
+}
+
+
+
+
+.mui .popup,
 .mui.popup {
-	border-radius:5px;
-	border:1px solid white;
+	background: hsla(224, 8%, 30%, 1); //var(--mui-normal-color);
+	border-radius:8px;
+	border:1px solid hsla(224, 8%, 15%, 1);
 	box-shadow:0 0 100px black;
-	overflow:hidden;
+}
+
+.mui-light .popup,
+.mui-light.popup {
+	background:white;
+	border-radius:8px;
+	border:1px solid gray;
+	box-shadow: 0px 0px 100px rgba(0,0,0,0.5);
+}
+
+.mui-light.list,
+.mui-light .list {
+	margin-left:0px;
+	margin-right:0px;
+	border-top:1px solid gray;
+	border-bottom:1px solid gray;
+	background:hsla(0, 0%, 95%, 1);
 }
 
 .mui.list,
@@ -141,26 +178,43 @@
 	background:hsla(224, 8%, 36%, 1); //var(--mui-light-color);
 }
 
-.mui .list > *,
-.mui.list > * {
-	border-top:1px solid hsla(224, 8%, 15%, 1); //var(--mui-dark-color);
-	border-bottom:0;
-	padding: 5px 10px 5px 0px;
-	margin-left:20px;
-}
-
 .mui .list > *:first-child,
 .mui.list > *:first-child {
 	border-top:0;
 }
 
+.mui .list > * > * {
+	border-bottom:1px solid hsla(224, 8%, 15%, 1); //var(--mui-dark-color);
+}
+.mui-light .list > * > * {
+	border-bottom:1px solid gray;
+}
 
+.mui-light .list > *:last-child > *,
+.mui .list > *:last-child > * {
+	border-bottom:none;
+}
+.mui-light .list > *:last-child > *:first-child,
+.mui .list > *:last-child > *:first-child {
+	border-bottom:none;
+}
+.mui-light .list > * > *:first-child {
+	border-bottom:1px solid hsla(0, 0%, 95%, 1);
+}
+.mui .list > * > *:first-child {
+	border-bottom:1px solid hsla(224, 8%, 36%, 1);
+}
+
+.mui-light.list.selectable > .selected,
+.mui-light .list.selectable > .selected,
 .mui.list.selectable > .selected,
 .mui .list.selectable > .selected {
 	background:#29a1d3; 
 	color:inherit;
 }
 
+.mui-light.list.selectable > .selected:hover,
+.mui-light .list.selectable > .selected:hover,
 .mui.list.selectable > .selected:hover,
 .mui .list.selectable > .selected:hover {
 	background:#29a1d3; 
@@ -168,7 +222,12 @@
 
 .mui.list.selectable > *:hover,
 .mui .list.selectable > *:hover{
-	background:#525864;
+	background:hsla(224, 8%, 50%, 1);
+}
+
+.mui-light .list.selectable > *:hover,
+.mui-light.list.selectable > *:hover{
+	background:hsla(0, 0%, 75%, 1);
 }
 
 .mui .table.list > .list > * {

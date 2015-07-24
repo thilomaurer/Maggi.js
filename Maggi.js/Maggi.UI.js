@@ -36,7 +36,9 @@ Maggi.UI=function(dom,data,ui,setdata,onDataChange) {
 	if (f) {
 		if (ui.wrap==true)  {
 			dom.addClass("wrap");
-			dom=$("<div>").appendTo(dom);
+			var wrap=$("<div>").appendTo(dom);
+			wrap._MaggiParent=dom._MaggiParent;
+			dom=wrap;
 		}
 		return f(dom,data,setdata,ui,onDataChange); 
 	}
@@ -109,7 +111,94 @@ Maggi.UI.BaseFunctionality=function(dom,data,setdata,format,onDataChange) {
 
 			dom.css("top",attach.y);
 			dom.css("left",left);
-			deco.css("margin-left",attach.x-left-2*spacing);
+			var ml=attach.x-left-2*spacing;
+			var mlmax=2*(wh-spacing)-2*spacing-8;
+			var mlmin=8;
+			if (ml>mlmax) ml=mlmax;
+			if (ml<mlmin) ml=mlmin;
+			deco.css("margin-left",ml);
+		}
+		vissethandler=function(k,v) {
+			updateClass(v==false,dom,"invisible");
+			if (v) { 
+				place();
+				if (format.popupfocus) {
+					var p=dom.ui[format.popupfocus]._Maggi[0];
+					p.focus();
+					p.select();
+				}
+			}
+		};
+		if (!format.hasOwnProperty("visible")) format.add("visible",false); 
+		if (format.visible==true) place();
+		if (format.visible==false) { dom.addClass("invisible");}
+		backbuilder=function() {
+			triggerElement.off("click",triggerElementClick);	
+			dom.removeClass("popup");
+			deco.remove();
+		};
+	}
+	if (format.wrappedpopup==true) {
+		var wrap=$('<div/>').insertBefore(dom);
+		dom.appendTo(wrap);
+		var triggerElement=dom._MaggiParent.ui[format.popuptrigger];
+		var deco=$('<div/>', {'class': "popup-triangle-wrapper"}).appendTo(dom);
+		var deco2=$('<div/>', {'class': "popup-triangle-inner"}).appendTo(deco);
+		dom.addClass("popup visibilityanimate");
+
+		$(window).resize(place);
+		if (dom.mutate) dom.mutate('width height top left right bottom', function(el,info) {
+			place();
+		});
+		if (triggerElement==null) { console.log("Maggi.UI: triggerelement not found."); return; }
+		if (triggerElement.mutate) triggerElement.mutate('width height top left right bottom', function(el,info) {
+			place();
+		});
+		triggerElementClick=function() {
+			format.visible=!format.visible;
+			return false;
+		};
+		triggerElement.on("click",triggerElementClick);
+
+		var getInnerClientRect = function(dom) {
+			var outer=dom[0].getBoundingClientRect();
+			var pad = function(dom,dir) {
+				return parseInt(dom.css("padding-"+dir).replace("px",""));
+			};
+			var left=outer.left+pad(dom,"left");
+			var top=outer.top+pad(dom,"top");
+			var bottom=outer.bottom-pad(dom,"bottom");
+			var right=outer.right-pad(dom,"right");
+			top=top+window.scrollY;
+			bottom=bottom+window.scrollY;
+			left=left+window.scrollX;
+			right=right+window.scrollX;
+			return {left:left,right:right,top:top,bottom:bottom};
+		}
+
+		var place = function()
+		{
+			var spacing=16;
+			var pt=triggerElement.offset();
+			//var rect=triggerElement.getBoundingClientRect();
+			var rect=getInnerClientRect(triggerElement);
+			dom.css("left",0);
+			var wh=dom.width()/2+spacing;
+
+			var attach={x:(rect.left+rect.right)/2,y:rect.bottom};
+			var overlap=attach.x+wh-$('body').width();
+			var left=attach.x-wh;
+			if (overlap>0) left=left-overlap;
+			if (left<0) left=0;
+
+			dom.css("top",attach.y);
+			dom.css("left",left);
+			var ml=attach.x-left-2*spacing;
+			var mlmax=2*(wh-spacing)-2*spacing-8;
+			var mlmin=8;
+			if (ml>mlmax) ml=mlmax;
+			if (ml<mlmin) ml=mlmin;
+			deco.css("margin-left",ml);
 		}
 		vissethandler=function(k,v) {
 			updateClass(v==false,dom,"invisible");
@@ -574,7 +663,7 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 	
 	ui.bind("set",formatsethandler);
 	ui.bind("add","order",formatsethandler);
-	ui.bind(["add","set"],"data",function(k,v) {
+	ui.bind(["add","set"],"data",function(k,v,oldv) {
 		rebuild(v);
 	});
 
