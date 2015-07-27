@@ -126,22 +126,28 @@
 	color:gray;
 }
 
-.mui.popup > #title {
+.mui-light .popup > #title,
+.mui .popup > #title {
 	text-align: center;
 	margin: 0px;
-	padding: 10px;
+	padding: 5px;
+	background: hsla(224, 8%, 36%, 1);
+	border-top-left-radius: 7px;
+	border-top-right-radius: 7px;
+}
+
+.mui .popup > #title {
 	background: hsla(224, 8%, 36%, 1);
 }
 
+.mui-light .popup > #title {
+	background: hsla(0, 0%, 80%, 1);
+}
+
+.mui-light .popup > *,
 .mui .popup > * {
 	margin:5px;
 }
-
-.mui-light .popup > * {
-	margin:5px;
-}
-
-
 
 
 .mui .popup,
@@ -209,7 +215,7 @@
 .mui-light .list.selectable > .selected,
 .mui.list.selectable > .selected,
 .mui .list.selectable > .selected {
-	background:#29a1d3; 
+	background: hsla(200, 87%, 50%, 1);
 	color:inherit;
 }
 
@@ -217,6 +223,7 @@
 .mui-light .list.selectable > .selected:hover,
 .mui.list.selectable > .selected:hover,
 .mui .list.selectable > .selected:hover {
+	background: hsla(200, 87%, 50%, 1);
 	background:#29a1d3; 
 }
 
@@ -286,14 +293,14 @@
         display: block;
 }
 
-.mui .button {
+
+.mui .button,
+.mui-light .button {
 	text-align:center;
 	vertical-align:middle;
 	cursor:pointer;
 	border-radius:5px;
-	background:#525864;
 	padding:5px;
-	color:white;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	-khtml-user-select: none;
@@ -302,27 +309,52 @@
 	user-select: none;
 }
 
-.mui .button:hover {
-	box-shadow: 0px 1px 1px black;
+.mui .button {
+	background:#525864;
+	color:white;
 }
 
-.mui .button.red {
-	background: #ee2e10;
+.mui-light .button {
+	background: hsla(0, 0%, 85%, 1);
+	color:black;
 }
-.mui .button.green {
-	background: #8ab71c;
+
+.mui .button:hover {
+	box-shadow: 0px 0px 0px 1px white;
 }
-.mui .button.blue {
-	background: #29a1d3;
+
+.mui-light .button:hover {
+	box-shadow: 0px 0px 0px 1px black;
 }
-.mui .button.yellow {
-	background: #f1b018;
+
+.mui .button.red,
+.mui-light .button.red {
+	background: hsla(12, 87%, 50%, 1);
 }
-.mui .button.inactive, div.button.disabled {
-	background: #888888 !important;
+.mui .button.green,
+.mui-light .button.green {
+	background: hsla(100, 87%, 50%, 1);
+}
+.mui .button.blue,
+.mui-light .button.blue {
+	background: hsla(200, 87%, 50%, 1);
+}
+.mui .button.yellow,
+.mui-light .button.yellow {
+	background: hsla(55, 87%, 50%, 1);
+}
+.mui .button.disabled, 
+.mui-light .button.disabled {
+	background: hsla(0, 0%, 50%, 1) !important;
 	box-shadow: none;
 }
 
 .mui .link a {
 	color:white;
+}
+
+
+
+.mui-light {
+
 }

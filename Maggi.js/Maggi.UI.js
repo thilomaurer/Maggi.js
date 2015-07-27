@@ -327,7 +327,7 @@ Maggi.UI.link=function(dom,data,setdata,ui,onDataChange) {
 };
 
 Maggi.UI.image=function(dom,data,setdata,ui,onDataChange) {
-	var update = function() {
+	var update = function(data) {
 		var url=data;
 		if (ui.urls!=null) url=ui.urls[data];
 		img.attr("src",url);
@@ -337,7 +337,7 @@ Maggi.UI.image=function(dom,data,setdata,ui,onDataChange) {
 	dom._Maggi=img;
 	onDataChange(update);
 	ui.bind("set","urls",update);
-	update();
+	update(data);
 };
 
 Maggi.UI.checkbox=function(dom,data,setdata,ui,onDataChange) {
