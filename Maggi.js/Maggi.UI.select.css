@@ -36,7 +36,7 @@
 }
 
 .mui .select label:hover {
-	background:hsla(224, 8%, 50%, 1);
+	background:hsla(224, 8%, 42%, 1);
 }
 
 .mui .select input:checked + label {

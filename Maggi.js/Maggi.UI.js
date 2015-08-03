@@ -224,7 +224,7 @@ Maggi.UI.BaseFunctionality=function(dom,data,setdata,format,onDataChange) {
 		updateClass(format.visible==false,dom,"invisible");
 	}
 	var sethandler = function(k,v,oldv) {
-		if (k=="enabled") updateClass(v,dom,"disabled");
+		if (k=="enabled") updateClass(v==false,dom,"disabled");
 		if (k=="class") { dom.removeClass(oldv); dom.addClass(v); }
 	};
 	format.bind(["add","set"],"visible",vissethandler);
@@ -399,6 +399,7 @@ Maggi.UI.input=function(dom,data,setdata,ui,onDataChange) {
 	});
 	ui.bind("set","placeholder",i.attr);
 	var datachange=function(data) {
+		if (ui.kind=="file") return;
 		var newvalue=data&&data.toString();
 		if (i[0].value!=newvalue) i[0].value=newvalue;
 		autolength(i,newvalue);
@@ -422,7 +423,7 @@ Maggi.UI.function=function(dom,data,setdata,ui,onDataChange) {
 	update();
 	ui.bind("set","label",update);
 	dom.click(function() {
-		if (data) data(dom._MaggiParent._Maggi);
+		if (ui.enabled!=false) if (data) data(dom._MaggiParent._Maggi);
 		return false;
 	});
 	return function() {

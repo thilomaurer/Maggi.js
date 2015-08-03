@@ -16,19 +16,19 @@ Maggi.UI.iframe=function(dom,s,sets,ui,onDataChange) {
 		ElementOfFile={};
 		doc.open();
 		if (s.file) { 
-			if (s.file.type=="js") {
+			if (s.file.type=="text/javascript") {
 				doc.write(jshtml);
 				var head=doc.getElementsByTagName('head').item(0);
 				for (var idx in s.files) {
 					var file=s.files[idx];
 					var el=null;
-					if (file.type=="js") {
+					if (file.type=="text/javascript") {
 						el=document.createElement('script');
-						el.type='text/javascript';
+						el.type=file.type;
 					}	
-					if (file.type=="css") {
+					if (file.type=="text/css") {
 						el=document.createElement("style");
-						el.type="text/css";
+						el.type=file.type;
 					}
 					if (el!=null) {
 						el.id=file.name
@@ -46,7 +46,7 @@ Maggi.UI.iframe=function(dom,s,sets,ui,onDataChange) {
 				el.innerHTML="$(document).ready(function() { var fn="+funcname+"; var dom=$('body'); if (fn!=null) { fn(dom); } else { dom.empty(); console.log('Maggi.IDE: function "+funcname+" was not defined');}});";
 				head.appendChild(el);
 			}
-			if (s.file.type=="html") {
+			if (s.file.type=="text/html") {
 				doc.write(s.file.data);
 				var scripts=doc.scripts;
 				//replace loaded scripts with live ones from ide
