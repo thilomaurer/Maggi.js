@@ -18,9 +18,9 @@ Maggi.UI.editor=function(dom,data,setdata,ui,onDataChange) {
 			var mode="text";
 			if (data.file) {
 				var type=data.file.type;
-				if (type=="js") mode="javascript";
-				if (type=="css") mode="css";
-				if (type=="html") mode="html";
+				if (type=="text/javascript") mode="javascript";
+				if (type=="text/css") mode="css";
+				if (type=="text/html") mode="html";
 			}
 			editor.getSession().setMode("ace/mode/"+mode);
 		}
