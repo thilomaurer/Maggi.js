@@ -31,7 +31,7 @@ var pwcalc=function(dom) {
 	};
 
 };
-
+var main=pwcalc;
 /*
 var pwcalc=function(dom) {
 	var data=Maggi({
