@@ -15,12 +15,19 @@ Maggi.UI.editor=function(dom,data,setdata,ui,onDataChange) {
 		var disableEvents=false; //hack to work around ACE issue.
 
 		function updateMode() {
+		    /*
+		    var mime="text";
+		    if (data.file) mime=data.file.type;
+			editor.getSession().setMode(mime);
+			*/
+			
 			var mode="text";
 			if (data.file) {
 				var type=data.file.type;
 				if (type=="text/javascript") mode="javascript";
 				if (type=="text/css") mode="css";
 				if (type=="text/html") mode="html";
+				if (type=="image/svg+xml") mode="svg";
 			}
 			editor.getSession().setMode("ace/mode/"+mode);
 		}

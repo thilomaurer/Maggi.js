@@ -30,8 +30,8 @@ Maggi.UI.iframe=function(dom,s,sets,ui,onDataChange) {
 						el=document.createElement("style");
 						el.type=file.type;
 					}
-					if (el!=null) {
-						el.id=file.name
+					if (el!==null) {
+						el.id=file.name;
 						el.innerHTML=file.data;
 						head.appendChild(el);
 						ElementOfFile[file.name]=el;
@@ -43,7 +43,7 @@ Maggi.UI.iframe=function(dom,s,sets,ui,onDataChange) {
 				var startidx=s.file.name.lastIndexOf("\/")+1;
 				var endidx=s.file.name.lastIndexOf(".");
 				var funcname=s.file.name.substring(startidx,endidx);
-				el.innerHTML="$(document).ready(function() { var fn="+funcname+"; var dom=$('body'); if (fn!=null) { fn(dom); } else { dom.empty(); console.log('Maggi.IDE: function "+funcname+" was not defined');}});";
+				el.innerHTML="$(document).ready(function() { var fn="+funcname+"; var dom=$('body'); var m=Maggi.UI_devel(dom); if (fn!=null) { fn(m,dom); } else { dom.empty(); console.log('Maggi.IDE: function "+funcname+" was not defined');}});";
 				head.appendChild(el);
 			}
 			if (s.file.type=="text/html") {
@@ -123,7 +123,7 @@ Maggi.UI.iframe=function(dom,s,sets,ui,onDataChange) {
 
 	var w=iframe[0].contentWindow;
 	var setdetach=function(k,v) {
-		if (v==true) {
+		if (v===true) {
 			if (w) iframe.remove();
 //			w.document.write("This frame is detached.");
 			w=window.open();
@@ -139,7 +139,7 @@ Maggi.UI.iframe=function(dom,s,sets,ui,onDataChange) {
 	s.bind("add", makedocument);
 	s.bind("set","detach",setdetach);
 
-	if (s.detach==null) s.add("detach",false);
+	if (s.detach===null) s.add("detach",false);
 	setdetach("detach",s.detach);
 
 	var unbind = function() {
