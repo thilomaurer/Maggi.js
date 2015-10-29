@@ -30,6 +30,7 @@ Maggi.UI.editor=function(dom,data,setdata,ui,onDataChange) {
 				if (type=="image/svg+xml") mode="svg";
 			}
 			editor.getSession().setMode("ace/mode/"+mode);
+			
 		}
 
 		editor.on("change", function(e) {
