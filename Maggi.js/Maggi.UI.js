@@ -16,7 +16,7 @@ Maggi.UI_devel=function(dom) {
 		backbuild=Maggi.UI(dom,a.data,a.ui);
 	});
 	return a;
-}
+};
 
 Maggi.UI=function(dom,data,ui,setdata,onDataChange) {
 	function cookui(ui) {
@@ -52,7 +52,7 @@ Maggi.UI=function(dom,data,ui,setdata,onDataChange) {
 Maggi.UI.BaseFunctionality=function(dom,data,setdata,format,onDataChange) {
 	var updateClass = function(v, dom, cls) {
 		if (v) dom.addClass(cls); else dom.removeClass(cls); 
-	}
+	};
 	var vissethandler=function(k,v) {
 		updateClass(v==false,dom,"invisible");
 	};
@@ -64,14 +64,7 @@ Maggi.UI.BaseFunctionality=function(dom,data,setdata,format,onDataChange) {
 		var deco2=$('<div/>', {'class': "popup-triangle-inner"}).appendTo(deco);
 		dom.addClass("popup visibilityanimate");
 
-		$(window).resize(place);
-		if (dom.mutate) dom.mutate('width height top left right bottom', function(el,info) {
-			place();
-		});
 		if (triggerElement==null) { console.log("Maggi.UI: triggerelement not found."); return; }
-		if (triggerElement.mutate) triggerElement.mutate('width height top left right bottom', function(el,info) {
-			place();
-		});
 		triggerElementClick=function() {
 			format.visible=!format.visible;
 			return false;
@@ -92,7 +85,7 @@ Maggi.UI.BaseFunctionality=function(dom,data,setdata,format,onDataChange) {
 			left=left+window.scrollX;
 			right=right+window.scrollX;
 			return {left:left,right:right,top:top,bottom:bottom};
-		}
+		};
 
 		var place = function()
 		{
@@ -111,13 +104,15 @@ Maggi.UI.BaseFunctionality=function(dom,data,setdata,format,onDataChange) {
 
 			dom.css("top",attach.y);
 			dom.css("left",left);
+			if (attach.y+dom.height()+2*spacing-$('body').height()>0)
+                dom.css("bottom",0);
 			var ml=attach.x-left-2*spacing;
 			var mlmax=2*(wh-spacing)-2*spacing-8;
 			var mlmin=8;
 			if (ml>mlmax) ml=mlmax;
 			if (ml<mlmin) ml=mlmin;
 			deco.css("margin-left",ml);
-		}
+		};
 		vissethandler=function(k,v) {
 			updateClass(v==false,dom,"invisible");
 			if (v) { 
@@ -130,10 +125,17 @@ Maggi.UI.BaseFunctionality=function(dom,data,setdata,format,onDataChange) {
 			}
 		};
 		if (!format.hasOwnProperty("visible")) format.add("visible",false); 
-		if (format.visible==true) place();
 		if (format.visible==false) { dom.addClass("invisible");}
+		
+		var observer = new MutationObserver(place);
+        observer.observe(dom[0], { childList:true });
+        observer.observe(triggerElement[0], { childList:true });
+		$(window).resize(place);
+
 		backbuilder=function() {
-			triggerElement.off("click",triggerElementClick);	
+		    observer.disconnect();
+		    $(window).off("resize",place);
+		    triggerElement.off("click",triggerElementClick);	
 			dom.removeClass("popup");
 			deco.remove();
 		};
@@ -146,14 +148,7 @@ Maggi.UI.BaseFunctionality=function(dom,data,setdata,format,onDataChange) {
 		var deco2=$('<div/>', {'class': "popup-triangle-inner"}).appendTo(deco);
 		dom.addClass("popup visibilityanimate");
 
-		$(window).resize(place);
-		if (dom.mutate) dom.mutate('width height top left right bottom', function(el,info) {
-			place();
-		});
 		if (triggerElement==null) { console.log("Maggi.UI: triggerelement not found."); return; }
-		if (triggerElement.mutate) triggerElement.mutate('width height top left right bottom', function(el,info) {
-			place();
-		});
 		triggerElementClick=function() {
 			format.visible=!format.visible;
 			return false;
@@ -174,7 +169,7 @@ Maggi.UI.BaseFunctionality=function(dom,data,setdata,format,onDataChange) {
 			left=left+window.scrollX;
 			right=right+window.scrollX;
 			return {left:left,right:right,top:top,bottom:bottom};
-		}
+		};
 
 		var place = function()
 		{
@@ -212,10 +207,17 @@ Maggi.UI.BaseFunctionality=function(dom,data,setdata,format,onDataChange) {
 			}
 		};
 		if (!format.hasOwnProperty("visible")) format.add("visible",false); 
-		if (format.visible==true) place();
 		if (format.visible==false) { dom.addClass("invisible");}
+		
+		var observer = new MutationObserver(place);
+        observer.observe(dom[0], { childList:true });
+        observer.observe(triggerElement[0], { childList:true });
+		$(window).resize(place);
+
 		backbuilder=function() {
-			triggerElement.off("click",triggerElementClick);	
+		    observer.disconnect();
+		    $(window).off("resize",place);
+		    triggerElement.off("click",triggerElementClick);	
 			dom.removeClass("popup");
 			deco.remove();
 		};
@@ -239,7 +241,7 @@ Maggi.UI.BaseFunctionality=function(dom,data,setdata,format,onDataChange) {
 		dom.removeClass(format.type);
 		if (backbuilder) backbuilder();
 	};
-}
+};
 
 Maggi.UI.parentclass=function(dom,data,setdata,format,onDataChange) {
 	if (!dom._Maggi) {
@@ -253,7 +255,7 @@ Maggi.UI.parentclass=function(dom,data,setdata,format,onDataChange) {
 		});
 	} 
 	dom._Maggi=true;
-}
+};
 
 Maggi.UI.text=function(dom,data,setdata,ui,onDataChange) {
 	//same for all?

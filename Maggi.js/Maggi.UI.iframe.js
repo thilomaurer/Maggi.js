@@ -92,6 +92,7 @@ Maggi.UI.iframe=function(dom,s,sets,ui,onDataChange) {
 		}
 		doc.close();
 	};
+	
 	function purge(d) {
 		var a = Object.keys(d);
 		for (var i = 0; i < a.length; i ++) {
@@ -100,11 +101,24 @@ Maggi.UI.iframe=function(dom,s,sets,ui,onDataChange) {
 			delete d[n];
 		}
 	}
+	
+	var to = function() {
+	    var now=new Date().getTime();
+	    var make=(maketime<=now);
+	    if (make) {
+		    purge(w);
+		    builddoc(w.document);
+	    }
+	};
 
 	var makedocument = function() {
-		purge(w);
-		builddoc(w.document);
+	    var now=new Date().getTime();
+	    maketime=now+latency;
+        setTimeout(to,latency);
 	};
+	
+	var latency=500;
+	var maketime=0;
 
 	var updateFile = function(file) {
 		var el=ElementOfFile[file.name];
@@ -150,7 +164,7 @@ Maggi.UI.iframe=function(dom,s,sets,ui,onDataChange) {
 		s.unbind(setdetach);
 		w.close();
 		backbuild_base();
-	}
+	};
 	return unbind;
 };
 

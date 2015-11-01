@@ -41,7 +41,7 @@
 	position: absolute;
 	top:0;
 	left:0;
-	margin:16px;
+	margin:16px !important; 
 	z-index:99999;
 }
 

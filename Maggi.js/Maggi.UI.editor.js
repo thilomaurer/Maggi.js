@@ -46,11 +46,12 @@ Maggi.UI.editor=function(dom,data,setdata,ui,onDataChange) {
 		var updateText = function() {
 			var text=null;
 			if (data.file) {
-				var text=data.file.data;
+				text=data.file.data;
 				if (editor.getValue()==text) return;
 			}
 			disableEvents=true; //hack to work around ACE issue.
-			editor.setValue(text);
+			if (text==null) text="";
+		    editor.setValue(text);
 			disableEvents=false;
 		};
 		var updateCursor = function() {
@@ -89,10 +90,11 @@ Maggi.UI.editor=function(dom,data,setdata,ui,onDataChange) {
 	var fmt=Maggi({
 		wrap:true,
 		children: {
-			doc:{type:"object",wrap:true},
+			doc:{wrap:true},
 			annot:{
 				type:"list",
 				childdefault:{
+				    childdefault:"text",
 					order:["type","row","column","text"],
 					builder:function(dom,data,ui) {
 						dom.addClass(data.type);
@@ -104,7 +106,7 @@ Maggi.UI.editor=function(dom,data,setdata,ui,onDataChange) {
 			}
 		},
 		builder:builder,
-		class:"editor tablerows"
+		class:"editor tablerows expand"
 	});
 	return Maggi.UI(dom,d,fmt);
 };
