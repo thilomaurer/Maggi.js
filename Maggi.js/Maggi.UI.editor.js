@@ -92,6 +92,7 @@ Maggi.UI.editor=function(dom,data,setdata,ui,onDataChange) {
 		children: {
 			doc:{wrap:true},
 			annot:{
+			    wrap:true,
 				type:"list",
 				childdefault:{
 				    childdefault:"text",
