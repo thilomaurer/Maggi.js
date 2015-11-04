@@ -1,13 +1,7 @@
-.editor #doc,
-.editor #doc > .ace_editor {
-	height:100%;
-}
-
 .editor,
-.editor #doc > .ace_editor {
+.editor #doc {
 	font-family: "Courier New", monospace; 
 	font-size:16px;
-	width:100%;
 }
 
 .editor #annot .list {
@@ -16,10 +10,6 @@
 
 .editor #annot .list > *:hover {
 	background:#ccc;
-}
-
-.editor #annot .list > * {
-	padding:2px;
 }
 
 .editor #annot .list > * > * {
@@ -57,5 +47,28 @@
 	background:green;
 	color:white;
 }
+
+.editor > #doc {
+    flex:1 1 auto;
+}
+
+.editor > #annot {
+    flex:0 0 auto;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

@@ -9,18 +9,17 @@ Maggi.UI.editor=function(dom,data,setdata,ui,onDataChange) {
 			}
 		};
 		
-		var editor=ace.edit(dom.ui.doc[0].children[0]);
+		var editor=ace.edit(dom.ui.doc[0]);
 		editor.setTheme("ace/theme/xcode");
-
+        editor.setOptions({
+                autoScrollEditorIntoView:false,
+                showGutter:true,
+                showInvisibles:true,
+                useSoftTabs:false,
+        });
 		var disableEvents=false; //hack to work around ACE issue.
 
 		function updateMode() {
-		    /*
-		    var mime="text";
-		    if (data.file) mime=data.file.type;
-			editor.getSession().setMode(mime);
-			*/
-			
 			var mode="text";
 			if (data.file) {
 				var type=data.file.type;
@@ -30,7 +29,6 @@ Maggi.UI.editor=function(dom,data,setdata,ui,onDataChange) {
 				if (type=="image/svg+xml") mode="svg";
 			}
 			editor.getSession().setMode("ace/mode/"+mode);
-			
 		}
 
 		editor.on("change", function(e) {
@@ -88,9 +86,8 @@ Maggi.UI.editor=function(dom,data,setdata,ui,onDataChange) {
 	
 	var d=Maggi({editor:"",annot:{}});
 	var fmt=Maggi({
-		wrap:true,
 		children: {
-			doc:{wrap:true},
+			doc:{},
 			annot:{
 			    wrap:true,
 				type:"list",
@@ -107,7 +104,7 @@ Maggi.UI.editor=function(dom,data,setdata,ui,onDataChange) {
 			}
 		},
 		builder:builder,
-		class:"editor tablerows expand"
+		class:"editor flexrows"
 	});
 	return Maggi.UI(dom,d,fmt);
 };

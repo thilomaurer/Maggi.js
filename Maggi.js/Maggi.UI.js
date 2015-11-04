@@ -95,9 +95,11 @@ Maggi.UI.BaseFunctionality=function(dom,data,setdata,format,onDataChange) {
 			var rect=getInnerClientRect(triggerElement);
 			dom.css("left",0);
 			var wh=dom.width()/2+spacing;
+		    console.log("wh "+wh);
 
 			var attach={x:(rect.left+rect.right)/2,y:rect.bottom};
 			var overlap=attach.x+wh-$('body').width();
+		    console.log("overlap "+overlap);
 			var left=attach.x-wh;
 			if (overlap>0) left=left-overlap;
 			if (left<0) left=0;
@@ -529,8 +531,12 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 		c._MaggiParent=dom;  //ugly hack to enable access to parent
 
 		var w=c;
-		if (ui.wrapchildren)
+		if (ui.wrapchildren==true)
 			w=$("<div>",{"class":"wrap"}).append(c);
+		if (ui.wrapchildren==2) {
+			w=$("<div>",{"class":"wrap"}).append(c);
+			w=$("<div>",{"class":"wrap"}).append(w);
+		}
 		chld[k]=c;
 		wrap[k]=w;
 		place(k);	
@@ -549,6 +555,9 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 				ui.children.add(k,u);
 			}
 			return;
+		}
+		if (typeof ui.children[k] === "function") {
+		    ui.children[k]=ui.children[k]();
 		}
 		make(k);
 		ui.children.bind("set",k,make);
