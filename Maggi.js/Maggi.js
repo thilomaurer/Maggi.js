@@ -15,7 +15,12 @@ var Maggi=function(other) {
 	var trigger = function(e,key,value,oldv) {
 		var fns=events[e];
 		if (fns==null) return;
-		for (var i=0; i<fns.length; i++) {
+		//since fns may be changed during a trigger, may result in infinite loop
+		//BUG: take fixed length for now
+		//TODO: trigger by copy of fns
+		var fnsl=fns.length; 
+		for (var i=0; i<fnsl; i++) {
+		//for (var i=0; i<fns.length; i++) {
 			var f=fns[i];
 			if (!f.keys||(f.keys.indexOf(key)>-1)) {
 				if (Maggi.log==true) 
@@ -116,11 +121,30 @@ var Maggi=function(other) {
 				ks=null;	
 				fn=makeArray(0);	
 			}
+			var stacktrace=function() {
+				var s=(new Error()).stack.split("\n");
+				return s.splice(2).map(function(s) {
+						var fields=s.match(/ at (.*) \((.*)\)/);
+						if (fields==null) fields=s.match(/ at ()(.*)/);
+						return {fn:fields[1],loc:fields[2]};
+					});
+			};
 			for (var ik in ts) {
 				var k=ts[ik];
 				if (events[k]==null) events[k]=[];
 				for (var i in fn) {
-					events[k].push({fn:fn[i],keys:ks});
+					if (Maggi.trace)
+					events[k].push({
+						fn:fn[i],
+						keys:ks,
+						id:Maggi.bind_id++,
+						trace:stacktrace()
+					});
+					else
+					events[k].push({
+						fn:fn[i],
+						keys:ks
+					});
 				}
 			}
 		},
@@ -179,6 +203,9 @@ var Maggi=function(other) {
 	return p;
 };
 
+Maggi.bind_id=0;
+Maggi.trace=false;
+
 Maggi.apply = function(data,d) {
 	var e=d.e; var k=d.k; var v=d.v;
 	if (Maggi.apply.log) console.log("Maggi.apply: e="+e+", k="+k);
@@ -227,7 +254,9 @@ Maggi.sync = function(socket,db,client) {
 	};
 	var apply=function(d) {
 		applying=true;
+		var ddd=new Date();
 		Maggi.apply(db.data,d);
+		console.log((new Date()).getTime()-ddd.getTime());
 		db.rev=d.rev;
 		applying=false; 
 	}

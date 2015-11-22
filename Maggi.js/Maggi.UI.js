@@ -2,10 +2,12 @@
  * Maggi.UI.js JavaScript Library 
  * https://home.thilomaurer.de/Maggi.js
  *
- * Copyright (C) 2014-05-22 Thilo Maurer
+ * Copyright (C) 2015-11-14 Thilo Maurer
  * All Rights Reserved.
  * 
  */
+
+Maggi.id=0;
 
 Maggi.UI_devel=function(dom) {
 	var a=Maggi({data:null,ui:null});
@@ -47,7 +49,6 @@ Maggi.UI=function(dom,data,ui,setdata,onDataChange) {
 };
 
 //non-object UI handlers
-//
 
 Maggi.UI.BaseFunctionality=function(dom,data,setdata,format,onDataChange) {
 	var updateClass = function(v, dom, cls) {
@@ -95,11 +96,11 @@ Maggi.UI.BaseFunctionality=function(dom,data,setdata,format,onDataChange) {
 			var rect=getInnerClientRect(triggerElement);
 			dom.css("left",0);
 			var wh=dom.width()/2+spacing;
-		    console.log("wh "+wh);
+//			console.log("wh "+wh);
 
 			var attach={x:(rect.left+rect.right)/2,y:rect.bottom};
 			var overlap=attach.x+wh-$('body').width();
-		    console.log("overlap "+overlap);
+//			console.log("overlap "+overlap);
 			var left=attach.x-wh;
 			if (overlap>0) left=left-overlap;
 			if (left<0) left=0;
@@ -107,7 +108,7 @@ Maggi.UI.BaseFunctionality=function(dom,data,setdata,format,onDataChange) {
 			dom.css("top",attach.y);
 			dom.css("left",left);
 			if (attach.y+dom.height()+2*spacing-$('body').height()>0)
-                dom.css("bottom",0);
+				dom.css("bottom",0);
 			var ml=attach.x-left-2*spacing;
 			var mlmax=2*(wh-spacing)-2*spacing-8;
 			var mlmin=8;
@@ -212,14 +213,14 @@ Maggi.UI.BaseFunctionality=function(dom,data,setdata,format,onDataChange) {
 		if (format.visible==false) { dom.addClass("invisible");}
 		
 		var observer = new MutationObserver(place);
-        observer.observe(dom[0], { childList:true });
-        observer.observe(triggerElement[0], { childList:true });
+		observer.observe(dom[0], { childList:true });
+		observer.observe(triggerElement[0], { childList:true });
 		$(window).resize(place);
 
 		backbuilder=function() {
-		    observer.disconnect();
-		    $(window).off("resize",place);
-		    triggerElement.off("click",triggerElementClick);	
+			observer.disconnect();
+			$(window).off("resize",place);
+			triggerElement.off("click",triggerElementClick);	
 			dom.removeClass("popup");
 			deco.remove();
 		};
@@ -255,7 +256,7 @@ Maggi.UI.parentclass=function(dom,data,setdata,format,onDataChange) {
 				p.addClass(newv);
 			}
 		});
-	} 
+	}
 	dom._Maggi=true;
 };
 
@@ -273,7 +274,7 @@ Maggi.UI.text=function(dom,data,setdata,ui,onDataChange) {
 					data=[data];
 				s=vsprintf(ui.format,data) 
 			}
-			else 
+			else
 				s=data.toString();
 		}
 		dom.text(s);
@@ -300,6 +301,7 @@ Maggi.UI.label=function(dom,data,setdata,ui,onDataChange) {
 	};
 	ui.bind("set","label",build);
 	build("label",ui.label);
+	if (ui.onClick) dom.click(ui.onClick);
 	
 	//same for all? should be in onDataChange
 	var backbuild_builder;
@@ -443,7 +445,6 @@ Maggi.UI.select=function(dom,data,setdata,ui,onDataChange) {
 	dom._Maggi=chld;
 	var style="width:"+(100/Object.keys(ui.choices).length).toString()+"%";
 	$.each(ui.choices,function(key,value) {
-		//console.log(key+ " " + value);
 		var id=name+"_"+key.toString();
 		chld[key]=$("<input>",{name:name,id:id,value:key,type:"radio",checked:key==data}).appendTo(dom).change(function() {
 			if (this.checked) setdata(key);
@@ -476,6 +477,7 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 	var sethandler={};
 	dom.ui=chld;
 	var wrap={};
+	var id=Maggi.id++;
 
 	var hasExplicitFormat=function(k) {
 		return ui.children[k]!=null;
@@ -519,7 +521,7 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 	};
 
 	var make=function(k) {
-		if (backbuild[k]) 
+		if (backbuild[k])
 			backbuild[k]();
 
 		var c=$("<"+(ui.childHTMLElement||"div")+">",{id:k});
@@ -539,15 +541,18 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 		}
 		chld[k]=c;
 		wrap[k]=w;
-		place(k);	
+		place(k);
 		backbuild[k]=Maggi.UI(chld[k],data[k],getFormat(k),function(v) { 
-			data[k]=v; 
-		}, function(fn) { 
-			sethandler[k]=fn; 
+			data[k]=v;
+		}, function(fn) {
+			sethandler[k]=fn;
 		});
 	};
 	var add=function(k) {
 		if (k instanceof Array) return;
+		wrap[k]=null;
+		ui.children.bind("set",k,make);
+		if (data==null) return;
 		if (!hasExplicitFormat(k)) {
 			if (ui.childdefault!=null) {
 				var u=ui.childdefault;
@@ -557,14 +562,14 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 			return;
 		}
 		if (typeof ui.children[k] === "function") {
-		    ui.children[k]=ui.children[k]();
+			ui.children[k]=ui.children[k]();
 		}
 		make(k);
-		ui.children.bind("set",k,make);
 	};
 	var remove=function(k) {
+		ui.children.unbind("set",make);
 		if (wrap.hasOwnProperty(k)) { 
-			wrap[k].remove(); 
+			if (wrap[k]!=null) wrap[k].remove(); 
 			if (backbuild[k]) {
 				backbuild[k](); 
 				delete backbuild[k];
@@ -590,6 +595,9 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 			$.each(oldv, function(idx,k) { if (!hasPropValue(newv,k)) remove(k); });
 			$.each(order(),function(idx,k) { if (wrap[k]) place(k); else add(k); });
 		}
+		if (k=="data") {
+			rebuild(newv);
+		}
 	};
 
 	var backbuild_builder;
@@ -600,18 +608,20 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 		if (ui.data!=null) data=ui.data;
 
 		backbuild_base=Maggi.UI.BaseFunctionality(dom,data,setdata,ui,onDataChange);
-		if (data==null||typeof data != "object") return;
+
 		dom._Maggi=data;
-		
-		data.bind("set", update);
-		data.bind("add", add);
-		data.bind("remove", remove);
+		if (typeof data == "object") {
+			data.bind("set", update);
+			data.bind("add", add);
+			data.bind("remove", remove);
+		}
 		ui.children.bind("add", add);
 		ui.children.bind("remove", remove);
+		ui.bind(["set","add"],formatsethandler);
 		if (ui.order) {
 			$.each(ui.order, function(idx,v) { add(v); });
 		} else if (ui.childdefault) {
-			$.each(data, add);
+			if (data!=null) $.each(data, add);
 		} else {
 			$.each(ui.children, add);
 		}
@@ -624,8 +634,11 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 			data.unbind("set", update);
 			data.unbind("add", add);
 			data.unbind("remove", remove);
-			ui.children.unbind("add");
-			ui.children.unbind("remove");
+		}
+		if (ui) {
+			ui.children.unbind("add",add);
+			ui.children.unbind("remove",remove);
+			ui.unbind(["set","add"],formatsethandler);
 		}
 		if (backbuild_base) backbuild_base();
 		removeall();
@@ -639,19 +652,10 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 
 	if (ui.children==null) ui.add("children",{});
 	
-	ui.bind("set",formatsethandler);
-	ui.bind("add","order",formatsethandler);
-	ui.bind(["add","set"],"data",function(k,v,oldv) {
-		rebuild(v);
-	});
-
 	if (onDataChange) onDataChange(rebuild);
 	build(data);
 
-	return function() {
-		backbuild();
-		ui.unbind(formatsethandler);
-	};
+	return backbuild;
 };
 
 Maggi.UI.tabs=function(ui,o,seto,format,onDataChange) {

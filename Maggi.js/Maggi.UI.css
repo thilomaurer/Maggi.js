@@ -37,11 +37,11 @@
 {
 	display:none;
 }
-
+/*
 .invisible {
 	display: none;
 }
-
+*/
 .popup {
 	position: absolute;
 	top:0;
@@ -55,16 +55,15 @@
 }
 
 .visibilityanimate {
-	display: initial;
 	visibility: visible;
-	transition: opacity 200ms ease-in, visibility 0s linear;
+	transition: opacity 350ms ease, visibility 0s linear;
 	opacity: 1;
 }
 
 .visibilityanimate.invisible {
 	visibility: hidden;
 	opacity: 0;
-	transition: opacity 200ms ease-in, visibility 0s linear 200ms;
+	transition: opacity 350ms ease, visibility 0s linear 350ms;
 }
 
 .mui-light .popup > .popup-triangle-wrapper,
