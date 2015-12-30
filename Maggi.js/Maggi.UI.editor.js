@@ -1,7 +1,7 @@
-Maggi.UI.editor=function(dom,data,setdata,ui,onDataChange) {
+Maggi.UI.editor=function(dom,data,setdata,outer_ui,onDataChange) {
 	
 	var builder=function(dom,d,ui) {
-
+		console.log(outer_ui.settings);
 		var annotsethandler=function(k,v) {
 			if (k=="selected") { 
 				var annot=d.annot[v];
@@ -11,12 +11,6 @@ Maggi.UI.editor=function(dom,data,setdata,ui,onDataChange) {
 		
 		var editor=ace.edit(dom.ui.doc[0]);
 		editor.setTheme("ace/theme/xcode");
-        editor.setOptions({
-                autoScrollEditorIntoView:false,
-                showGutter:true,
-                showInvisibles:true,
-                useSoftTabs:false,
-        });
 		var disableEvents=false; //hack to work around ACE issue.
 
 		function updateMode() {
@@ -27,6 +21,7 @@ Maggi.UI.editor=function(dom,data,setdata,ui,onDataChange) {
 				if (type=="text/css") mode="css";
 				if (type=="text/html") mode="html";
 				if (type=="image/svg+xml") mode="svg";
+				if (type=="application/json") mode="json";
 			}
 			editor.getSession().setMode("ace/mode/"+mode);
 		}
@@ -49,7 +44,7 @@ Maggi.UI.editor=function(dom,data,setdata,ui,onDataChange) {
 			}
 			disableEvents=true; //hack to work around ACE issue.
 			if (text==null) text="";
-		    editor.setValue(text);
+			editor.setValue(text);
 			disableEvents=false;
 		};
 		var updateCursor = function() {
@@ -74,11 +69,34 @@ Maggi.UI.editor=function(dom,data,setdata,ui,onDataChange) {
 			if (k[0]=="file"&&k[1]=="data") updateText();
 			if (k[0]=="file"&&k[1]=="cursor") updateCursor();
 		};
+		var ouihandler=function(k,v) {
+			if (k=="readonly") editor.setReadOnly(v);
+			//if (k=="settings"||k[0]=="settings") editor.setOptions(outer_ui.settings);
+			if (k[0]=="settings") {
+				var opt={};
+				if (k[2]=="keyboard") {
+					var modes={
+						gui:"",
+						vim:"ace/keyboard/vim",
+						emacs:"ace/keyboard/emacs"
+					};
+					editor.setKeyboardHandler(modes[v]);
+				} else {
+					opt[k[2]]=v;
+					editor.setOptions(opt);
+				}
+			}
+		};
 		data.bind(sethandler);
+		outer_ui.bind(ouihandler);
 		fmt.children.annot.bind(annotsethandler);
 		updateFile();
+		ouihandler("readonly",outer_ui.readonly);
+		ouihandler("settings",outer_ui.settings);
+		if (outer_ui.settings) ouihandler(["settings","keyboard"],outer_ui.settings.keyboard);
 		return function() {
 			data.unbind(sethandler);
+			outer_ui.unbind(ouihandler);
 			fmt.children.annot.unbind(annotsethandler);
 			editor.destroy();
 		}
@@ -89,12 +107,12 @@ Maggi.UI.editor=function(dom,data,setdata,ui,onDataChange) {
 		children: {
 			doc:{},
 			annot:{
-			    wrap:true,
+				wrap:true,
 				type:"list",
 				childdefault:{
-				    childdefault:"text",
+					childdefault:"text",
 					order:["type","row","column","text"],
-					builder:function(dom,data,ui) {
+					builder:function(dom,data) {
 						dom.addClass(data.type);
 					}
 				},

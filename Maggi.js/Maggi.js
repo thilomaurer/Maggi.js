@@ -19,12 +19,12 @@ var Maggi=function(other) {
 		//BUG: take fixed length for now
 		//TODO: trigger by copy of fns
 		var fnsl=fns.length; 
+		if (Maggi.log==true) {
+			console.log("Maggi.log: trigger "+fnsl+" "+e+" for "+JSON.stringify(key));
+		}
 		for (var i=0; i<fnsl; i++) {
-		//for (var i=0; i<fns.length; i++) {
 			var f=fns[i];
 			if (!f.keys||(f.keys.indexOf(key)>-1)) {
-				if (Maggi.log==true) 
-					console.log("trigger "+e+" for "+JSON.stringify(key));
 				f.fn(key,value,oldv,e);
 			}
 		}
@@ -201,6 +201,16 @@ var Maggi=function(other) {
 	myeach(other,p.add);
 
 	return p;
+};
+
+Maggi.merge = function(obj1, obj2) {
+	for (var p in obj2) {
+		if (obj1[p]&&(obj1[p].constructor==Object)) {
+			Maggi.merge(obj1[p], obj2[p]);
+		} else {
+			obj1.add(p,obj2[p]);
+		}
+	}
 };
 
 Maggi.bind_id=0;

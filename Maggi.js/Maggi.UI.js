@@ -20,6 +20,22 @@ Maggi.UI_devel=function(dom) {
 	return a;
 };
 
+Array_unique = function (a) {
+    var r = new Array();
+    o:for(var i = 0, n = a.length; i < n; i++)
+    {
+        for(var x = 0, y = r.length; x < y; x++)
+        {
+            if(r[x]==a[i])
+            {
+                continue o;
+            }
+        }
+        r[r.length] = a[i];
+    }
+    return r;
+}
+
 Maggi.UI=function(dom,data,ui,setdata,onDataChange) {
 	function cookui(ui) {
 		if (ui===null) return ui;
@@ -66,7 +82,7 @@ Maggi.UI.BaseFunctionality=function(dom,data,setdata,format,onDataChange) {
 		dom.addClass("popup visibilityanimate");
 
 		if (triggerElement==null) { console.log("Maggi.UI: triggerelement not found."); return; }
-		triggerElementClick=function() {
+		var triggerElementClick=function() {
 			format.visible=!format.visible;
 			return false;
 		};
@@ -129,16 +145,16 @@ Maggi.UI.BaseFunctionality=function(dom,data,setdata,format,onDataChange) {
 		};
 		if (!format.hasOwnProperty("visible")) format.add("visible",false); 
 		if (format.visible==false) { dom.addClass("invisible");}
-		
+
 		var observer = new MutationObserver(place);
-        observer.observe(dom[0], { childList:true });
-        observer.observe(triggerElement[0], { childList:true });
+		observer.observe(dom[0], { childList:true });
+		observer.observe(triggerElement[0], { childList:true });
 		$(window).resize(place);
 
 		backbuilder=function() {
-		    observer.disconnect();
-		    $(window).off("resize",place);
-		    triggerElement.off("click",triggerElementClick);	
+			observer.disconnect();
+			$(window).off("resize",place);
+			triggerElement.off("click",triggerElementClick);
 			dom.removeClass("popup");
 			deco.remove();
 		};
@@ -268,10 +284,14 @@ Maggi.UI.text=function(dom,data,setdata,ui,onDataChange) {
 		var s="(null)";
 		if (data!=null) { 
 			if (ui.format) {
-				if (data instanceof Object)
+				if (data instanceof Date)
+					data=data.toString();
+				if (data instanceof Object){
 					data=Object.keys(data).map(function (key) {return data[key]});
-				else 
+				}
+				else {
 					data=[data];
+				}
 				s=vsprintf(ui.format,data) 
 			}
 			else
@@ -296,13 +316,14 @@ Maggi.UI.label=function(dom,data,setdata,ui,onDataChange) {
 	//same for all?
 	var unbase=Maggi.UI.BaseFunctionality(dom,data,setdata,ui,onDataChange);
 
-	var build=function(k,label) {
-		dom.text(label);
+	var build=function() {
+		dom.text(ui.label);
+		if (ui.onClick) dom.click(ui.onClick);
 	};
 	ui.bind("set","label",build);
 	build("label",ui.label);
-	if (ui.onClick) dom.click(ui.onClick);
-	
+	ui.bind("add","onClick",build);
+
 	//same for all? should be in onDataChange
 	var backbuild_builder;
 	if (ui.builder) backbuild_builder=ui.builder(dom,data,ui);
@@ -351,12 +372,13 @@ Maggi.UI.checkbox=function(dom,data,setdata,ui,onDataChange) {
 		var unbase=Maggi.UI.BaseFunctionality(dom,data,setdata,ui,onDataChange);
 		var name="maggi_"+Maggi.UI.select.counter.toString(); Maggi.UI.select.counter++;
 		var id=name+"_id";
+		if (ui.labelposition=="before") $("<label>",{for:id,text:ui.label}).appendTo(dom);
 		dom._Maggi=$("<input>",{name:name,id:id,type:"checkbox"}).appendTo(dom).change(function() {
 			if (setdata) setdata(this.checked);
 		});
-		$("<label>",{for:id,text:ui.label}).appendTo(dom);
+		$("<label>",{for:id,id:"toggle"}).appendTo(dom);
+		if (ui.labelposition!="before") $("<label>",{for:id,text:ui.label}).appendTo(dom);
 	} 
-	//if (data) dom._Maggi[0].setAttribute("checked","checked"); else dom._Maggi[0].removeAttribute("checked");
 	dom._Maggi[0].checked=data;
 };
 
@@ -412,7 +434,7 @@ Maggi.UI.input=function(dom,data,setdata,ui,onDataChange) {
 	};
 	onDataChange(datachange);
 	datachange(data);
-	dom.click(function() {i.focus();});
+	dom.click(function(event) {i.focus(); event.stopPropagation();});
 	dom._Maggi=i; //deprecated?
 	return function() {
 		ui.unbind("set",i.attr);
@@ -443,7 +465,6 @@ Maggi.UI.select=function(dom,data,setdata,ui,onDataChange) {
 	var name="maggi_radiogroup_"+Maggi.UI.select.counter.toString(); Maggi.UI.select.counter++;
 	var chld={};
 	dom._Maggi=chld;
-	var style="width:"+(100/Object.keys(ui.choices).length).toString()+"%";
 	$.each(ui.choices,function(key,value) {
 		var id=name+"_"+key.toString();
 		chld[key]=$("<input>",{name:name,id:id,value:key,type:"radio",checked:key==data}).appendTo(dom).change(function() {
@@ -451,7 +472,7 @@ Maggi.UI.select=function(dom,data,setdata,ui,onDataChange) {
 		});
 		var text=value.label;
 		if (text==null) text=value;
-		$("<label>",{for:id,text:text,style:style}).appendTo(dom);
+		$("<label>",{for:id,text:text}).appendTo(dom);
 	});
 
 	onDataChange(function(data) {
@@ -461,10 +482,13 @@ Maggi.UI.select=function(dom,data,setdata,ui,onDataChange) {
 	var formatsethandler=function() {};
 	
 	ui.bind("set",formatsethandler);
+	var backbuild_builder=null;
+	if (ui.builder) backbuild_builder=ui.builder(dom,data,ui); //must be last in build
 
 	return function() {
-		unbase();
+		if (backbuild_builder) backbuild_builder();
 		ui.unbind(formatsethandler);
+		unbase();
 	};
 
 };
@@ -523,6 +547,8 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 	var make=function(k) {
 		if (backbuild[k])
 			backbuild[k]();
+		if (wrap[k]) wrap[k].remove();
+		if (chld[k]) chld[k].remove();
 
 		var c=$("<"+(ui.childHTMLElement||"div")+">",{id:k});
 
@@ -618,12 +644,25 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 		ui.children.bind("add", add);
 		ui.children.bind("remove", remove);
 		ui.bind(["set","add"],formatsethandler);
+		/*
 		if (ui.order) {
 			$.each(ui.order, function(idx,v) { add(v); });
 		} else if (ui.childdefault) {
 			if (data!=null) $.each(data, add);
 		} else {
 			$.each(ui.children, add);
+		}
+		*/
+		if (ui.order) {
+			$.each(ui.order, function(idx,v) { add(v); });
+		} else {
+			var uic=ui.children;
+			//console.log(uic);
+			//console.log(data);
+			var a=Object.keys(uic);
+			if (data)
+				a=Array_unique(a.concat(Object.keys(data)));
+			$.each(a, function(idx,v) { add(v); });
 		}
 		if (ui.builder) backbuild_builder=ui.builder(dom,data,ui); //must be last in build
 	};
