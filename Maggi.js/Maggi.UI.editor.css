@@ -25,6 +25,7 @@
 }
 .editor #annot .list > * > #type {
 	padding-right:8px;
+	padding-left:4px;
 }
 .editor #annot .list > .error {
 	color:red;

@@ -19,9 +19,8 @@ var Maggi=function(other) {
 		//BUG: take fixed length for now
 		//TODO: trigger by copy of fns
 		var fnsl=fns.length; 
-		if (Maggi.log==true) {
+		if (Maggi.log==true) 
 			console.log("Maggi.log: trigger "+fnsl+" "+e+" for "+JSON.stringify(key));
-		}
 		for (var i=0; i<fnsl; i++) {
 			var f=fns[i];
 			if (!f.keys||(f.keys.indexOf(key)>-1)) {

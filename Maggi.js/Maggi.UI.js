@@ -316,20 +316,28 @@ Maggi.UI.label=function(dom,data,setdata,ui,onDataChange) {
 	//same for all?
 	var unbase=Maggi.UI.BaseFunctionality(dom,data,setdata,ui,onDataChange);
 
-	var build=function() {
-		dom.text(ui.label);
-		if (ui.onClick) dom.click(ui.onClick);
+	var setLabel=function(k,v) {
+		dom.text(v);
 	};
-	ui.bind("set","label",build);
-	build("label",ui.label);
-	ui.bind("add","onClick",build);
+	var onClick=function(e) {
+	    var handled=(ui.onClick!=null&&(ui.enabled!=false));
+	    if (handled) ui.onClick();
+	    return !handled;
+	};
+	dom.on("click",onClick);
+
+	var handlers=[
+		[ui,["add","set"],"label",setLabel]
+	];
+	var unbind=installBindings(handlers);
 
 	//same for all? should be in onDataChange
 	var backbuild_builder;
 	if (ui.builder) backbuild_builder=ui.builder(dom,data,ui);
 	return function() {
 		if (backbuild_builder) backbuild_builder();
-		ui.unbind(build);
+		dom.off("click",onClick);
+		unbind();
 		unbase();
 	};
 };
@@ -625,8 +633,13 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 			rebuild(newv);
 		}
 	};
-
+	
 	var backbuild_builder;
+	var setbuilder=function() {
+		    if (backbuild_builder) backbuild_builder();
+		    if (ui.builder) backbuild_builder=ui.builder(dom,data,ui); //must be last in build
+    };
+
 	var backbuild_base;
 
 	var build=function(newdata) {
@@ -644,27 +657,17 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 		ui.children.bind("add", add);
 		ui.children.bind("remove", remove);
 		ui.bind(["set","add"],formatsethandler);
-		/*
-		if (ui.order) {
-			$.each(ui.order, function(idx,v) { add(v); });
-		} else if (ui.childdefault) {
-			if (data!=null) $.each(data, add);
-		} else {
-			$.each(ui.children, add);
-		}
-		*/
 		if (ui.order) {
 			$.each(ui.order, function(idx,v) { add(v); });
 		} else {
 			var uic=ui.children;
-			//console.log(uic);
-			//console.log(data);
 			var a=Object.keys(uic);
 			if (data)
 				a=Array_unique(a.concat(Object.keys(data)));
 			$.each(a, function(idx,v) { add(v); });
 		}
-		if (ui.builder) backbuild_builder=ui.builder(dom,data,ui); //must be last in build
+		ui.bind("set","builder",setbuilder);
+		setbuilder();
 	};
 	
 	var backbuild=function() {
@@ -678,6 +681,7 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 			ui.children.unbind("add",add);
 			ui.children.unbind("remove",remove);
 			ui.unbind(["set","add"],formatsethandler);
+			ui.unbind("set",setbuilder)
 		}
 		if (backbuild_base) backbuild_base();
 		removeall();
