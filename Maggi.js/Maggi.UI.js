@@ -66,7 +66,7 @@ Maggi.UI=function(dom,data,ui,setdata,onDataChange) {
 
 //non-object UI handlers
 
-Maggi.UI.BaseFunctionality=function(dom,data,setdata,format,onDataChange) {
+Maggi.UI.BaseFunctionality=function(dom,data,setdata,ui,onDataChange) {
 	var updateClass = function(v, dom, cls) {
 		if (v) dom.addClass(cls); else dom.removeClass(cls); 
 	};
@@ -74,16 +74,16 @@ Maggi.UI.BaseFunctionality=function(dom,data,setdata,format,onDataChange) {
 		updateClass(v==false,dom,"invisible");
 	};
 	var backbuilder=null;
-	dom.addClass(format.type);
-	if (format.popup==true) {
-		var triggerElement=dom._MaggiParent.ui[format.popuptrigger];
+	dom.addClass(ui.type);
+	if (ui.popup==true) {
+		var triggerElement=dom._MaggiParent.ui[ui.popuptrigger];
 		var deco=$('<div/>', {'class': "popup-triangle-wrapper"}).appendTo(dom);
 		var deco2=$('<div/>', {'class': "popup-triangle-inner"}).appendTo(deco);
 		dom.addClass("popup visibilityanimate");
 
 		if (triggerElement==null) { console.log("Maggi.UI: triggerelement not found."); return; }
 		var triggerElementClick=function() {
-			format.visible=!format.visible;
+			ui.visible=!ui.visible;
 			return false;
 		};
 		triggerElement.on("click",triggerElementClick);
@@ -136,15 +136,15 @@ Maggi.UI.BaseFunctionality=function(dom,data,setdata,format,onDataChange) {
 			updateClass(v==false,dom,"invisible");
 			if (v) { 
 				place();
-				if (format.popupfocus) {
-					var p=dom.ui[format.popupfocus]._Maggi[0];
+				if (ui.popupfocus) {
+					var p=dom.ui[ui.popupfocus]._Maggi[0];
 					p.focus();
 					p.select();
 				}
 			}
 		};
-		if (!format.hasOwnProperty("visible")) format.add("visible",false); 
-		if (format.visible==false) { dom.addClass("invisible");}
+		if (!ui.hasOwnProperty("visible")) ui.add("visible",false); 
+		if (ui.visible==false) { dom.addClass("invisible");}
 
 		var observer = new MutationObserver(place);
 		observer.observe(dom[0], { childList:true });
@@ -159,17 +159,17 @@ Maggi.UI.BaseFunctionality=function(dom,data,setdata,format,onDataChange) {
 			deco.remove();
 		};
 	}
-	if (format.wrappedpopup==true) {
+	if (ui.wrappedpopup==true) {
 		var wrap=$('<div/>').insertBefore(dom);
 		dom.appendTo(wrap);
-		var triggerElement=dom._MaggiParent.ui[format.popuptrigger];
+		var triggerElement=dom._MaggiParent.ui[ui.popuptrigger];
 		var deco=$('<div/>', {'class': "popup-triangle-wrapper"}).appendTo(dom);
 		var deco2=$('<div/>', {'class': "popup-triangle-inner"}).appendTo(deco);
 		dom.addClass("popup visibilityanimate");
 
 		if (triggerElement==null) { console.log("Maggi.UI: triggerelement not found."); return; }
 		triggerElementClick=function() {
-			format.visible=!format.visible;
+			ui.visible=!ui.visible;
 			return false;
 		};
 		triggerElement.on("click",triggerElementClick);
@@ -218,15 +218,15 @@ Maggi.UI.BaseFunctionality=function(dom,data,setdata,format,onDataChange) {
 			updateClass(v==false,dom,"invisible");
 			if (v) { 
 				place();
-				if (format.popupfocus) {
-					var p=dom.ui[format.popupfocus]._Maggi[0];
+				if (ui.popupfocus) {
+					var p=dom.ui[ui.popupfocus]._Maggi[0];
 					p.focus();
 					p.select();
 				}
 			}
 		};
-		if (!format.hasOwnProperty("visible")) format.add("visible",false); 
-		if (format.visible==false) { dom.addClass("invisible");}
+		if (!ui.hasOwnProperty("visible")) ui.add("visible",false); 
+		if (ui.visible==false) { dom.addClass("invisible");}
 		
 		var observer = new MutationObserver(place);
 		observer.observe(dom[0], { childList:true });
@@ -241,23 +241,33 @@ Maggi.UI.BaseFunctionality=function(dom,data,setdata,format,onDataChange) {
 			deco.remove();
 		};
 	}
-	if (format.popup==null) {
-		updateClass(format.visible==false,dom,"invisible");
+	if (ui.popup==null) {
+		updateClass(ui.visible==false,dom,"invisible");
 	}
 	var sethandler = function(k,v,oldv) {
 		if (k=="enabled") updateClass(v==false,dom,"disabled");
 		if (k=="class") { dom.removeClass(oldv); dom.addClass(v); }
 	};
-	format.bind(["add","set"],"visible",vissethandler);
-	format.bind("set",sethandler);
-	updateClass(format.enabled==false,dom,"disabled");
-	if (format.class) 
-		dom.addClass(format.class);
+	ui.bind(["add","set"],"visible",vissethandler);
+	ui.bind("set",sethandler);
+	updateClass(ui.enabled==false,dom,"disabled");
+	
+	var onClick=function(e) {
+	    var handled=(ui.onClick!=null&&(ui.enabled!=false));
+	    if (handled) ui.onClick();
+	    return !handled;
+	};
+	dom.on("click",onClick);
+	
+	if (ui.class) 
+		dom.addClass(ui.class);
 	return function() {
-		format.unbind("set",sethandler);
-		format.unbind("set",vissethandler);
-		dom.removeClass(format.class);
-		dom.removeClass(format.type);
+		dom.off("click",onClick);
+	    
+		ui.unbind("set",sethandler);
+		ui.unbind("set",vissethandler);
+		dom.removeClass(ui.class);
+		dom.removeClass(ui.type);
 		if (backbuilder) backbuilder();
 	};
 };

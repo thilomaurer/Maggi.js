@@ -470,12 +470,11 @@
 	color:white;
 }
 
-.mui-light .project > #name:hover,
-.mui-light .project #view > #revision:hover {
+.mui-light .hoverhighlight:hover {
 	background-color: hsla(0, 0%, 85%, 1);
 }
 
-.mui .project > #name:hover,
-.mui .project #view > #revision:hover {
+.mui .hoverhighlight:hover {
 	background-color: hsla(224, 8%, 42%, 1);
 }
+
