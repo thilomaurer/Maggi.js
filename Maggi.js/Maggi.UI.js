@@ -329,12 +329,6 @@ Maggi.UI.label=function(dom,data,setdata,ui,onDataChange) {
 	var setLabel=function(k,v) {
 		dom.text(v);
 	};
-	var onClick=function(e) {
-	    var handled=(ui.onClick!=null&&(ui.enabled!=false));
-	    if (handled) ui.onClick();
-	    return !handled;
-	};
-	dom.on("click",onClick);
 
 	var handlers=[
 		[ui,["add","set"],"label",setLabel]
@@ -346,7 +340,6 @@ Maggi.UI.label=function(dom,data,setdata,ui,onDataChange) {
 	if (ui.builder) backbuild_builder=ui.builder(dom,data,ui);
 	return function() {
 		if (backbuild_builder) backbuild_builder();
-		dom.off("click",onClick);
 		unbind();
 		unbase();
 	};
@@ -555,11 +548,15 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 		var w=wrap[k];
 		var o=order();
 		var idx=o.indexOf(k);
-		var beforek=o[idx-1];
-		if (beforek==null||wrap[beforek]==null)
-			w.appendTo(dom); 
-		else 
-			w.insertAfter(wrap[beforek]);
+		if (idx==0) {
+		    w.prependTo(dom); 
+		} else {
+    		var beforek=o[idx-1];
+    		if (beforek==null||wrap[beforek]==null)
+    			w.appendTo(dom); 
+    		else 
+    			w.insertAfter(wrap[beforek]);
+		}
 	};
 
 	var make=function(k) {
