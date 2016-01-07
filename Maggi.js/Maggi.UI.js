@@ -20,6 +20,31 @@ Maggi.UI_devel=function(dom) {
 	return a;
 };
 
+var installBindings=function(handlers) {
+	$.each(handlers,function(idx,v) {
+		var o=v[0];
+		var e=v[1];
+		var k=v[2];
+		var f=v[3];
+		if (o!=null) {
+			o.bind(e,k,f);
+			f(k,o[k]);
+		} else console.log("bind to null ignored");
+	});
+	return function() {
+		$.each(handlers,function(idx,v) {
+			var o=v[0];
+			var e=v[1];
+			var k=v[2];
+			var f=v[3];
+			if (o!=null) {
+				o.unbind(e,k,f);
+			} else console.log("unbind from null ignored");
+		});
+	};
+};
+
+
 Array_unique = function (a) {
     var r = new Array();
     o:for(var i = 0, n = a.length; i < n; i++)
