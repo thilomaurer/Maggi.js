@@ -59,7 +59,7 @@ Array_unique = function (a) {
         r[r.length] = a[i];
     }
     return r;
-}
+};
 
 Maggi.UI=function(dom,data,ui,setdata,onDataChange) {
 	function cookui(ui) {
@@ -293,7 +293,7 @@ Maggi.UI.BaseFunctionality=function(dom,data,setdata,ui,onDataChange) {
 		ui.unbind("set",vissethandler);
 		dom.removeClass(ui.class);
 		dom.removeClass(ui.type);
-		if (backbuilder) backbuilder();
+		if (backbuilder) { backbuilder(); backbuilder=null; }
 	};
 };
 
@@ -342,7 +342,7 @@ Maggi.UI.text=function(dom,data,setdata,ui,onDataChange) {
 	var backbuild_builder;
 	if (ui.builder) backbuild_builder=ui.builder(dom,data,ui);
 	return function() {
-		if (backbuild_builder) backbuild_builder();
+		if (backbuild_builder) { backbuild_builder(); backbuild_builder=null; }
 		unbase();
 	};
 };
@@ -364,7 +364,7 @@ Maggi.UI.label=function(dom,data,setdata,ui,onDataChange) {
 	var backbuild_builder;
 	if (ui.builder) backbuild_builder=ui.builder(dom,data,ui);
 	return function() {
-		if (backbuild_builder) backbuild_builder();
+		if (backbuild_builder) { backbuild_builder(); backbuild_builder=null; }
 		unbind();
 		unbase();
 	};
@@ -522,7 +522,7 @@ Maggi.UI.select=function(dom,data,setdata,ui,onDataChange) {
 	if (ui.builder) backbuild_builder=ui.builder(dom,data,ui); //must be last in build
 
 	return function() {
-		if (backbuild_builder) backbuild_builder();
+		if (backbuild_builder) { backbuild_builder(); backbuild_builder=null; }
 		ui.unbind(formatsethandler);
 		unbase();
 	};
@@ -585,8 +585,10 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 	};
 
 	var make=function(k) {
-		if (backbuild[k])
+		if (backbuild[k]) {
 			backbuild[k]();
+			delete backbuild[k];
+		}
 		if (wrap[k]) wrap[k].remove();
 		if (chld[k]) chld[k].remove();
 
@@ -614,6 +616,7 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 			sethandler[k]=fn;
 		});
 	};
+	var fromdefault={};
 	var add=function(k) {
 		if (k instanceof Array) return;
 		wrap[k]=null;
@@ -623,6 +626,7 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 			if (ui.childdefault!=null) {
 				var u=ui.childdefault;
 				if (typeof u === "function") u=u();
+				fromdefault[k]=true;
 				ui.children.add(k,u);
 			}
 			return;
@@ -633,8 +637,13 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 		make(k);
 	};
 	var remove=function(k) {
-		ui.children.unbind("set",make);
-		if (wrap.hasOwnProperty(k)) { 
+		ui.children.unbind("set",make); //what is this line for?
+		if (fromdefault[k]==true) {
+		    ui.children[k]=null;
+		    delete ui.children[k];
+		    fromdefault[k]=false;
+		}
+		if (wrap.hasOwnProperty(k)) {
 			if (wrap[k]!=null) wrap[k].remove(); 
 			if (backbuild[k]) {
 				backbuild[k](); 
@@ -668,7 +677,7 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 	
 	var backbuild_builder;
 	var setbuilder=function() {
-		    if (backbuild_builder) backbuild_builder();
+		    if (backbuild_builder) { backbuild_builder(); backbuild_builder=null; }
 		    if (ui.builder) backbuild_builder=ui.builder(dom,data,ui); //must be last in build
     };
 
@@ -703,7 +712,7 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 	};
 	
 	var backbuild=function() {
-		if (backbuild_builder) backbuild_builder(); //must be first in backbuild
+		if (backbuild_builder) { backbuild_builder(); backbuild_builder=null; } //must be first in backbuild
 		if (data) {
 			data.unbind("set", update);
 			data.unbind("add", add);
@@ -715,7 +724,7 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 			ui.unbind(["set","add"],formatsethandler);
 			ui.unbind("set",setbuilder)
 		}
-		if (backbuild_base) backbuild_base();
+		if (backbuild_base) { backbuild_base(); backbuild_base=null; }
 		removeall();
 		dom._Maggi=null;
 	};
@@ -834,8 +843,8 @@ Maggi.UI.list=function(dom,data,setdata,ui,onDataChange) {
 			data.unbind("remove", remove);
 		}
 		objsethandler=null;
-		if (backbuild_base) backbuild_base();
-		if (backbuild_header) backbuild_header();
+		if (backbuild_base) { backbuild_base(); backbuild_base=null; }
+		if (backbuild_header) { backbuild_header(); backbuild_header=null; }
 		dom._Maggi=null;
 	};
 
@@ -854,8 +863,6 @@ Maggi.UI.list=function(dom,data,setdata,ui,onDataChange) {
 		backbuild();
 		ui.unbind("set",formatsethandler);
 	};
-
-
 
 };
 
