@@ -38,7 +38,7 @@ var installBindings=function(handlers) {
 			var k=v[2];
 			var f=v[3];
 			if (o!=null) {
-				o.unbind(e,k,f);
+				o.unbind(e,f); //TODO: (e,k,f);
 			} else console.log("unbind from null ignored");
 		});
 	};
@@ -781,7 +781,7 @@ Maggi.UI.list=function(dom,data,setdata,ui,onDataChange) {
 	var installClick = function(k,v) {
 		if (ui.select=="single"||ui.select=="multi")
 			v.click(function() { 
-				select(k);
+				if (ui.children[k].enabled!=false) select(k);
 			}); 
 	};
 	var select=function(k) {

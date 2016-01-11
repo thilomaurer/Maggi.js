@@ -1,7 +1,7 @@
 Maggi.UI.editor=function(dom,data,setdata,outer_ui,onDataChange) {
 	
 	var builder=function(dom,d,ui) {
-		console.log(outer_ui.settings);
+		//console.log(outer_ui.settings);
 		var annotsethandler=function(k,v) {
 			if (k=="selected") { 
 				var annot=d.annot[v];
@@ -10,6 +10,7 @@ Maggi.UI.editor=function(dom,data,setdata,outer_ui,onDataChange) {
 		};
 		
 		var editor=ace.edit(dom.ui.doc[0]);
+		editor.$blockScrolling = Infinity;
 		editor.setTheme("ace/theme/xcode");
 		var disableEvents=false; //hack to work around ACE issue.
 

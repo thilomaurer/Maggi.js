@@ -126,6 +126,8 @@
 	text-align: left;
 }
 
+.mui-light.disabled,
+.mui-light .disabled,
 .mui.disabled,
 .mui .disabled {
 	color:gray;
@@ -171,10 +173,7 @@
 	box-shadow: 0px 0px 100px rgba(0,0,0,0.5);
 }
 
-/* SIMPLELIST */
-
-
-/* TABLELIST */
+/* SIMPLELIST, TABLELIST */
 
 .mui-light.simplelist,
 .mui-light .simplelist,
@@ -197,6 +196,8 @@
 	background:hsla(224, 8%, 36%, 1); //var(--mui-light-color);
 }
 
+.mui-light .tablelist > *:first-child,
+.mui-light.tablelist > *:first-child,
 .mui .tablelist > *:first-child,
 .mui.tablelist > *:first-child {
 	border-top:0;
@@ -258,6 +259,14 @@
 .mui.tablelist.selectable > *:hover,
 .mui .tablelist.selectable > *:hover{
 	background:hsla(224, 8%, 50%, 1);
+}
+.mui-light .simplelist.selectable > *.disabled:hover,
+.mui-light .tablelist.selectable > *.disabled:hover,
+.mui-light.tablelist.selectable > *.disabled:hover,
+.mui .simplelist.selectable > *.disabled:hover,
+.mui .tablelist.selectable > *.disabled:hover,
+.mui.tablelist.selectable > *.disabled:hover{
+	background:inherit;
 }
 
 .mui-light .simplelist.selectable > *:hover,
