@@ -19,6 +19,7 @@ Maggi.UI.editor=function(dom,data,setdata,outer_ui,onDataChange) {
 			if (data.file) {
 				var type=data.file.type;
 				if (type=="text/javascript") mode="javascript";
+				if (type=="application/javascript") mode="javascript";
 				if (type=="text/css") mode="css";
 				if (type=="text/html") mode="html";
 				if (type=="image/svg+xml") mode="svg";

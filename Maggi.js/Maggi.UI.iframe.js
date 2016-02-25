@@ -16,14 +16,14 @@ Maggi.UI.iframe=function(dom,s,sets,ui,onDataChange) {
 		ElementOfFile={};
 		doc.open();
 		if (s.file&&s.file.scope=="client") { 
-			if (s.file.type=="text/javascript") {
+			if (s.file.type=="text/javascript"||s.file.type=="application/javascript") {
 				doc.write(jshtml);
 				var head=doc.getElementsByTagName('head').item(0);
 				for (var idx in s.files) {
 					var file=s.files[idx];
 					if (file.scope=="client") {
     					var el=null;
-    					if (file.type=="text/javascript") {
+    					if (file.type=="text/javascript"||file.type=="application/javascript") {
     						el=document.createElement('script');
     						el.type=file.type;
     					}	
