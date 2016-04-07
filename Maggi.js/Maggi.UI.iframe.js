@@ -92,77 +92,60 @@ Maggi.UI.iframe=function(dom,s,sets,ui,onDataChange) {
 		}
 		doc.close();
 	};
-	
-	function purge(d) {
-		var a = Object.keys(d);
-		for (var i = 0; i < a.length; i ++) {
-			var n = a[i];
-			d[n]=null;
-			delete d[n];
-		}
-	}
-	
+
+	var iframe,w,detached=false;
 	var to = function() {
 	    var now=new Date().getTime();
 	    var make=(maketime<=now);
 	    if (make) {
-		    purge(w);
+		    if (iframe) {iframe.remove(); iframe=null;}
+		    if (detached) {w.close(); w=null;}
+		    if (s.detach) {
+		        w=window.open();
+		    } else {
+            	iframe=$('<iframe>', {name:s.name}).appendTo(dom);
+                w=iframe[0].contentWindow;
+		    }
+		    detached=s.detach;
 		    builddoc(w.document);
 	    }
 	};
-
+	
+	var latency=1000;
+	var maketime=0;
 	var makedocument = function() {
 	    var now=new Date().getTime();
 	    maketime=now+latency;
         setTimeout(to,latency);
 	};
-	
-	var latency=500;
-	var maketime=0;
+
 
 	var updateFile = function(file) {
 		var el=ElementOfFile[file.name];
 		if (!el) return;
 		el.innerHTML=file.data;
-		//but el is in shadow document, not the live one.
-		//just fully renew the live one for now
-		makedocument();
+		//if JS changed reload
+		if ((file.type=="text/javascript")||(file.type=="application/javascript"))
+		  makedocument();
 	};
 
 	var sethandler=function(k,v) {
+		if (k=="reload") to();
+		if (k=="detach") makedocument();
 		if (k=="file") makedocument();
 		if (k[0]=="files"&&k[2]=="data") updateFile(s.files[k[1]]);
 	};
 
 	backbuild_base=Maggi.UI.BaseFunctionality(dom,s,sets,ui,onDataChange);
-	var iframe=$('<iframe>', {name:s.name}).appendTo(dom);
-
-	var w=iframe[0].contentWindow;
-	var setdetach=function(k,v) {
-		if (v===true) {
-			if (w) iframe.remove();
-//			w.document.write("This frame is detached.");
-			w=window.open();
-		} else {
-			if (w) w.close();
-			iframe.appendTo(dom);
-			w=iframe[0].contentWindow;
-		}
-		makedocument();
-	};
 
 	s.bind("set", sethandler); 
-	s.bind("add", makedocument);
-	s.bind("set","detach",setdetach);
 
 	if (s.detach===null) s.add("detach",false);
-	setdetach("detach",s.detach);
+	to();
 
 	var unbind = function() {
 		s.unbind(sethandler);
-		s.unbind(makedocument);
-		s.unbind(setdetach);
-		w.close();
+
 		backbuild_base();
 	};
 	return unbind;

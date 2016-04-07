@@ -8,10 +8,10 @@
  */
 
 var Maggi=function(other) {
-	var d={},p={},events={};
+    var d={},p={},events={};
 
-	if (!(other instanceof Date)) if (!(other instanceof Function)) if (other instanceof Object) if (other._hasMaggi) return other;
-	if (other instanceof jQuery) return other;
+    if (!(other instanceof Date)) if (!(other instanceof Function)) if (other instanceof Object) if (other._hasMaggi) return other;
+    if (other instanceof jQuery) return other;
 
 	var trigger = function(e,key,value,oldv) {
 		var fns=events[e];
