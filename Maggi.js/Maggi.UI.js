@@ -639,7 +639,7 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 	var remove=function(k) {
 		ui.children.unbind("set",make); //what is this line for?
 		if (fromdefault[k]==true) {
-		    ui.children[k]=null;
+		    //ui.children[k]=null;
 		    delete ui.children[k];
 		    fromdefault[k]=false;
 		}
