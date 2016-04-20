@@ -261,9 +261,9 @@ var log=function(tag,socket,d) {
 	console.log(text);
 };
 
-Maggi.sync = function(socket,db,client) {
+Maggi.sync = function(socket,db,client,ready,disconnect) {
 	var applying=false;
-	var emit=function(d) { log("Maggi send",socket,d); socket.emit("Maggi",JSON.stringify(d)); };
+	var emit=function(d) { log("Maggi send",socket,d); socket.emit("Maggi",d); };
 	var handler=function(k,v,oldv,e) {
 		if (applying) return;
 		db.rev+=1;
@@ -273,13 +273,12 @@ Maggi.sync = function(socket,db,client) {
 		applying=true;
 		var ddd=new Date();
 		Maggi.apply(db.data,d);
-		console.log((new Date()).getTime()-ddd.getTime());
+		console.log("Time to apply in ms:",(new Date()).getTime()-ddd.getTime());
 		db.rev=d.rev;
 		applying=false; 
 	}
 	db.data.bind(["set","add","remove"],handler);
-	socket.on('Maggi', function(json) {
-		var d=JSON.parse(json);
+	socket.on('Maggi', function(d) {
 		log("Maggi recv", socket, d);
 		if (d.f=="delta") {
 			if (d.rev==db.rev+1) {
@@ -290,8 +289,10 @@ Maggi.sync = function(socket,db,client) {
 		}
 		if (d.f=="request") 
 			emit({f:"response",e:"add",k:null,v:db.data,rev:db.rev});
-		if (d.f=="response") 
+		if (d.f=="response") { 
 			apply(d);
+			if (ready) ready();
+		}
 		if (d.f=="error") 
 			if (client&&d.id=="old_rev") emit({f:"request"});
 
@@ -299,6 +300,10 @@ Maggi.sync = function(socket,db,client) {
 	socket.on('disconnect',function() {
 		db.data.unbind(handler);
 		console.log("disconnected " + socket.id);
+		if (disconnect) disconnect();
+	});
+	socket.on('error',function(e) {
+		console.warn(e);
 	});
 	if (client) emit({f:"request"});
 };
@@ -308,9 +313,9 @@ Maggi.serve = function(socket,db) {
 	Maggi.sync(socket,db,false);
 };
 
-Maggi.client = function(socket,data) {
+Maggi.client = function(socket,data,ready,disconnect) {
 	var db={data:data,rev:0};
-	Maggi.sync(socket,db,true);
+	Maggi.sync(socket,db,true,ready,disconnect);
 };
 
 if (typeof module !== 'undefined')
