@@ -46,7 +46,7 @@ Maggi.UI.editor=function(dom,data,setdata,outer_ui,onDataChange) {
 			}
 			disableEvents=true; //hack to work around ACE issue.
 			if (text==null) text="";
-			editor.setValue(text);
+			editor.session.setValue(text);
 			disableEvents=false;
 		};
 		var updateCursor = function() {
@@ -56,6 +56,7 @@ Maggi.UI.editor=function(dom,data,setdata,outer_ui,onDataChange) {
 			if ((c.row==op.row)&&(c.column==op.column)) return;
 			disableEvents=true; //hack to work around ACE issue.
 			editor.selection.setSelectionRange({start:c,end:c},false);
+			editor.centerSelection();
 			disableEvents=false;
 		};
 		var updateFile = function() {
