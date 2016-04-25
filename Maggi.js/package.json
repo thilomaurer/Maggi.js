@@ -6,6 +6,14 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Thilo Maurer",
-  "license": "Closed"
+  "author": {
+    "name": "Thilo Maurer"
+  },
+  "license": "Closed",
+  "readme": "ERROR: No README data found!",
+  "_id": "Maggi.js@0.0.1",
+  "dist": {
+    "shasum": "0fbd784d03308e95b481f1c1c7aebeec09885fd6"
+  },
+  "_from": "../Maggi.js"
 }
