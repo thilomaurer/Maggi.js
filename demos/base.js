@@ -1,9 +1,9 @@
-var base=function(dom) {
-	var data=Maggi({
+var base=function(m) {
+	m.data={
 		child:"child-content",
-	});
+	};
 
-	var ui=Maggi({
+	m.ui={
 		visible:true,
 		enabled:false,
 		class:"mui",
@@ -11,7 +11,5 @@ var base=function(dom) {
 		    dom.prepend($('<div>',{text:"prepended"}));
 		    data.child="child-content-modified";
 		}
-	});
-
-	Maggi.UI(dom,data,ui);
+	};
 };

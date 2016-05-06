@@ -30,6 +30,10 @@ body {
 	font-family: 'Open Sans', sans-serif;
 }
 
+h1 {
+	background-color:rgb(36, 37, 42);
+}
+
 #console {
 	height:200px;
 }
@@ -102,14 +106,6 @@ div.button.inactive, div.button.disabled {
 	height:400px;
 }
 
-#content.tabs {
-	box-shadow:0px 5px 10px #aaa;
-	border-radius:6px;
-	overflow:hidden;
-	padding:2px;
-	background: #24252a;
-}
-
 #content.tabs > #_Maggi_UI_TabView_Header > * {
 	font-weight:bold;
 	display: inline-block;
@@ -118,10 +114,7 @@ div.button.inactive, div.button.disabled {
 }
 
 #content.tabs > #_Maggi_UI_TabView_Header > .selected {
-	color:black;
-	background:linear-gradient(#ddd, #eee);
-	border-top-left-radius:5px;
-	border-top-right-radius:5px;
+	color:white;
 }
 
 #content.tabs > #_Maggi_UI_TabView_Header {
@@ -129,9 +122,6 @@ div.button.inactive, div.button.disabled {
 }
 
 #content.tabs > #_Maggi_UI_TabView_Container {
-	background:#eee;
-	border-bottom-left-radius:5px;
-	border-bottom-right-radius:5px;
 	padding:8px;
 }
 
@@ -153,13 +143,6 @@ div.button.inactive, div.button.disabled {
 	border-right:2px solid gray;
 }
 
-
-h1 {
-	background:linear-gradient(#fff, #eee);
-	box-shadow:0px -5px 20px #000;
-	text-shadow: 0px 1px 0px white;
-}
-
 #cart {
 	width: 400px;
 }
@@ -173,10 +156,6 @@ h2 {
 	color:blue;
 }
 
-
-.doc {
-	margin:10px;
-}
 
 .doc	h3 {
 	margin-top:10px;
@@ -239,4 +218,9 @@ h2 {
 
 #mag #items.list > *:hover {
 	text-decoration:underline;
+}
+
+
+.prj {
+	height:600px;
 }

@@ -183,58 +183,70 @@ var doc = function() {
 	}
 
 
-	var projects=Maggi({});
-	var sources=[
-		{key:"base",name:"Base", srcs: ["demos/base.js","demos/my.css"]},
-		{key:"object",name:"Object", srcs: ["demos/object.js","demos/my.css"]},
-		{key:"text",name:"Text", srcs: ["demos/text.js","demos/my.css","ide/sprintf.js"]},
-		{key:"html",name:"HTML", srcs: ["demos/html.js","demos/my.css"]},
-		{key:"function",name:"Function", srcs: ["demos/func.js","demos/my.css"]},
-		{key:"input",name:"Input", srcs: ["demos/input.js","demos/my.css"]},
-		{key:"link",name:"Link", srcs: ["demos/link.js","demos/my.css"]},
-		{key:"checkbox",name:"Checkbox", srcs: ["demos/checkbox.js","demos/my.css"]},
-		{key:"list",name:"List", srcs: ["demos/list.js","demos/my.css"]},
-		{key:"tabs",name:"Tabs", srcs: ["demos/tabs.js","demos/my.css"]},
-		{key:"select",name:"Select", srcs: ["demos/select.js","demos/my.css"]},
-		{key:"demo",name:"Password Calculator", srcs: ["demos/pwcalc.js","demos/pwcalc.css","demos/pwcalc.html","demos/utils.js"]},
-	];
-	var lp=function(idx,v) {
-		var files=["Maggi.js/jquery-2.0.3.js","Maggi.js/Maggi.js","Maggi.js/Maggi.UI.js","Maggi.js/Maggi.UI.css","Maggi.js/Maggi.UI.input.css","Maggi.js/Maggi.UI.select.css"];
-		if (v.srcs) files=v.srcs.concat(files);
-
-		initproject("Thilo Maurer","username@domain",v.name,files,function(project) {
-			projects.add(idx,project);
-			ui.children[v.key].children.democontainer.projectid=idx;
-		});
-	}
-	$.each(sources,function(k,v) {
-		lp(k,v);
-	});
-
-	var d={
-		base:{head:"Base",desc:"Every UI-model, independently of its type, contains the following base properties.",props:baseprop,democontainer:projects},
-		object:{head:"Object",desc:"",props:objprop,democontainer:projects},
-		text:{head:"Text",desc:"",props:textprop,democontainer:projects},
-		html:{head:"HTML",desc:"",props:htmlprop,democontainer:projects},
-		input:{head:"Input",desc:"",props:inputprop,democontainer:projects},
-		function:{head:"Function",desc:"",props:funcprop,democontainer:projects},
-		link:{head:"Link",desc:"",props:linkprop,democontainer:projects},
-		select:{head:"Select",desc:"",props:selectprop,democontainer:projects},
-		checkbox:{head:"Checkbox (SHOULD NAME SWITCH?)",desc:"",props:checkboxprop,democontainer:projects},
-		list:{head:"List",desc:"",props:tabprop,democontainer:projects},
-		tabs:{head:"Tabs",desc:"",props:tabprop,democontainer:projects},
-		demo:{head:"Password Calculator Demo",desc:"This simple example demos a SHA1 Password Calculator.",democontainer:projects}
+	var sources={
+		base:{name:"Base", srcs: ["demos/base.js","demos/my.css"]},
+		object:{name:"Object", srcs: ["demos/object.js","demos/my.css"]},
+		text:{name:"Text", srcs: ["demos/text.js","demos/my.css","ide/sprintf.js"]},
+		html:{name:"HTML", srcs: ["demos/html.js","demos/my.css"]},
+		function:{name:"Function", srcs: ["demos/func.js","demos/my.css"]},
+		input:{name:"Input", srcs: ["demos/input.js","demos/my.css"]},
+		link:{name:"Link", srcs: ["demos/link.js","demos/my.css"]},
+		checkbox:{name:"Checkbox", srcs: ["demos/checkbox.js","demos/my.css"]},
+		list:{name:"List", srcs: ["demos/list.js","demos/my.css"]},
+		tabs:{name:"Tabs", srcs: ["demos/tabs.js","demos/my.css"]},
+		select:{name:"Select", srcs: ["demos/select.js","demos/my.css"]},
+		demo:{name:"Password Calculator", srcs: ["demos/pwcalc.js","demos/pwcalc.css","demos/pwcalc.html","demos/utils.js"]},
 	};
 
-
+	var d={
+		base:{head:"Base",demoprj:null,desc:"Every UI-model, independently of its type, contains the following base properties.",props:baseprop},
+		object:{head:"Object",demoprj:null,desc:"",props:objprop},
+		text:{head:"Text",demoprj:null,desc:"",props:textprop},
+		html:{head:"HTML",demoprj:null,desc:"",props:htmlprop},
+		input:{head:"Input",demoprj:null,desc:"",props:inputprop},
+		function:{head:"Function",demoprj:null,desc:"",props:funcprop},
+		link:{head:"Link",demoprj:null,desc:"",props:linkprop},
+		select:{head:"Select",demoprj:null,desc:"",props:selectprop},
+		checkbox:{head:"Checkbox (SHOULD NAME SWITCH?)",demoprj:null,desc:"",props:checkboxprop},
+		list:{head:"List",demoprj:null,desc:"",props:tabprop},
+		tabs:{head:"Tabs",demoprj:null,desc:"",props:tabprop},
+		demo:{head:"Password Calculator Demo",demoprj:null,desc:"This simple example demos a SHA1 Password Calculator."}
+	};
+	
 	d.intro="<h2>Introduction</h2> <b>Maggi.js</b> is a Javascript framework that enables rapid development of object centric applications and their user-interfaces. The framework consists of two parts: <ul><li>The <b>Maggi.js</b> framework enables binding functions to events of object-properties.<li>The <b>Maggi.UI.js</b> framework is as user-interface framework that leverages the Maggi.js framework to bind to data- and ui-models in order to create and manage user-interfaces.</ul>";
 	d.mag="<h2>Maggi.js</h2> Maggi.js is a Javascript framework that enables rapid development of object centric applications, by \"maggically\" adding bubbling property-events to any object. Binding functions to these events allows for a triggering of dependent updates.<BR>This is a demo for an object <I>data</I> that manages a shopping-cart:<BR>";
 	d.magui='<h2>Maggi.UI.js</h2> Maggi.UI.js is a Javascript UI framework that enables rapid development of user-interfaces for object centric applications. It reliefs you from the burden of writing and managing the DOM tree of your web-application. Everything is managed under the hood, controlled though simple objects that define the UI. You don\'t need to see any HTML any longer. Maggi.UI steps beyond the MVC (model, view, controller) software architecture pattern: It drives applications using the MM (model, model) pattern: Maggi.UI creates (and updates) views and controllers fully automatically from two models: the data-model, an object that contains the data that is to be displayed (or not), and a second ui-model, an object that defines the layout and functionality of the UI for the data to be displayed. <BR><BR>          A UI-model may contains a number of properties that define the functionality of the UI element.<BR>             There are 3 ways to specify a UI-model:              <ol>                    <li>                    Direct specification using a Javascipt object variable<BR>                      <div class="preformatted">ui={<BR>  prop1:value1,<BR>  prop2:value2,<BR>  ...<BR>}</div><BR>                   <li>                    If the UI-Model is a function, the function\'s return value will be used as UI model.                   <div class="preformatted">ui=function() { return {prop1:value1,prop2:value2,...}; }</div>          <li>                    Specifing the UI-Model by a string is equivalent to using a object with the type property set to that string:                      <div class="preformatted">ui=string<BR>ui={type:string}</div>           </ol>           A specification of the predefined UI-models follows.  ';
 
 	d=Maggi(d);
-	
-	var propui={ type:"list", listtype:"ordered", childdefault:propui};
 
+	var loaded=0;	
+	$.each(d,function(k,v) {
+		var x=sources[k];
+		if (x==null) return;
+		var files=["ide/jquery.js","ide/Maggi.js","ide/Maggi.UI.js","ide/Maggi.UI.css","ide/Maggi.UI.input.css","ide/Maggi.UI.select.css"];
+		files=x.srcs.concat(files);
+
+		initproject(
+			{name:"<nobody>",username:"username",email:"username@domain.com"},
+			{name:x.name},files,
+			function(project) {
+				project.view.panes.add(0,{fileid:1,mode:"edit"});
+				project.view.panes.add(1,{fileid:2,mode:"edit"});
+				project.view.panes.add(2,{fileid:1,mode:"preview"});
+				project.view.panes.order=[0,1,2];
+				var rev=project.revisions[0];
+		    		projectfuncs(project).branch(rev)();
+				v.demoprj=project;
+				loaded+=1;
+				if (loaded==Object.keys(sources).length)
+					start();
+			}
+		);
+	});
+
+
+	
+	var propui={ type:"list", listtype:"ordered", childdefault:propui}
 	var maketypeui = function() {
 		return {
 			type:"object",
@@ -243,18 +255,21 @@ var doc = function() {
 					type:"format",
 					format:"Properties of %s"
 				},
+				demoprj:prjui(),
 				desc:{type:"text"},
 				props:propui,
-				democontainer: {type:"user", user:ide, panesonly:true,projectid:null}
 			},
-			order:["head","desc","democontainer","props"],
+			builder(dom,data,ui) {
+				ui.children.demoprj.mode="active";
+			},
+			order:["head","demoprj","desc","props"],
 			class:"typeui"
 		};
 	};
 
 	var ui=Maggi({
 		type:"tabs",
-		headerui:{type:"object"},
+		headerui:{type:"object",childdefault:"text"},
 		headerdata:{
 			intro:"Introduction",
 			mag:"Maggi.js",
@@ -369,6 +384,8 @@ var doc = function() {
 	});
 
 	ui.children.mag=MaggiDemoUI;
-	
-	Maggi.UI($('#content'),d,ui);
+
+	var start=function() {	
+		Maggi.UI($('#content'),d,ui);
+	}
 }

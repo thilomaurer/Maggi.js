@@ -1,6 +1,11 @@
-var text=function(dom) {
+var text=function(m) {
+	
+	m.data={
+		pi:3.1415926,
+		ints:[0,2,3]
+	};
 
-	var ui=Maggi({
+	m.ui={
 		children:{
 			pi:{
 				type:"text",
@@ -13,12 +18,6 @@ var text=function(dom) {
 
 		},
 		class:"mui"
-	});
+	};
 
-	var data=Maggi({
-		pi:3.1415926,
-		ints:[0,2,3]
-	});
-
-	Maggi.UI(dom,data,ui);
 };

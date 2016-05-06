@@ -1,5 +1,5 @@
 .pwcalc > * {
-    margin:10px;
+    margin:5px;
 }
 
 #password {
@@ -7,9 +7,5 @@
 	font-family:monospace;
 	color:lightgreen;
 	font-size:20px;
-}
-
-#len {
-    display:inline-block;
 }
 
