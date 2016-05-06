@@ -258,17 +258,18 @@ Maggi.db={};
 
 Maggi.db.load=function(dbname,bindfs) {
 	var db;
-	var basename=__dirname + "/" + dbname;
+	var dirname=process.cwd();
+	var basename=dirname + "/" + Maggi.db.server.path + "/" + dbname;
 	var dbjson=basename+".json";
 	var dbdir=basename + ".fs/";
 	var enc="utf8";
 	try {
 		db=fs.readFileSync(dbjson, enc);
 	} catch(e) {
-	    console.log("Initializing new Maggi.db '"+dbname+"'");
+	    console.log("Initializing new db '"+dbname+"' from " + dbjson);
 	    db='{"data":{},"rev":0}';
 	}
-	console.log("Loading Maggi.db '"+dbname+"'");
+	console.log("Loading db '"+dbname+"' from " + dbjson);
 	try {
 		db=JSON.parse(db);
 	} catch(e) {
@@ -303,12 +304,12 @@ Maggi.db.serve = function(socket,dbname,db) {
 Maggi.db.server=function(io,preload) {
     Maggi.db.sync.log=true;
     var dbs={};
-    if (preload!=null) dbs[preload]=Maggi.db.load(Maggi.db.server.path+"/"+preload,false);
+    if (preload!=null) dbs[preload]=Maggi.db.load(preload,false);
     io.sockets.on('connection', function(socket) {
     	console.log(socket.id,"connected");
     	socket.on("Maggi.db",function(dbname) {
             if (dbs[dbname]===undefined) 
-                dbs[dbname]=Maggi.db.load(Maggi.db.server.path+"/"+dbname,false);
+                dbs[dbname]=Maggi.db.load(dbname,false);
         	Maggi.db.serve(socket,dbname,dbs[dbname]);
     	});
     });

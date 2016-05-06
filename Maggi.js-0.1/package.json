@@ -1,6 +1,6 @@
 {
   "name": "Maggi.js",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Allows for binding to bubbling property-events",
   "main": "Maggi.js",
   "scripts": {
@@ -11,9 +11,16 @@
   },
   "license": "Closed",
   "readme": "ERROR: No README data found!",
-  "_id": "Maggi.js@0.0.1",
+  "_id": "Maggi.js@0.1.0",
   "dist": {
     "shasum": "0fbd784d03308e95b481f1c1c7aebeec09885fd6"
   },
-  "_from": "../Maggi.js"
+  "_from": "../Maggi.js",
+  "bugs": {
+    "url": "https://github.com/thilomaurer/Maggi.js/issues"
+  },
+  "dependencies": {
+    "jquery": "~2.2.3",
+    "mkdirp": "~0.5.1"
+  }
 }

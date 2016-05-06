@@ -186,7 +186,7 @@ var doc = function() {
 	var sources={
 		base:{name:"Base", srcs: ["api/demos/base.js","api/demos/my.css"]},
 		object:{name:"Object", srcs: ["api/demos/object.js","api/demos/my.css"]},
-		text:{name:"Text", srcs: ["api/demos/text.js","api/demos/my.css","ide/sprintf.js"]},
+		text:{name:"Text", srcs: ["api/demos/text.js","api/demos/my.css","ide/Maggi.js/sprintf.js"]},
 		html:{name:"HTML", srcs: ["api/demos/html.js","api/demos/my.css"]},
 		function:{name:"Function", srcs: ["api/demos/func.js","api/demos/my.css"]},
 		input:{name:"Input", srcs: ["api/demos/input.js","api/demos/my.css"]},
@@ -223,7 +223,7 @@ var doc = function() {
 	$.each(d,function(k,v) {
 		var x=sources[k];
 		if (x==null) return;
-		var files=["ide/jquery.js","ide/Maggi.js","ide/Maggi.UI.js","ide/Maggi.UI.css","ide/Maggi.UI.input.css","ide/Maggi.UI.select.css"];
+		var files=["ide/Maggi.js/jquery.js","ide/Maggi.js/Maggi.js","ide/Maggi.js/Maggi.UI.js","ide/Maggi.js/Maggi.UI.css","ide/Maggi.js/Maggi.UI.input.css","ide/Maggi.js/Maggi.UI.select.css"];
 		files=x.srcs.concat(files);
 
 		initproject(
