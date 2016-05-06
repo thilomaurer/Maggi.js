@@ -184,18 +184,18 @@ var doc = function() {
 
 
 	var sources={
-		base:{name:"Base", srcs: ["demos/base.js","demos/my.css"]},
-		object:{name:"Object", srcs: ["demos/object.js","demos/my.css"]},
-		text:{name:"Text", srcs: ["demos/text.js","demos/my.css","ide/sprintf.js"]},
-		html:{name:"HTML", srcs: ["demos/html.js","demos/my.css"]},
-		function:{name:"Function", srcs: ["demos/func.js","demos/my.css"]},
-		input:{name:"Input", srcs: ["demos/input.js","demos/my.css"]},
-		link:{name:"Link", srcs: ["demos/link.js","demos/my.css"]},
-		checkbox:{name:"Checkbox", srcs: ["demos/checkbox.js","demos/my.css"]},
-		list:{name:"List", srcs: ["demos/list.js","demos/my.css"]},
-		tabs:{name:"Tabs", srcs: ["demos/tabs.js","demos/my.css"]},
-		select:{name:"Select", srcs: ["demos/select.js","demos/my.css"]},
-		demo:{name:"Password Calculator", srcs: ["demos/pwcalc.js","demos/pwcalc.css","demos/pwcalc.html","demos/utils.js"]},
+		base:{name:"Base", srcs: ["api/demos/base.js","api/demos/my.css"]},
+		object:{name:"Object", srcs: ["api/demos/object.js","api/demos/my.css"]},
+		text:{name:"Text", srcs: ["api/demos/text.js","api/demos/my.css","ide/sprintf.js"]},
+		html:{name:"HTML", srcs: ["api/demos/html.js","api/demos/my.css"]},
+		function:{name:"Function", srcs: ["api/demos/func.js","api/demos/my.css"]},
+		input:{name:"Input", srcs: ["api/demos/input.js","api/demos/my.css"]},
+		link:{name:"Link", srcs: ["api/demos/link.js","api/demos/my.css"]},
+		checkbox:{name:"Checkbox", srcs: ["api/demos/checkbox.js","api/demos/my.css"]},
+		list:{name:"List", srcs: ["api/demos/list.js","api/demos/my.css"]},
+		tabs:{name:"Tabs", srcs: ["api/demos/tabs.js","api/demos/my.css"]},
+		select:{name:"Select", srcs: ["api/demos/select.js","api/demos/my.css"]},
+		demo:{name:"Password Calculator", srcs: ["api/demos/pwcalc.js","api/demos/pwcalc.css","api/demos/pwcalc.html","api/demos/utils.js"]},
 	};
 
 	var d={
