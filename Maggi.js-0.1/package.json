@@ -1,7 +1,7 @@
 {
   "name": "Maggi.js",
   "version": "0.1.0",
-  "description": "Allows for binding to bubbling property-events",
+  "description": "rapid development of modern web applications using an object-centric client-server model",
   "main": "Maggi.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,18 +9,23 @@
   "author": {
     "name": "Thilo Maurer"
   },
-  "license": "Closed",
-  "readme": "ERROR: No README data found!",
-  "_id": "Maggi.js@0.1.0",
-  "dist": {
-    "shasum": "0fbd784d03308e95b481f1c1c7aebeec09885fd6"
+  "license": {
+    "type": "AGPL-3.0",
+    "url": "http://www.gnu.org/licenses/agpl-3.0.html"
   },
-  "_from": "../Maggi.js",
   "bugs": {
     "url": "https://github.com/thilomaurer/Maggi.js/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thilomaurer/Maggi.js.git"
   },
   "dependencies": {
     "jquery": "~2.2.3",
     "mkdirp": "~0.5.1"
-  }
+  },
+  "readme": "Maggi.js\n========\n\nMaggi.js is a Javascript framework that enables rapid development of modern web applications using an object-centric client-server model.\n\nIt consits of the following parts:\n\n* Maggi.js, an extension to the javascript object model \\\"maggically\\\" adding bubbling property-events. Binding functions to these events allows, e.g., for triggering for dependent updates.\n* Maggi.db.js, a client-server infrastructure \\\"maggically\\\" syncing objects live on multiple clients persistantly with a cloud-server.\n* Maggi.UI.js, a model-model framework for \\\"maggically\\\" generating responsive web-client user-interfaces from a data model and a user-interface model.\n\n## Installation\n\n  npm install Maggi.js --save\n",
+  "readmeFilename": "README.md",
+  "_id": "Maggi.js@0.1.0",
+  "_from": "Maggi.js@"
 }
