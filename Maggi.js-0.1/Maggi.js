@@ -254,7 +254,7 @@ Maggi.apply = function(data,d) {
 	}
 };
 
-Maggi.db={};
+Maggi.db=function() { return Maggi.db.client.apply( this, arguments ); };
 
 Maggi.db.load=function(dbname,bindfs) {
 	var db;
@@ -281,6 +281,9 @@ Maggi.db.load=function(dbname,bindfs) {
 	db.bind("set","rev",function() {
 		writefile(dbjson, stringify, enc);
 	});
+	db.data.bind(["set","add","remove"],function() {
+		db.rev+=1;
+	});
 
 	var saveFS=function(k,v) {
 		if (v instanceof Object) {
@@ -297,27 +300,26 @@ Maggi.db.load=function(dbname,bindfs) {
 	return db;
 };
 
-Maggi.db.serve = function(socket,dbname,db) {
-	Maggi.db.sync(socket,dbname,db,false);
-};
+Maggi.db.ionamespace="/Maggi.db";
 
 Maggi.db.server=function(io,preload) {
-    Maggi.db.sync.log=true;
-    var dbs={};
-    if (preload!=null) dbs[preload]=Maggi.db.load(preload,false);
-    io.sockets.on('connection', function(socket) {
-    	console.log(socket.id,"connected");
-    	socket.on("Maggi.db",function(dbname) {
-            if (dbs[dbname]===undefined) 
-                dbs[dbname]=Maggi.db.load(dbname,false);
-        	Maggi.db.serve(socket,dbname,dbs[dbname]);
-    	});
-    });
-    return dbs;
+	Maggi.db.sync.log=true;
+	var dbs={};
+	if (preload!=null) dbs[preload]=Maggi.db.load(preload,false);
+	io.of(Maggi.db.ionamespace).on('connection', function(socket) {
+		console.log(socket.id,"connected");
+		socket.on("Maggi.db",function(dbname) {
+			if (dbs[dbname]===undefined) 
+				dbs[dbname]=Maggi.db.load(dbname,false);
+			Maggi.db.sync(socket,dbname,dbs[dbname],false);
+		});
+	});
+	return dbs;
 };
+
 Maggi.db.server.path="db";
 
-Maggi.db.sync = function(socket,dbname,db,client,events) {
+Maggi.db.sync = function(socket,dbname,db,client,events,onsync) {
 	var applying=false;
 	var mk="Maggi.db."+dbname;
 	var dshort=function(d) {
@@ -328,13 +330,13 @@ Maggi.db.sync = function(socket,dbname,db,client,events) {
 		return d.rev + " " + d.f + " " + d.e + " " + k + " " + l;
 	};
 	var log=function(key,d) {
-        if (Maggi.db.sync.log) console.log(socket.id,key,mk,dshort(d));
+		if (Maggi.db.sync.log)
+			console.log(socket.id,key,mk,dshort(d));
 	};
 	log({true:"client",false:"serve"}[client]);
 	var emit=function(d) { log("emit",d); socket.emit(mk,d); };
 	var handler=function(k,v,oldv,e) {
 		if (applying) return;
-		db.rev+=1;
 		emit({f:"delta",e:e,k:k,rev:db.rev,v:v});
 	};
 	var apply=function(d) {
@@ -345,7 +347,7 @@ Maggi.db.sync = function(socket,dbname,db,client,events) {
 	};
 	db.data.bind(["set","add","remove"],handler);
 	socket.on(mk, function(d) {
-	    log("recv",d);
+		log("recv",d);
 		if (d.f=="delta") {
 			if (d.rev==db.rev+1) {
 				apply(d);
@@ -357,7 +359,8 @@ Maggi.db.sync = function(socket,dbname,db,client,events) {
 			emit({f:"response",e:"add",k:null,v:db.data,rev:db.rev});
 		if (d.f=="response") { 
 			apply(d);
-			if (events&&events.ready) events.ready();
+			if (onsync) onsync();
+			if (events&&events.ready) events.ready(dbname,db.data);
 		}
 		if (d.f=="error") 
 			if (client&&d.id=="old_rev") emit({f:"request"});
@@ -366,7 +369,7 @@ Maggi.db.sync = function(socket,dbname,db,client,events) {
 	socket.on('disconnect',function() {
 		db.data.unbind(handler);
 		log("disconnected");
-		if (events&&events.disconnect) events.disconnect();
+		if (events&&events.disconnect) events.disconnect(dbname,db.data);
 	});
 	socket.on('error',function(e) {
 		console.warn(socket.id,"error",mk,e);
@@ -374,10 +377,27 @@ Maggi.db.sync = function(socket,dbname,db,client,events) {
 	if (client) emit({f:"request"});
 };
 
-Maggi.db.client = function(socket,dbname,data,events) {
+Maggi.db.client = function(dbname,events,defs) {
+    var add_unset=function(o,def) {
+        for (var k in def) {
+            if (o[k]==null) o.add(k,def[k]);
+            else
+            if (o[k] instanceof Object) add_unset(o[k],def[k]);
+        }
+    };
+
+    var data=Maggi({});
 	var db={data:data,rev:0};
+	db.data.bind(["set","add","remove"],function() {
+		db.rev+=1;
+	});
+	var socket = io(Maggi.db.ionamespace);
 	socket.emit("Maggi.db",dbname);
-	Maggi.db.sync(socket,dbname,db,true,events);
+	var onsync=function() {
+	        add_unset(data,defs);
+	}
+	Maggi.db.sync(socket,dbname,db,true,events,onsync);
+	return data;
 };
 
 if (typeof module !== 'undefined') {
