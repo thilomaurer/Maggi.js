@@ -1,3 +1,5 @@
+/* Maggi.js javascript framework - Thilo Maurer - https://github.com/thilomaurer/Maggi.js - AGPL-3.0 */
+
 :root {
 	--mui-dark-color: hsla(224, 8%, 15%, 1);
 	--mui-gray-color: hsla(224, 8%, 22%, 1);
@@ -132,13 +134,13 @@
 .mui .disabled {
 	color:gray;
 }
-
+/*
 .mui-light .popup > #title,
 .mui .popup > #title {
 	text-align: center;
 	margin: 0px;
-	padding: 5px;
-	background: hsla(224, 8%, 36%, 1);
+	padding: 10px;
+	background: hsla(224, 8%, 40%, 0.5);
 	border-top-left-radius: 7px;
 	border-top-right-radius: 7px;
 }
@@ -155,11 +157,11 @@
 .mui .popup > * {
 	margin:10px;
 }
-
+*/
 
 .mui .popup,
 .mui.popup {
-	background: hsla(224, 8%, 30%, 1); //var(--mui-normal-color);
+	background: hsla(224, 8%, 30%, 1); /*var(--mui-normal-color);*/
 	border-radius:8px;
 	border:1px solid hsla(224, 8%, 15%, 1);
 	box-shadow:0 0 100px black;
@@ -179,8 +181,6 @@
 .mui-light .simplelist,
 .mui-light.tablelist,
 .mui-light .tablelist {
-	margin-left:0px;
-	margin-right:0px;
 	border-top:1px solid gray;
 	border-bottom:1px solid gray;
 	background:hsla(0, 0%, 95%, 1);
@@ -189,8 +189,6 @@
 .mui .simplelist,
 .mui.tablelist,
 .mui .tablelist {
-	margin-left:0px;
-	margin-right:0px;
 	border-top:1px solid hsla(224, 8%, 15%, 1); //var(--mui-dark-color);
 	border-bottom:1px solid hsla(224, 8%, 15%, 1); //var(--mui-dark-color);
 	background:hsla(224, 8%, 36%, 1); //var(--mui-light-color);
@@ -212,10 +210,20 @@
 .mui-light .tablelist > * > * {
 	border-bottom:1px solid gray;
 }
-
+/*
+.mui .simplelist > .cols > *:first-child {
+    border-bottom:1px solid black;
+} 
+*/
 .mui .simplelist > *,
 .mui-light .simplelist > * {
-	padding:5px;
+    margin-left: 15px;
+	padding:5px 10px 5px 0;
+}
+ 
+.mui .simplelist > .cols > *:first-child,
+.mui-light .simplelist > .cols > *:first-child {
+    margin-left:0;
 }
 
 .mui-light .simplelist > *:last-child,
@@ -235,16 +243,20 @@
 	border-bottom:1px solid hsla(224, 8%, 36%, 1);
 }
 
+.mui-light .selectable.selected,
+.mui .selectable.selected,
 .mui-light .simplelist.selectable > .selected,
 .mui .simplelist.selectable > .selected,
 .mui-light.tablelist.selectable > .selected,
 .mui-light .tablelist.selectable > .selected,
 .mui.tablelist.selectable > .selected,
 .mui .tablelist.selectable > .selected {
-	background: hsla(200, 87%, 50%, 1);
+	background: hsla(200, 87%, 50%, .5);
 	color:inherit;
 }
 
+.mui-light .selectable.selected:hover,
+.mui .selectable.selected:hover,
 .mui-light .simplelist.selectable > .selected:hover,
 .mui .simplelist.selectable > .selected:hover,
 .mui-light.tablelist.selectable > .selected:hover,
@@ -255,11 +267,55 @@
 	background:#29a1d3; 
 }
 
+.mui .selectable:hover,
 .mui .simplelist.selectable > *:hover,
 .mui.tablelist.selectable > *:hover,
 .mui .tablelist.selectable > *:hover{
 	background:hsla(224, 8%, 50%, 1);
 }
+
+/*
+.mui .selectable {
+    position: relative;
+
+}
+
+.mui .selectable.selected:before {
+    content: "";
+    position: absolute;
+    left: -15px;
+    right: 0;
+    background: hsla(200, 87%, 50%, .5);
+    display: block;
+    top: 0;
+    bottom: 0;
+}
+
+.mui .selectable:hover:after {
+    content: "";
+    position: absolute;
+    left: -15px;
+    right: 0;
+    background: hsla(0,100%,100%,0.3);
+    display: block;
+    top: 0;
+    bottom: 0;
+}
+
+.mui .selectable.selected:hover:after {
+    content: "";
+    position: absolute;
+    left: -15px;
+    right: 0;
+    background: hsla(0,100%,100%,0.5);
+    display: block;
+    top: 0;
+    bottom: 0;
+}
+*/
+
+.mui-light .selectable.disabled:hover,
+.mui .selectable.disabled:hover,
 .mui-light .simplelist.selectable > *.disabled:hover,
 .mui-light .tablelist.selectable > *.disabled:hover,
 .mui-light.tablelist.selectable > *.disabled:hover,
@@ -269,6 +325,7 @@
 	background:inherit;
 }
 
+.mui-light .selectable:hover,
 .mui-light .simplelist.selectable > *:hover,
 .mui-light .tablelist.selectable > *:hover,
 .mui-light.tablelist.selectable > *:hover{
@@ -277,7 +334,7 @@
 
 .mui .table.tablelist > .tablelist > * {
 	border:0;
-	padding:0px 5px 0px 5px;
+	padding:0 5px 0px 5px;
 	
 }
 .mui .table.tablelist > .tablelist > *:first-child{
@@ -287,6 +344,46 @@
 .mui .table.tablelist > .tablelist > *:last-child{
 	padding-right:10px;
 }
+
+/* SETTINGS */
+
+.mui .settings > * {
+    margin:15px;
+}
+
+.mui .settings > .labeledlist {
+    margin:0;
+}
+
+
+.mui .settings > .listlabel + .simplelist {
+    margin-top:0;
+}
+
+.mui .settings > .listlabel {
+    margin-bottom: 0;
+}
+
+.mui .simplelist > .cols {
+    align-items: baseline;
+}
+/*
+.mui .simplelist > .children > * {
+    flex:1 1 auto;
+}
+
+.mui .simplelist > .children > *:first-child {
+    flex: 0 1 auto;
+    margin-right: 10px;
+}
+*/
+.mui-light .settings .simplelist,
+.mui .settings .simplelist {
+	margin-left:0;
+	margin-right:0;
+}
+
+
 
 /* CHECKBOX */
 
@@ -300,12 +397,20 @@
 	display:none;
 }
 
-.checkbox.toggle label{
-	flex: 1 0 auto
+.checkbox.toggle label {
+	flex: 1 0 auto;
+}
+	
+.checkbox.toggle label#label:first-child {
+    margin-right: 10px;
 }
 
-.checkbox.toggle label#toggle{
-	flex: 0 0 auto
+.checkbox.toggle label#label:last-child {
+    margin-left: 10px;
+}
+
+.checkbox.toggle label#toggle {
+	flex: 0 0 auto;
 }
 
 .checkbox.toggle input + #toggle {
@@ -366,8 +471,8 @@
 	left: 21px;
 }
 
-.mui.tabs > #_Maggi_UI_TabView_Header > *,
-.mui .tabs > #_Maggi_UI_TabView_Header > * {
+.mui.tabs > #selector > *,
+.mui .tabs > #selector > * {
 	display: inline-block;
 	padding:5px;
 	padding-left:10px;
@@ -377,30 +482,44 @@
 	color:#454954
 }
 
-.mui.tabs > #_Maggi_UI_TabView_Header > *:hover,
-.mui .tabs > #_Maggi_UI_TabView_Header > *:hover {
+.mui.tabs > #selector > *:hover,
+.mui .tabs > #selector > *:hover {
 	color:white;
 }
 
-.mui.tabs > #_Maggi_UI_TabView_Header > .selected,
-.mui .tabs > #_Maggi_UI_TabView_Header > .selected {
+.mui.tabs > #selector > .selected,
+.mui .tabs > #selector > .selected {
 	background: #454954;
 	color:white;
 }
 
-.mui.tabs > #_Maggi_UI_TabView_Header,
-.mui .tabs > #_Maggi_UI_TabView_Header {
+.mui.tabs > #selector,
+.mui .tabs > #selector {
 	background: #24252a;
 	border-top-left-radius:5px;
 	border-top-right-radius:5px;
 }
 
-.tabs > #_Maggi_UI_TabView_Container > * {
-	display: none;
+.tabs > #container > * {
 	padding:5px;
 }
 
-.tabs > #_Maggi_UI_TabView_Container > .selected {
+.childswitcher {
+    display: flex;
+    flex-flow: column;
+}
+
+.childswitcher > #selector {
+	margin:5px;
+	flex: 0 0 auto;
+    align-self: center;
+}
+
+.childswitcher > #container > * {
+	display: none;
+}
+
+.childswitcher > #container > .selected {
 	display: block;
 }
 
@@ -451,7 +570,7 @@
 }
 .mui .button.green,
 .mui-light .button.green {
-	background: hsla(100, 87%, 50%, 1);
+	background: hsla(100, 87%, 40%, 1);
 }
 .mui .button.blue,
 .mui-light .button.blue {
@@ -485,5 +604,193 @@
 
 .mui .hoverhighlight:hover {
 	background-color: hsla(224, 8%, 42%, 1);
+}
+
+/* INPUT */
+.mui input,
+.mui-light input {
+	font-size:18px;
+	font-family: 'Open Sans', sans-serif;
+}
+
+.mui .input,
+.mui-light .input {
+	border: 1px solid transparent;
+	border-radius: 5px;
+	padding:5px;
+	align-items:baseline;
+}
+.mui .input {
+	background: hsla(224, 8%, 15%, 0.5);
+	color: white;
+}
+.mui-light .input {
+	background: hsla(0, 0%, 85%, 0.5);
+	color: black;
+}
+
+.mui .input input::-webkit-input-placeholder {
+	color: hsla(0, 0%, 100%, 0.5);
+}
+
+.mui-light .input input::-webkit-input-placeholder {
+	color: hsla(0, 0%, 0%, 0.5);
+}
+
+.mui .input > #postfix,
+.mui-light .input > #postfix,
+.mui .input > #prefix,
+.mui-light .input > #prefix {
+    margin-left: 5px;
+    margin-right: 5px;
+	flex:0 0 auto;
+}
+ 
+.mui .input input,
+.mui-light .input input {
+	width: 100%;
+	background: transparent;
+	color: inherit;
+	outline: none;
+	border: 0;
+}
+
+.mui .input:hover,
+.mui-light .input:hover {
+	border: 1px solid #29a1d3;
+}
+
+.mui .input.focused,
+.mui-light .input.focused {
+	border: 1px solid #29a1d3;
+	box-shadow: 0 0 0 1px #29a1d3;
+}
+
+.mui .input.first,
+.mui-light .input.first {
+	margin-bottom:0px;
+	border-bottom-left-radius:0px;
+	border-bottom-right-radius:0px;
+}
+
+.mui .input + .input,
+.mui-light .input + .input {
+	margin-top:1px;
+	border-top-left-radius:0px;
+	border-top-right-radius:0px;
+}
+
+/* SELECT */
+.mui .select,
+.mui-light .select {
+	display:flex;
+	flex-wrap:wrap;
+	border-radius:5px;
+	vertical-align:bottom;
+	overflow:hidden;
+}
+
+.mui .select {
+	border:1px solid white;
+}
+
+.mui-light .select {
+	border:1px solid black;
+}
+
+.mui .select input,
+.mui-light .select input {
+	display:none;
+}
+
+.mui .select label,
+.mui-light .select label {
+	text-align:center;
+	flex: 1 0 auto;
+	padding:3px;
+	overflow:hidden;
+}
+
+.mui-light .select label,
+.mui .select label {
+    padding:5px 10px 5px 10px;
+}
+
+.mui .select label {
+	color: white;
+}
+
+.mui-light .select label {
+	color: black;
+}
+
+.mui .select label:hover {
+	background:hsla(224, 8%, 42%, 1);
+}
+
+.mui .select input:checked + label {
+	background:white;
+	color:black;
+}
+
+.mui-light .select label:hover {
+	background:#aaa;
+}
+
+.mui-light .select input:checked + label {
+	background:black;
+	color:white;
+}
+.mui .select.fillhorizontal,
+.mui-light .select.fillhorizontal {
+	display: flex;
+}
+
+
+/* OVERLAY */
+.overlayed {
+	-webkit-filter: blur(10px);
+}
+
+.allanimate {
+	transition: all 200ms ease;
+}
+
+.overlay {
+	top:0;
+	left:0;
+	bottom:0;
+	right:0;
+	background:rgba(0,0,0,0.5);
+	position:absolute;
+	
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.overlay > .popup {
+	position:initial;
+	overflow:auto;
+}
+.debug:hover #inspector {
+    display:block;
+}
+
+.debug #inspector {
+    adisplay:none;
+    position:absolute;
+    background:black;
+}
+
+.debug .member {
+    margin-left:20px;
+}
+.debug .member > *{
+    display:inline;
+}
+
+.debug #label:after{
+    content:": ";
 }
 

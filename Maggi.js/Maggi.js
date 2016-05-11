@@ -1,30 +1,51 @@
-/*!
- * Maggi.js JavaScript Library 
- * https://home.thilomaurer.de/Maggi.js
- *
- * Copyright (C) 2014-05-22 Thilo Maurer
- * All Rights Reserved.
- * 
- */
+/* Maggi.js javascript framework - Thilo Maurer - https://github.com/thilomaurer/Maggi.js - AGPL-3.0 */
 
 var Maggi=function(other) {
-    var d={},p={},events={};
+	var d={},p={},events={};
 
-    if (!(other instanceof Date)) if (!(other instanceof Function)) if (other instanceof Object) if (other._hasMaggi) return other;
-    //if (other instanceof jQuery) return other;
+	if (!(other instanceof Date)) if (!(other instanceof Function)) if (other instanceof Object) if (other._hasMaggi) return other;
+	//if (other instanceof jQuery) return other;
+	
+	var indexOf = function(keys,key) {
+		if (key==null) return -1;
+		var l=keys.length;
+		for (var i=0;i<l;i++) {
+		var k=keys[i];
+		if (k==key) return i;
+		if (k.length==key.length) { // "<="" since k needs to be no full match of Key
+			var found=true;
+			for (var j=0;j<k.length;j++)
+				found&=(k[j]==key[j])||k[j]=="*";
+				if (found)  return i;
+			}
+		}
+		return -1;
+	};
 
 	var trigger = function(e,key,value,oldv) {
 		var fns=events[e];
 		if (fns==null) return;
-		//since fns may be changed during a trigger, may result in infinite loop
-		//BUG: take fixed length for now
-		//TODO: trigger by copy of fns
+		//trigger by copy of fns, since fns may be changed during a trigger, may result in infinite loop
+		fns=fns.slice();
 		var fnsl=fns.length; 
-		if (Maggi.log==true) 
-			console.log("Maggi.log: trigger "+fnsl+" "+e+" for "+JSON.stringify(key));
+		if (Maggi.log==true) {
+			console.log("Maggi.js:",fnsl,"triggers of "+e+" for ",key,d);
+			if (Maggi.logtrace==true) {
+    			var stacktrace=function() {
+    				var s=(new Error()).stack.split("\n");
+    				return s.splice(2).map(function(s) {
+    						var fields=s.match(/ at (.*) \((.*)\)/);
+    						if (fields==null) fields=s.match(/ at ()(.*)/);
+    						return {fn:fields[1],loc:fields[2]};
+    					});
+    			};
+    			console.log(stacktrace());
+			}
+		}
 		for (var i=0; i<fnsl; i++) {
 			var f=fns[i];
-			if (!f.keys||(f.keys.indexOf(key)>-1)) {
+			if (Maggi.trace===true) console.log("Maggi.js:",f.keys,key);
+			if (!f.keys||(indexOf(f.keys,key)>-1)) {
 				f.fn(key,value,oldv,e);
 			}
 		}
@@ -32,6 +53,7 @@ var Maggi=function(other) {
 
 	func = {
 		add: function(key,value) {
+			if (key==null) return console.warn("Maggi.js: ignoring add of member (null)");
 			var get = function() {
 					var v=d[key];
 					trigger("get",key,v);
@@ -90,6 +112,7 @@ var Maggi=function(other) {
 			}
 		},
 		remove: function(key) {
+			if (key==null) return console.warn("Maggi.js: ignoring remove of member (null)");
 			if (!d.hasOwnProperty(key)) return;
 			var value=d[key];
 			delete p[key];
@@ -103,12 +126,15 @@ var Maggi=function(other) {
 			var n=arg.length;
 			var makeArray = function(idx) {
 				var a=arg[idx];
-				if (a instanceof Array) return a;
 				return [a];
 			};
 			if (n>=3) {
-				ts=makeArray(0);	
-				ks=makeArray(1);	
+				ts=makeArray(0);
+				if ((arg[1] instanceof Array)&&(arg[1][0] instanceof Array))
+				{
+				    ks=arg[1];
+				} else
+				ks=makeArray(1);
 				fn=makeArray(2);	
 			}
 			if (n==2) {
@@ -207,8 +233,14 @@ var Maggi=function(other) {
 	});
 	myeach(other,p.add);
 
+	Object.defineProperty(p, "__uniqueid", {
+		value: Maggi.ID++,
+		enumerable: false,
+		writable: false
+	});
 	return p;
 };
+Maggi.ID=0;
 
 Maggi.merge = function(obj1, obj2) {
 	for (var p in obj2) {
@@ -281,9 +313,12 @@ Maggi.db.load=function(dbname,bindfs) {
 	db.bind("set","rev",function() {
 		writefile(dbjson, stringify, enc);
 	});
-	db.data.bind(["set","add","remove"],function() {
+	var handler=function() {
 		db.rev+=1;
-	});
+	};
+	db.data.bind("set",handler);
+	db.data.bind("add",handler);
+	db.data.bind("remove",handler);
 
 	var saveFS=function(k,v) {
 		if (v instanceof Object) {
@@ -345,7 +380,9 @@ Maggi.db.sync = function(socket,dbname,db,client,events,onsync) {
 		db.rev=d.rev;
 		applying=false; 
 	};
-	db.data.bind(["set","add","remove"],handler);
+	db.data.bind("set",handler);
+	db.data.bind("add",handler);
+	db.data.bind("remove",handler);
 	socket.on(mk, function(d) {
 		log("recv",d);
 		if (d.f=="delta") {
@@ -388,9 +425,12 @@ Maggi.db.client = function(dbname,events,defs) {
 
     var data=Maggi({});
 	var db={data:data,rev:0};
-	db.data.bind(["set","add","remove"],function() {
+	var handler=function() {
 		db.rev+=1;
-	});
+	};
+	db.data.bind("set",handler);
+	db.data.bind("add",handler);
+	db.data.bind("remove",handler);
 	var socket = io(Maggi.db.ionamespace);
 	socket.emit("Maggi.db",dbname);
 	var onsync=function() {
