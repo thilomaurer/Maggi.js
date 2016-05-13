@@ -1,4 +1,9 @@
-/* Maggi.js javascript framework - Thilo Maurer - https://github.com/thilomaurer/Maggi.js - AGPL-3.0 */
+/*!
+ * Maggi.js JavaScript framework
+ * Thilo Maurer
+ * https://github.com/thilomaurer/Maggi.js
+ * LAGPL-3.0 - https://github.com/thilomaurer/Maggi.js/blob/master/LICENSE
+ */
 
 Maggi.id=0;
 
@@ -406,7 +411,7 @@ Maggi.UI.parts.visible={
 Maggi.UI.parts.text={
     name:"text",
     partclass:"text",
-    members:{format:null,strings:null,mod:null},
+    members:{format:null,map:null},
     parts:"common",
     bindings:{
         e:["set","data","update"],
@@ -416,23 +421,19 @@ Maggi.UI.parts.text={
     update: function(m) {
         var s="(null)";
         var d=m.data;
-        if (m.ui.mod) d=m.ui.mod(d);
+        var map=m.ui.map;
+        var fmt=m.ui.format;
+        if (map) {
+            if (map instanceof Function)
+                d=map(d);
+            else
+                d=map[d];
+        }
         if (d!=null) { 
-        	if (m.ui.format!=null) {
-        		if (d instanceof Date)
-        			d=d.toString();
-        		if (d instanceof Object){
-        			d=Object.keys(d).map(function (key) {return d[key]});
-        		}
-        		else {
-        			d=[d];
-        		}
-        		s=vsprintf(m.ui.format,d);
-        	}
-        	else {
-        	    if (m.ui.strings!=null) d=m.ui.strings[d];
-        		s=d.toString();
-        	}
+            if (fmt!=null)
+                s=sprintf(fmt,d);
+            else
+                s=d.toString();
         }
         m.dom.text(s);
     }

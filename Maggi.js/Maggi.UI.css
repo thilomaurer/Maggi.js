@@ -1,4 +1,9 @@
-/* Maggi.js javascript framework - Thilo Maurer - https://github.com/thilomaurer/Maggi.js - AGPL-3.0 */
+/*!
+ * Maggi.js JavaScript framework
+ * Thilo Maurer
+ * https://github.com/thilomaurer/Maggi.js
+ * LAGPL-3.0 - https://github.com/thilomaurer/Maggi.js/blob/master/LICENSE
+ */
 
 :root {
 	--mui-dark-color: hsla(224, 8%, 15%, 1);
