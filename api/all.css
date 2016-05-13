@@ -107,7 +107,6 @@ div.button.inactive, div.button.disabled {
 }
 
 #content.tabs > #_Maggi_UI_TabView_Header > * {
-	font-weight:bold;
 	display: inline-block;
 	padding:8px;
 	color:#888;
@@ -118,6 +117,7 @@ div.button.inactive, div.button.disabled {
 }
 
 #content.tabs > #_Maggi_UI_TabView_Header {
+        text-align: center;
 	display:block;
 }
 

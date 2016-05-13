@@ -223,7 +223,7 @@ var doc = function() {
 	$.each(d,function(k,v) {
 		var x=sources[k];
 		if (x==null) return;
-		var files=["ide/Maggi.js/jquery.js","ide/Maggi.js/Maggi.js","ide/Maggi.js/Maggi.UI.js","ide/Maggi.js/Maggi.UI.css","ide/Maggi.js/Maggi.UI.input.css","ide/Maggi.js/Maggi.UI.select.css"];
+		var files=["ide/jquery.js","ide/Maggi.js/Maggi.js","ide/Maggi.js/Maggi.UI.js","ide/Maggi.js/Maggi.UI.css","ide/Maggi.js/Maggi.UI.input.css","ide/Maggi.js/Maggi.UI.select.css"];
 		files=x.srcs.concat(files);
 
 		initproject(
