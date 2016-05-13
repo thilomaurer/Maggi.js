@@ -1,19 +1,13 @@
-var input=function(dom) {
+var input=function(m,dom) {
+	$("html").addClass("mui");
 	
-	var ui=Maggi({
-		children:{
-			username:{
-				type:"input",
-				placeholder:"name@domain",
-				kind:"email",
-				autosize:true,
-				onReturnKey:function(v) { alert(v); }
-			}
-		},
-		class:"mui"
-	});
+	m.data="";
+	m.ui={
+		parts:"input",
+		placeholder:"name@domain",
+		kind:"email",
+		autosize:false,
+		onReturnKey:function(v) { alert(v); }
+	};
 
-	var data=Maggi({username:""});
-
-	Maggi.UI(dom,data,ui);
 };

@@ -196,6 +196,7 @@ var doc = function() {
 		tabs:{name:"Tabs", srcs: ["api/demos/tabs.js","api/demos/my.css"]},
 		select:{name:"Select", srcs: ["api/demos/select.js","api/demos/my.css"]},
 		demo:{name:"Password Calculator", srcs: ["api/demos/pwcalc.js","api/demos/pwcalc.css","api/demos/pwcalc.html","api/demos/utils.js"]},
+		part:{name:"Part", srcs: ["api/demos/partui.js","api/demos/partui.css"]},
 	};
 
 	var d={
@@ -210,7 +211,8 @@ var doc = function() {
 		checkbox:{head:"Checkbox (SHOULD NAME SWITCH?)",demoprj:null,desc:"",props:checkboxprop},
 		list:{head:"List",demoprj:null,desc:"",props:tabprop},
 		tabs:{head:"Tabs",demoprj:null,desc:"",props:tabprop},
-		demo:{head:"Password Calculator Demo",demoprj:null,desc:"This simple example demos a SHA1 Password Calculator."}
+		demo:{head:"Password Calculator Demo",demoprj:null,desc:"This simple example demos a SHA1 Password Calculator."},
+		part:{head:"Part Description",demoprj:null,desc:"DEVEL"}
 	};
 	
 	d.intro="<h2>Introduction</h2> <b>Maggi.js</b> is a Javascript framework that enables rapid development of object centric applications and their user-interfaces. The framework consists of two parts: <ul><li>The <b>Maggi.js</b> framework enables binding functions to events of object-properties.<li>The <b>Maggi.UI.js</b> framework is as user-interface framework that leverages the Maggi.js framework to bind to data- and ui-models in order to create and manage user-interfaces.</ul>";
@@ -223,7 +225,7 @@ var doc = function() {
 	$.each(d,function(k,v) {
 		var x=sources[k];
 		if (x==null) return;
-		var files=["ide/jquery.js","ide/Maggi.js/Maggi.js","ide/Maggi.js/Maggi.UI.js","ide/Maggi.js/Maggi.UI.css","ide/Maggi.js/Maggi.UI.input.css","ide/Maggi.js/Maggi.UI.select.css"];
+		var files=["ide/jquery.js","Maggi.js/Maggi.js","Maggi.js/Maggi.UI.js","Maggi.js/Maggi.UI.css","Maggi.js/sprintf.js"];
 		files=x.srcs.concat(files);
 
 		initproject(
@@ -285,7 +287,8 @@ var doc = function() {
 			select:"Select",
 			list:"List",
 			tabs:"Tabs",
-			demo:"Demo"
+			demo:"Demo",
+			part:"Part",
 		},
 		selected:"intro",
 		childdefault:maketypeui,
@@ -305,6 +308,7 @@ var doc = function() {
 			list:maketypeui(),
 			tabs:maketypeui(),
 			demo:maketypeui(),
+			part:maketypeui(),
 		}
 	});
 
