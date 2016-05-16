@@ -191,39 +191,69 @@ Maggi.UI.parts.input={
     description:"The Part Input is so great because...",
     caption:"The Part Input",
     member_description:{
-	autosize:{
-		name:"autosize",
-		type:"boolean",
-		caption:"Autosize Length",
-		description:"Have the width (number of characters) of the input matching the length of its content, i.e. the attribute 'size' of the input HTMLElement is kept in sync with the content-length.",
-		example:"true"
-	},
-	placeholder:{
-		caption:"Placeholder",
-		name:"placeholder",
-		type:"string",
-		description: "String to show as a placeholder in the input when it is empty edit",
-		example:'placeholder:"username"'
-	},
-	kind:{
-		caption:"Input Kind",
-		name:"kind",
-		type:"string",
-		description: "The kind of input is set to the type attribute of the input element. Common values are text, number, email, etc... See current HTML standard for a full list. ",
-		example:'kind:"email"'
-	},
-	onReturnKey:{
-		caption:"Return Key Action",
-		name:"onReturnKey",
-		type:"function(value)",
-		description: "The function called with the current value of the input when the 'Return' key is being input by the user.",
-		example:"function(v) { alert(v); }"
-	},
-        prefix:{},
-        postfix:{},
-        postfixui:{},
-        focus:{},
-        selectOnFocus:{}
+    	autosize:{
+    		name:"autosize",
+    		type:"boolean",
+    		caption:"Autosize Length",
+    		description:"Have the width (number of characters) of the input matching the length of its content, i.e. the attribute 'size' of the input HTMLElement is kept in sync with the content-length.",
+    		example:"true"
+    	},
+    	placeholder:{
+    		caption:"Placeholder",
+    		name:"placeholder",
+    		type:"string",
+    		description: "String to show as a placeholder in the input when it is empty edit",
+    		example:'placeholder:"username"'
+    	},
+    	kind:{
+    		caption:"Input Kind",
+    		name:"kind",
+    		type:"string",
+    		description: "The kind of input is set to the type attribute of the input element. Common values are text, number, email, etc... See current HTML standard for a full list. ",
+    		example:'kind:"email"'
+    	},
+    	onReturnKey:{
+    		caption:"Return Key Action",
+    		name:"onReturnKey",
+    		type:"function(value)",
+    		description: "The function called with the current value of the input when the 'Return' key is being input by the user.",
+    		example:"function(v) { alert(v); }"
+    	},
+        prefix:{
+    		caption:"Prefix Text",
+    		name:"prefix",
+    		type:"string",
+    		description: "The text prefixing the editable text.",
+    		example:"value:"
+        },
+        postfix:{
+    		caption:"Postfix Text",
+    		name:"postfix",
+    		type:"string",
+    		description: "The text postfixing the editable text.",
+    		example:"Dollar"
+        },
+        postfixui:{
+    		caption:"Postfix UI",
+    		name:"postfixui",
+    		type:"maggi.UI object",
+    		description: "The UI postfixing the editable text. Overrides postfix.",
+    		example:'{parts:"label",label:"Dollar"}'
+        },
+        focus:{
+    		caption:"Focus State",
+    		name:"focus",
+    		type:"boolean",
+    		description: "Determines the focus state of the element.",
+    		example:true
+        },
+        selectOnFocus:{
+    		caption:"Select on Focus",
+    		name:"selectOnFocus",
+    		type:"boolean",
+    		description: "When true, all content of the input is selected on receiving focus.",
+    		example:true
+        }
     },
     parts:"common",
     bindings:{

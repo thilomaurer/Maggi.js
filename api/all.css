@@ -28,6 +28,9 @@ input::selection {
 
 body {
 	font-family: 'Open Sans', sans-serif;
+	display:flex;
+	flex-direction:column;
+	height:100%;
 }
 
 h1 {
@@ -203,10 +206,6 @@ h2 {
 
 .typeui #head {
 	font-size:20px;
-}
-
-#content {
-	border-radius:8px;
 }
 
 
