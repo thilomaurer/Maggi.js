@@ -1,4 +1,5 @@
-var ideui = function() {
+var ide={};
+ide.ui = function() {
 	return {
 		children: {
             header:{
@@ -140,7 +141,7 @@ var ideui = function() {
 	};
 };
 
-var ide_init = function(m,dom) {
+ide.init = function(m,dom) {
 	m.data={projects:{}};
 	m.data.bind("set","projects",function(k,v) {
 		for (i in v) {
@@ -149,7 +150,7 @@ var ide_init = function(m,dom) {
 			v[i]=pp;
 		}
 	});	
-	m.ui=ideui();
+	m.ui=ide.ui();
 };
 
 var orderRemove=function(o,k) {

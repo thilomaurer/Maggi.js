@@ -1,8 +1,7 @@
-
 var main = function() {
 	var dom=$('body');
 	var m=Maggi.UI_devel(dom);
-	ide_init(m);
+	ide.init(m);
 
 	var ddd=new Date();
 	var events={
