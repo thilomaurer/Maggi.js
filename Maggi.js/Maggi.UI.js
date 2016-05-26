@@ -279,7 +279,7 @@ Maggi.UI.BaseFunctionality=function(dom,data,setdata,ui,onDataChange) {
 	
 	var onClick=function(e) {
 	    var handled=(ui.onClick!=null&&(ui.enabled!=false));
-	    if (handled) ui.onClick();
+	    if (handled) ui.onClick(e);
 	    return !handled;
 	};
 	dom.on("click",onClick);
