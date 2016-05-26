@@ -1,5 +1,25 @@
 {
-    "name":"Maggi.UI.IDE",
-    "author":"Thilo Maurer, www.thilomaurer.de",
-    "icon":"https://upload.wikimedia.org/wikipedia/commons/6/6a/Under_construction_icon-orange.svg"
+	"name":"Maggi Projects",
+	"author":"Thilo Maurer, www.thilomaurer.de",
+	"icon":"node_modules/Maggi.js/Maggi.js.svg",
+	"deps":[
+		"node_modules/jquery/dist/jquery.js",
+		"node_modules/socket.io/node_modules/socket.io-client/socket.io.js",
+		"node_modules/Maggi.js-0.1/Maggi.js",
+		"node_modules/Maggi.js-0.1/sprintf.js",
+		"node_modules/Maggi.js-0.1/Maggi.UI.js","node_modules/Maggi.js-0.1/Maggi.UI.css", "node_modules/Maggi.js-0.1/Maggi.UI.input.css", "node_modules/Maggi.js-0.1/Maggi.UI.select.css",
+		"node_modules/ace-editor-builds/src-min-noconflict/ace.js",
+		"node_modules/Maggi.js-0.1/Maggi.UI.editor.js","node_modules/Maggi.js-0.1/Maggi.UI.editor.css",
+		"node_modules/Maggi.js-0.1/Maggi.UI.overlay.js","node_modules/Maggi.js-0.1/Maggi.UI.overlay.css",
+		"project.js","project.css",
+		"filepreview.js",
+		"pane.js","pane.css",
+		"panes.js","panes.css",
+		"ide.js","ide.css",
+		"list.js",
+		"file.js","file.css",
+		"files.js",
+		"prj.js",
+		"main.js","main.css"
+	]
 }

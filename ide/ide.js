@@ -4,8 +4,8 @@ var ideui = function() {
             header:{
                 data:{
                     banner:{
-                        logo:"icons/Maggi.UI.IDE.svg",
-                        title:"Maggi.UI.IDE Projects",
+                        logo:"node_modules/Maggi.js/Maggi.js.svg",
+                        title:"aggi Projects",
                     },
                     newproject:{icon:"icons/plus.svg",name:"Create new Project..."}
                 },
@@ -15,22 +15,23 @@ var ideui = function() {
 					    class:"visibilityanimate prjjson hoverhighlight"
                     },
                     banner:{
+                        wrap:true,
                         children:{
-                            logo:{type:"image"},
+                            logo:{type:"image",class:"logo"},
                             title:{type:"text"}
                         },
 					    class:"visibilityanimate"
                     }
                 },
                 class:"cols",
-		visible:true
+				visible:true
             },
-			projects: {
-				class:"flexrows flexanimate",
-				childdefault:prjui,
-				selected:null,
-				builder:function(dom,data,ui) {
-					var u=function() {
+            projects: {
+            class:"flexrows flexanimate",
+            childdefault:prjui,
+            selected:null,
+            builder:function(dom,data,ui) {
+                var u=function() {
 					    if (ui.selected==null) dom.addClass("noneselected"); else dom.removeClass("noneselected");
 						$.each(dom.ui,function(k,v) {
 							var dui=dom.ui[k];
