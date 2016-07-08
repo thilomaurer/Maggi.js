@@ -269,22 +269,29 @@ Maggi.UI.parts.input={
         ph:   ["set","ui.placeholder" ,function(m,k,v) {m.i.attr("placeholder",v);}],
         k:    ["set","ui.kind" ,function(m,k,v) {m.i.attr("type",v);}],
         e:    ["set","data","datachange"],
-        f:    ["set","ui.focus",function(m,k,v) {if (v===true) m.i.focus();}]
+        eas:  ["set","data","as"],
+        as:   ["set","autosize","as"],
+        f:    ["set","ui.focus",function(m,k,v) {if (v===true) m.i.focus();}],
+        g:    ["set","ui.enabled",function(m,k,v) { var r="readonly"; if (v===false) m.i.attr(r,r); else m.i.removeAttr(r); }]
     },
     dom:{prefix:"div",midfix:"div",postfix:"div",i:"input"},
+    as:function(m) {
+	var i=m.i;
+	if (m.ui.autosize) {
+		var l=0;
+		if (m.data!==null) l=m.data.toString().length;
+		if (m.ui.placeholder!==null) if (l<m.ui.placeholder.length) l=m.ui.placeholder.length;
+		if (l===0) i.addClass("empty"); else i.removeClass("empty");
+		if (l===0) l=1;
+		i.attr("size",l);
+	} else i.removeAttr("size");	
+    },
     datachange: function(m) {
-            var i=m.i;
-    		if (m.ui.kind=="file") return;
-    		var newvalue=m.data&&m.data.toString();
-    		if (i[0].value!=newvalue) i[0].value=newvalue;
-    		if (m.ui.autosize) {
-    		    var l=0;
-    			if (m.data!==null) l=m.data.toString().length;
-    			if (l===0) i.addClass("empty"); else i.removeClass("empty");
-    			if (l===0) l=1;
-    			i.attr("size",l);
-    		}    		
-	},  
+	var i=m.i;
+	if (m.ui.kind=="file") return;
+	var newvalue=(m.data!=null)&&(m.data.toString());
+	if (i[0].value!=newvalue) i[0].value=newvalue;
+    },  
     builder(m) {
         var i=m.i.appendTo(m.midfix);
     	i.on("input",function(event) {
@@ -482,8 +489,7 @@ Maggi.UI.parts.text={
     parts:"common",
     bindings:{
         e:["set","data","update"],
-        g:["set","ui.format","update"],
-        h:["set","ui.strings","update"],
+        g:["set","ui.format","update"]
     },
     update: function(m) {
         var s="(null)";
@@ -503,6 +509,9 @@ Maggi.UI.parts.text={
                 s=d.toString();
         }
         m.dom.text(s);
+    },
+    builder(m) {
+	return function() { m.dom.empty() };
     }
 };
 

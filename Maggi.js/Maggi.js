@@ -67,6 +67,7 @@ var Maggi=function(other) {
 			var set = function(v) {
 				if (!(v instanceof Date)) if (!(v instanceof Function)) if (v instanceof Object) if (v._hasMaggi!=true) v=Maggi(v);
 				var oldv=d[key];
+				if (v!=v) return;
 				if (v==oldv) return;
 				uninstallBubble(oldv);
 				installBubble(v);
@@ -217,11 +218,31 @@ var Maggi=function(other) {
 			}
 		},
 		set: function(kv) {
+			var tk=[];
+			var ov={};
+			var set = function(key,v) {
+				if (!(v instanceof Date)) if (!(v instanceof Function)) if (v instanceof Object) if (v._hasMaggi!=true) v=Maggi(v);
+				var oldv=d[key];
+				if (v!=v) return;
+				if (v==oldv) return;
+				//uninstallBubble(oldv);
+				//installBubble(v);
+				d[key]=v;
+				ov[key]=oldv;
+				tk.push(key);
+			};
 			for (var i = 0; i<kv.length; i++) {
 				var k=kv[i][0];
 				var v=kv[i][1];
-				d[k]=v;
-				trigger("set",k,v);
+				set(k,v);
+			}
+			tk=[tk[0]];
+			for (var i = 0; i<tk.length; i++)
+			{
+				var k=tk[i];
+				var v=d[k];
+				var oldv=ov[k];
+				trigger("set",k,v,oldv);
 			}
 		},
 		trigger: trigger,
@@ -366,7 +387,7 @@ Maggi.db.sync = function(socket,dbname,db,client,events,onsync) {
 		if (d==null) return "(null)"; 
 		var k=d.k;
 		if (k instanceof Array) k=k.join(".");
-		var l=d.v&&JSON.stringify(d.v).length;
+		var l=d.v&&JSON.stringify(d.v).substring(0,32);
 		return d.rev + " " + d.f + " " + d.e + " " + k + " " + l;
 	};
 	var log=function(key,d) {

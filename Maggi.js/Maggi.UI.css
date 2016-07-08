@@ -135,8 +135,10 @@
 
 .mui-light.disabled,
 .mui-light .disabled,
+.mui-light .input.disabled input,
 .mui.disabled,
-.mui .disabled {
+.mui .disabled,
+.mui .input.disabled input {
 	color:gray;
 }
 /*
@@ -683,6 +685,13 @@
 	margin-top:1px;
 	border-top-left-radius:0px;
 	border-top-right-radius:0px;
+}
+
+.mui .input.invisible + .input,
+.mui-light .input.invisible + .input {
+	margin-top:0px;
+	border-top-left-radius:5px;
+	border-top-right-radius:5px;
 }
 
 /* SELECT */
