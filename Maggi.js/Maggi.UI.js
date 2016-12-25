@@ -271,7 +271,7 @@ Maggi.UI.parts.input={
         e:    ["set","data","datachange"],
         eas:  ["set","data","as"],
         as:   ["set","autosize","as"],
-        f:    ["set","ui.focus",function(m,k,v) {if (v===true) m.i.focus();}],
+        f:    ["set","ui.focus",function(m,k,v) { if (v===true) m.i.focus(); }],
         g:    ["set","ui.enabled",function(m,k,v) { var r="readonly"; if (v===false) m.i.attr(r,r); else m.i.removeAttr(r); }]
     },
     dom:{prefix:"div",midfix:"div",postfix:"div",i:"input"},
@@ -312,7 +312,10 @@ Maggi.UI.parts.input={
     		m.dom.removeClass('focused');
     		m.ui.focus=false;
     	});
-    	var onClick=function(event) {m.i.focus(); event.stopPropagation(); };
+	var onClick=function(event) {
+		m.i.focus();
+		if (event!=null) event.stopPropagation();
+	};
     	m.dom.on("click",onClick);
     	return function() {
     	    m.dom.off("click",onClick);

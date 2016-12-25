@@ -365,10 +365,15 @@ Maggi.db.ionamespace="/Maggi.db";
 
 Maggi.db.server=function(io,preload) {
 	Maggi.db.sync.log=true;
+	Maggi.db.server.clientCount=0;
 	var dbs={};
 	if (preload!=null) dbs[preload]=Maggi.db.load(preload,false);
 	io.of(Maggi.db.ionamespace).on('connection', function(socket) {
-		console.log(socket.id,"connected");
+		Maggi.db.server.clientCount++;
+		console.log(socket.id,"connected (client",Maggi.db.server.clientCount.toString(),")");
+		socket.on('disconnect',function() {
+			Maggi.db.server.clientCount--;
+		});
 		socket.on("Maggi.db",function(dbname) {
 			if (dbs[dbname]===undefined) 
 				dbs[dbname]=Maggi.db.load(dbname,false);
@@ -387,7 +392,10 @@ Maggi.db.sync = function(socket,dbname,db,client,events,onsync) {
 		if (d==null) return "(null)"; 
 		var k=d.k;
 		if (k instanceof Array) k=k.join(".");
-		var l=d.v&&JSON.stringify(d.v).substring(0,32);
+		if (d.v instanceof Function)
+			l="function(...) {...}";
+		else
+			l=d.v&&JSON.stringify(d.v).substring(0,32);
 		return d.rev + " " + d.f + " " + d.e + " " + k + " " + l;
 	};
 	var log=function(key,d) {
@@ -430,7 +438,9 @@ Maggi.db.sync = function(socket,dbname,db,client,events,onsync) {
 
 	});
 	socket.on('disconnect',function() {
-		db.data.unbind(handler);
+		db.data.unbind("set",handler);
+		db.data.unbind("add",handler);
+		db.data.unbind("remove",handler);
 		log("disconnected");
 		if (events&&events.disconnect) events.disconnect(dbname,db.data);
 	});
