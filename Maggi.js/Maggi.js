@@ -7,6 +7,8 @@
 
 var Maggi=function(other) {
 	var d={},p={},events={};
+	var bubbleEvents=["set","remove","add"];
+	var bubbles={};
 
 	if (!(other instanceof Date)) if (!(other instanceof Function)) if (other instanceof Object) if (other._hasMaggi) return other;
 	//if (other instanceof jQuery) return other;
@@ -34,26 +36,50 @@ var Maggi=function(other) {
 		fns=fns.slice();
 		var fnsl=fns.length; 
 		if (Maggi.log==true) {
-			console.log("Maggi.js:",fnsl,"triggers of "+e+" for ",key,d);
+			console.log("Maggi.trigger:",fnsl,"triggers of "+e+" for ",key,d);
 			if (Maggi.logtrace==true) {
-    			var stacktrace=function() {
-    				var s=(new Error()).stack.split("\n");
-    				return s.splice(2).map(function(s) {
-    						var fields=s.match(/ at (.*) \((.*)\)/);
-    						if (fields==null) fields=s.match(/ at ()(.*)/);
-    						return {fn:fields[1],loc:fields[2]};
-    					});
-    			};
-    			console.log(stacktrace());
+				var stacktrace=function() {
+					var s=(new Error()).stack.split("\n");
+					return s.splice(2).map(function(s) {
+						var fields=s.match(/ at (.*) \((.*)\)/);
+						if (fields==null) fields=s.match(/ at ()(.*)/);
+						return {fn:fields[1],loc:fields[2]};
+					});
+				};
+				console.log(stacktrace());
 			}
 		}
 		for (var i=0; i<fnsl; i++) {
 			var f=fns[i];
-			if (Maggi.trace===true) console.log("Maggi.js:",f.keys,key);
-			if (!f.keys||(indexOf(f.keys,key)>-1)) {
+			if (Maggi.trace===true) console.log("Maggi.trigger:",f.keys,key);
+			if (!f.keys||(indexOf(f.keys,key)>-1))
 				f.fn(key,value,oldv,e);
-			}
 		}
+	};
+
+	var installBubble=function(value,bubbleFuncs) {
+		if (value&&value._hasMaggi)
+			bubbleEvents.forEach(function(e) {
+				value.bind(e,bubbleFuncs[e]);
+			});
+	};
+
+	var uninstallBubble=function(value,bubbleFuncs) {
+		if (value&&value._hasMaggi)
+			bubbleEvents.forEach(function(e) {
+				value.unbind(e,bubbleFuncs[e]);
+			});
+	};
+
+	var bubble=function(e,key,k,v,oldv) {
+		var bubblekey;
+		if (k instanceof Array)
+			bubblekey=k.slice(0);
+		else
+			bubblekey=[k];
+
+		bubblekey.unshift(key);
+		trigger(e,bubblekey,v,oldv);
 	};
 
 	func = {
@@ -69,43 +95,18 @@ var Maggi=function(other) {
 				var oldv=d[key];
 				if (v!=v) return;
 				if (v==oldv) return;
-				uninstallBubble(oldv);
-				installBubble(v);
+				uninstallBubble(oldv,bubbleFuncs);
+				installBubble(v,bubbleFuncs);
 				d[key]=v;
 				trigger("set",key,v,oldv);
 			};
-			var bubbleEvents=["set","remove","add"];
-			var bubble=function(e,k,v,oldv) {
-				var bubblekey;
-				if (k instanceof Array)
-					bubblekey=k.slice(0);
-				else 
-					bubblekey=[k];
-
-				bubblekey.unshift(key);
-				trigger(e,bubblekey,v,oldv);
-			};
 			var bubbleFuncs={};
+			bubbles[key]=bubbleFuncs;
 			bubbleEvents.forEach(function(e) {
-				bubbleFuncs[e]=function(k,v,oldv) { bubble(e,k,v,oldv) };
+				bubbleFuncs[e]=function(k,v,oldv) { bubble(e,key,k,v,oldv) };
 			});
-			var installBubble=function(value) {
-				//propage child events to parent
-				if (value&&value._hasMaggi) {
-					bubbleEvents.forEach(function(e) {
-						value.bind(e,bubbleFuncs[e]);
-					});
-				}
-			};
-			var uninstallBubble=function(value) {
-				if (value&&value._hasMaggi) {
-					bubbleEvents.forEach(function(e) {
-						value.unbind(e,bubbleFuncs[e]);
-					});
-				}
-			};
 			if (p.hasOwnProperty(key)) { 
-				//console.log('Maggi: set by add for property "'+key+'" of '+JSON.stringify(p)+'.');
+				//console.log('Maggi.add: set by add for property "'+key+'" of '+JSON.stringify(p)+'.');
 				set(value);
 				return;
 			} else {
@@ -113,7 +114,7 @@ var Maggi=function(other) {
 				d[key]=value;
 				var prop={get: get, set: set, enumerable: true, configurable: true};
 				Object.defineProperty(p,key,prop);
-				installBubble(value);
+				installBubble(value,bubbleFuncs);
 				trigger("add",key,value);
 			}
 		},
@@ -123,8 +124,8 @@ var Maggi=function(other) {
 			var value=d[key];
 			delete p[key];
 			delete d[key];
-			trigger("remove",key,value); //fire remove last time
-			p.unbind(key);               //before removing all bindings for key
+			uninstallBubble(value,bubbles[key]);
+			trigger("remove",key,value);
 		},
 		bind: function() {
 			var ts,ks,fn;
@@ -165,20 +166,20 @@ var Maggi=function(other) {
 				var k=ts[ik];
 				if (events[k]==null) events[k]=[];
 				for (var i in fn) {
-				    var e;
+					var e;
 					if (Maggi.trace) {
-					    e={
-    						fn:fn[i],
-    						keys:ks,
-    						id:Maggi.bind_id++,
-    						trace:stacktrace()
-    					};
-    					console.log("bind",e.id,e.keys);
+						e={
+							fn:fn[i],
+							keys:ks,
+							id:Maggi.bind_id++,
+							trace:stacktrace()
+						};
+						console.log("Maggi.bind:",e.id,e.keys);
 					} else {
-    					e={
-    						fn:fn[i],
-    						keys:ks
-    					};
+						e={
+							fn:fn[i],
+							keys:ks
+						};
 					}
 					events[k].push(e);
 				}

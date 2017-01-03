@@ -1,6 +1,6 @@
 {
   "name": "Maggi.js",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "rapid development of modern web applications using an object-centric client-server model",
   "main": "Maggi.js",
   "scripts": {
@@ -27,6 +27,6 @@
   },
   "readme": "Maggi.js\n========\n\nMaggi.js is a Javascript framework that enables rapid development of modern web applications using an object-centric client-server model.\n\nIt consits of the following parts:\n\n* Maggi.js, an extension to the javascript object model \\\"maggically\\\" adding bubbling property-events. Binding functions to these events allows, e.g., for triggering for dependent updates.\n* Maggi.db.js, a client-server infrastructure \\\"maggically\\\" syncing objects live on multiple clients persistantly with a cloud-server.\n* Maggi.UI.js, a model-model framework for \\\"maggically\\\" generating responsive web-client user-interfaces from a data model and a user-interface model.\n\n## Installation\n\n  npm install Maggi.js --save\n",
   "readmeFilename": "README.md",
-  "_id": "Maggi.js@0.2.1",
-  "_from": "Maggi.js@~0.2.1"
+  "_id": "Maggi.js@0.2.3",
+  "_from": "Maggi.js@~0.2.3"
 }

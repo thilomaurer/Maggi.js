@@ -659,6 +659,7 @@ Maggi.UI.parts.select={
         e:["set","ui.choices",function(m,k,v) {
             var name="MaggiUISelect"+Maggi.UI.parts.select.counter.toString(); Maggi.UI.parts.select.counter++;
             m.dom.empty();
+            m.dom.on("click",function(event) { event.stopPropagation(); });
             $.each(m.ui.choices,function(key,value) {
                 var id=name+"_"+key.toString();
                 m.chld[key]=$("<input>",{name:name,id:id,value:key,type:"radio"}).appendTo(m.dom).change(function() {
@@ -689,7 +690,7 @@ Maggi.UI.parts.childselect={
         if (k instanceof Array) k=k[k.length-1];
         var z=m.inner[k];
         if (z==null) return;
-        m.inner[k].m.dom.on("click",function() { m.ui.selected=k; });
+        m.inner[k].m.dom.on("click",function(event) { m.ui.selected=k; event.stopPropagation(); });
         m.inner[k].m.dom.addClass("selectable");
     },
     remove:function(m,k) {
@@ -895,7 +896,7 @@ Maggi.UI.parts.switchable={
 Maggi.UI.parts.popup={
     name:"popup",
     parts:["switchable","domwrap"],
-    partclass:"popup visibilityanimate",
+    partclass:"popup scroll visibilityanimate",
     members:{
         switchstate:false, 
         switchclass:{false:"invisible"}
