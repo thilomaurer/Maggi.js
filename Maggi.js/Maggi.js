@@ -208,12 +208,13 @@ var Maggi=function(other) {
 			for (var ik in ks) {
 				var k=ks[ik];
 				if (events[k]) for (var i in fn) { 
-					//var idx=events[k].indexOf(fn[i]);
-					var idx=indexOf(events[k],"fn",fn[i]);
-					if (idx>=0&&Maggi.trace) {
-					    console.log("unbind",events[k][idx].id,events[k][idx].keys);
-					}
-					if (idx>=0) events[k].splice(idx,1);
+					var idx;
+					do {
+						idx=indexOf(events[k],"fn",fn[i]);
+						if (idx>=0&&Maggi.trace)
+						    console.log("unbind",events[k][idx].id,events[k][idx].keys);
+						if (idx>=0) events[k].splice(idx,1);
+					} while (idx>=0);
 				}
 			}
 		},
