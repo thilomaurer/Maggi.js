@@ -711,7 +711,7 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 		setbuilder();
 	};
 	
-	var backbuild=function() {
+	var backbuilder=function() {
 		if (backbuild_builder) { backbuild_builder(); backbuild_builder=null; } //must be first in backbuild
 		if (data) {
 			data.unbind("set", update);
@@ -730,7 +730,7 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 	};
 
 	var rebuild=function(newdata) {
-		backbuild();
+		backbuilder();
 		build(newdata);
 	};
 
@@ -739,7 +739,7 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 	if (onDataChange) onDataChange(rebuild);
 	build(data);
 
-	return backbuild;
+	return backbuilder;
 };
 
 Maggi.UI.tabs=function(ui,o,seto,format,onDataChange) {
@@ -837,7 +837,7 @@ Maggi.UI.list=function(dom,data,setdata,ui,onDataChange) {
 		}
 	};
 	
-	var backbuild=function() {
+	var backbuilder=function() {
 		if (data) {
 			data.unbind("add", add);
 			data.unbind("remove", remove);
@@ -849,7 +849,7 @@ Maggi.UI.list=function(dom,data,setdata,ui,onDataChange) {
 	};
 
 	var rebuild=function(newdata) {
-		backbuild();
+		backbuilder();
 		data=newdata;
 		build();
 	};
@@ -860,7 +860,7 @@ Maggi.UI.list=function(dom,data,setdata,ui,onDataChange) {
 	build();
 
 	return function() {
-		backbuild();
+		backbuilder();
 		ui.unbind("set",formatsethandler);
 	};
 

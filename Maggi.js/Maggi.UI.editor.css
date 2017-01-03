@@ -1,5 +1,12 @@
+.editor .ace_editor {
+	position:absolute;
+	top:0;
+	bottom:0;
+	width:100%;
+}
+
 .editor,
-.editor #doc {
+.editor .ace_editor {
 	font-family: "Courier New", monospace; 
 	font-size:16px;
 }
@@ -51,6 +58,7 @@
 
 .editor > #doc {
     flex:1 1 auto;
+    position:relative;
 }
 
 .editor > #annot {

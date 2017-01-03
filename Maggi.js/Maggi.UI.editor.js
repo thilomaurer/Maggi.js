@@ -3,13 +3,14 @@ Maggi.UI.editor=function(dom,data,setdata,outer_ui,onDataChange) {
 	var builder=function(dom,d,ui) {
 		//console.log(outer_ui.settings);
 		var annotsethandler=function(k,v) {
-			if (k=="selected") { 
+			if (k=="selected"&&v!=null) {
+				editor.focus();
 				var annot=d.annot[v];
 				data.file.cursor={row:annot.row, column:annot.column};
 			}
 		};
-		
-		var editor=ace.edit(dom.ui.doc[0]);
+		var wrapper=$("<div>").appendTo(dom.ui.doc);	
+		var editor=ace.edit(wrapper[0]);
 		editor.$blockScrolling = Infinity;
 		editor.setTheme("ace/theme/xcode");
 		var disableEvents=false; //hack to work around ACE issue.
@@ -32,7 +33,9 @@ Maggi.UI.editor=function(dom,data,setdata,outer_ui,onDataChange) {
 			if (!disableEvents) data.file.data=editor.getValue();
 		});
 		editor.getSession().selection.on('changeCursor', function() {
-			if (!disableEvents) data.file.cursor=editor.getCursorPosition();
+			if (disableEvents) return;
+			editor.focus();
+			data.file.cursor=editor.getCursorPosition();
 		});
 		editor.getSession().on("changeAnnotation", function() {
 			d.annot = editor.getSession().getAnnotations();
@@ -56,15 +59,17 @@ Maggi.UI.editor=function(dom,data,setdata,outer_ui,onDataChange) {
 			if ((c.row==op.row)&&(c.column==op.column)) return;
 			disableEvents=true; //hack to work around ACE issue.
 			editor.selection.setSelectionRange({start:c,end:c},false);
-			editor.centerSelection();
+			if (editor.isFocused()) editor.centerSelection();
 			disableEvents=false;
 		};
 		var updateFile = function() {
 			var file=data.file;
 			editor.setReadOnly(file==null);
+			fmt.children.annot.selected=null;
 			updateText();
 			updateMode();
 			updateCursor();
+			editor.centerSelection();
 		};
 		var sethandler=function(k,v) {
 			if (k=="file") updateFile(); 
@@ -72,19 +77,30 @@ Maggi.UI.editor=function(dom,data,setdata,outer_ui,onDataChange) {
 			if (k[0]=="file"&&k[1]=="data") updateText();
 			if (k[0]=="file"&&k[1]=="cursor") updateCursor();
 		};
+		var setKeyboard=function(v) {
+			var modes={
+				gui:"",
+				vim:"ace/keyboard/vim",
+				emacs:"ace/keyboard/emacs"
+			};
+			editor.setKeyboardHandler(modes[v]);
+		};
 		var ouihandler=function(k,v) {
 			if (k=="readonly") editor.setReadOnly(v);
-			//if (k=="settings"||k[0]=="settings") editor.setOptions(outer_ui.settings);
-			if (k[0]=="settings") {
+			if (k=="settings") {
 				var opt={};
+				for (var attrname in v.editing) { opt[attrname] = v.editing[attrname]; }
+				for (var attrname in v.ui) { opt[attrname] = v.ui[attrname]; }
+				for (var attrname in v.gutter) { opt[attrname] = v.gutter[attrname]; }
+				setKeyboard(opt.keyboard);
+				delete opt.keyboard;
+				editor.setOptions(opt);
+			}
+			if (k[0]=="settings") {
 				if (k[2]=="keyboard") {
-					var modes={
-						gui:"",
-						vim:"ace/keyboard/vim",
-						emacs:"ace/keyboard/emacs"
-					};
-					editor.setKeyboardHandler(modes[v]);
+					setKeyboard(v);
 				} else {
+					var opt={};
 					opt[k[2]]=v;
 					editor.setOptions(opt);
 				}
@@ -96,7 +112,6 @@ Maggi.UI.editor=function(dom,data,setdata,outer_ui,onDataChange) {
 		updateFile();
 		ouihandler("readonly",outer_ui.readonly);
 		ouihandler("settings",outer_ui.settings);
-		if (outer_ui.settings) ouihandler(["settings","keyboard"],outer_ui.settings.keyboard);
 		return function() {
 			data.unbind(sethandler);
 			outer_ui.unbind(ouihandler);
