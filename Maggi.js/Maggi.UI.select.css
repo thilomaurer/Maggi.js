@@ -4,6 +4,7 @@
 	border-radius:5px;
 	vertical-align:bottom;
 	overflow:hidden;
+	flex-wrap:wrap;
 }
 
 .mui .select {

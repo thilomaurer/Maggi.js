@@ -12,7 +12,6 @@ Maggi.UI.editor=function(dom,data,setdata,outer_ui,onDataChange) {
 		var wrapper=$("<div>").appendTo(dom.ui.doc);	
 		var editor=ace.edit(wrapper[0]);
 		editor.$blockScrolling = Infinity;
-		editor.setTheme("ace/theme/xcode");
 		var disableEvents=false; //hack to work around ACE issue.
 
 		function updateMode() {
@@ -34,7 +33,6 @@ Maggi.UI.editor=function(dom,data,setdata,outer_ui,onDataChange) {
 		});
 		editor.getSession().selection.on('changeCursor', function() {
 			if (disableEvents) return;
-			editor.focus();
 			data.file.cursor=editor.getCursorPosition();
 		});
 		editor.getSession().on("changeAnnotation", function() {
@@ -85,6 +83,10 @@ Maggi.UI.editor=function(dom,data,setdata,outer_ui,onDataChange) {
 			};
 			editor.setKeyboardHandler(modes[v]);
 		};
+		var setTheme=function(v) {
+			if (v==null) return;
+			editor.setTheme("ace/theme/"+v);
+		};
 		var ouihandler=function(k,v) {
 			if (k=="readonly") editor.setReadOnly(v);
 			if (k=="settings") {
@@ -92,12 +94,16 @@ Maggi.UI.editor=function(dom,data,setdata,outer_ui,onDataChange) {
 				for (var attrname in v.editing) { opt[attrname] = v.editing[attrname]; }
 				for (var attrname in v.ui) { opt[attrname] = v.ui[attrname]; }
 				for (var attrname in v.gutter) { opt[attrname] = v.gutter[attrname]; }
+				if (v.colorscheme) setTheme(v.colorscheme.day);
 				setKeyboard(opt.keyboard);
 				delete opt.keyboard;
 				editor.setOptions(opt);
 			}
 			if (k[0]=="settings") {
-				if (k[2]=="keyboard") {
+				if (k[1]=="colorscheme") {
+					if (k[2]=="day"||k[2]=="night")
+						setTheme(v);
+				} else if (k[2]=="keyboard") {
 					setKeyboard(v);
 				} else {
 					var opt={};
@@ -109,6 +115,7 @@ Maggi.UI.editor=function(dom,data,setdata,outer_ui,onDataChange) {
 		data.bind(sethandler);
 		outer_ui.bind(ouihandler);
 		fmt.children.annot.bind(annotsethandler);
+		setTheme("xcode");
 		updateFile();
 		ouihandler("readonly",outer_ui.readonly);
 		ouihandler("settings",outer_ui.settings);
