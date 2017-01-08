@@ -59,6 +59,23 @@
     flex:0 0 auto;
 }
 
+/* trick ace into calculating without scroll bar*/
+html > iace_outer::-webkit-scrollbar-track
+{
+	display:none;
+}
+
+html > ace_outer::-webkit-scrollbar
+{
+	width: 0;
+	height: 0;
+}
+
+html > ace_outer::-webkit-scrollbar-corner
+{
+	display:none;
+}
+
 
 
 

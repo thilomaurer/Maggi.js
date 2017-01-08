@@ -25,11 +25,16 @@
 	background-color: transparent;
 }
 
-.mui ::-webkit-scrollbar-thumb,
 .mui-light ::-webkit-scrollbar-thumb
 {
 	border-radius: 2px;
 	background-color: #888;
+}
+
+.mui ::-webkit-scrollbar-thumb
+{
+	border-radius: 2px;
+	background-color: hsla(224, 8%, 50%, 1);
 }
 
 .mui ::-webkit-scrollbar-corner,

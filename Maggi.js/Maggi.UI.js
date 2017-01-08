@@ -561,7 +561,7 @@ Maggi.UI.object=function(dom,data,setdata,ui,onDataChange) {
 
 	var order=function() {
 		if (ui.order) {
-			return Object.keys(ui.order).sort().map(function(k) { return ui.order[k]; });
+			return Object.keys(ui.order).sort(function(a,b) { return a-b; }).map(function(k) { return ui.order[k]; });
 		} else if (ui.childdefault) {
 			return Object.keys(data);
 		} else {
