@@ -8,7 +8,7 @@
 Maggi.id=0;
 
 var clone=function(o) { return $.extend(true,{},o); };
-var log=function(o) { if (o instanceof Object) o=clone(o); console.log(o); };
+var log=function(o) { if (o instanceof Object) o=clone(o); console.warn(o); };
 var Object2Array=function(o) { return Object.keys(o).map(function(k) { return parseInt(k); }).sort(function(a,b) {return a-b;}).map(function(k) { return o[k]; }); };
 
 Maggi.UI=function(dom,data,ui,parent) {
