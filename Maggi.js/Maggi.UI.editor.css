@@ -60,7 +60,7 @@
 }
 
 /* trick ace into calculating without scroll bar*/
-html > iace_outer::-webkit-scrollbar-track
+html > ace_outer::-webkit-scrollbar-track
 {
 	display:none;
 }
@@ -75,20 +75,4 @@ html > ace_outer::-webkit-scrollbar-corner
 {
 	display:none;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

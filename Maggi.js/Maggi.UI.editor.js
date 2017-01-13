@@ -11,6 +11,11 @@ Maggi.UI.editor=function(dom,data,setdata,outer_ui,onDataChange) {
 		};
 		var wrapper=$("<div>").appendTo(dom.ui.doc);	
 		var editor=ace.edit(wrapper[0]);
+		var onresize=function() {
+			editor.resize();
+			editor.centerSelection();
+		};
+		addResizeListener(wrapper[0],onresize);
 		editor.$blockScrolling = Infinity;
 		var disableEvents=false; //hack to work around ACE issue.
 
@@ -36,7 +41,8 @@ Maggi.UI.editor=function(dom,data,setdata,outer_ui,onDataChange) {
 			data.file.cursor=editor.getCursorPosition();
 		});
 		editor.getSession().on("changeAnnotation", function() {
-			d.annot = editor.getSession().getAnnotations();
+			var annot=editor.getSession().getAnnotations();
+			d.annot=annot.slice(0,16);
 		});	
 
 		var updateText = function() {
