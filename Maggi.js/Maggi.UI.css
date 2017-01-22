@@ -259,10 +259,12 @@
 .mui-light .tablelist.selectable > .selected,
 .mui.tablelist.selectable > .selected,
 .mui .tablelist.selectable > .selected {
-	background: hsla(200, 87%, 50%, .5);
+	background: hsla(200, 87%, 50%, 1);
 	color:inherit;
+	border-left: 15px solid hsla(200, 87%, 50%, 1);
+	margin-left: 0;
 }
-
+/*
 .mui-light .selectable.selected:hover,
 .mui .selectable.selected:hover,
 .mui-light .simplelist.selectable > .selected:hover,
@@ -272,14 +274,17 @@
 .mui.tablelist.selectable > .selected:hover,
 .mui .tablelist.selectable > .selected:hover {
 	background: hsla(200, 87%, 50%, 1);
-	background:#29a1d3; 
+	border-left: 15px solid hsla(200, 87%, 50%, 1);
+	margin-left: 0;
 }
-
+*/
 .mui .selectable:hover,
 .mui .simplelist.selectable > *:hover,
 .mui.tablelist.selectable > *:hover,
 .mui .tablelist.selectable > *:hover{
 	background:hsla(224, 8%, 50%, 1);
+	border-left: 15px solid hsla(224, 8%, 50%, 1);
+	margin-left: 0;
 }
 
 /*
@@ -355,23 +360,30 @@
 
 /* SETTINGS */
 
+
+.mui-light .settings > *,
 .mui .settings > * {
     margin:15px;
 }
 
+.mui-light .settings > .labeledlist,
 .mui .settings > .labeledlist {
     margin:0;
 }
 
 
+.mui-light .settings > .listlabel + .simplelist,
 .mui .settings > .listlabel + .simplelist {
     margin-top:0;
 }
 
+.mui-light .settings > .listlabel,
 .mui .settings > .listlabel {
     margin-bottom: 0;
+    text-transform: uppercase;
 }
 
+.mui-light .simplelist > .cols,
 .mui .simplelist > .cols {
     align-items: baseline;
 }
@@ -399,6 +411,10 @@
 	display: flex;
 	flex-flow: row;
 	align-items: center;
+}
+
+.checkbox.toggle.invisible {
+	display: none;
 }
 
 .checkbox.toggle input {
@@ -668,10 +684,21 @@
 	border: 1px solid #29a1d3;
 }
 
+.mui .input.alerting,
+.mui-light .input.alerting {
+	border: 1px solid red;
+}
+
 .mui .input.focused,
 .mui-light .input.focused {
 	border: 1px solid #29a1d3;
 	box-shadow: 0 0 0 1px #29a1d3;
+}
+
+.mui .input.alerting.focused,
+.mui-light .input.alerting.focused {
+	border: 1px solid red;
+	box-shadow: 0 0 0 1px red;
 }
 
 .mui .input.first,

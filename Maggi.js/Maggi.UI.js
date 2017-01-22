@@ -23,6 +23,27 @@ Maggi.UI=function(dom,data,ui,parent) {
 
 Maggi.UI2=function(m) {
 
+	var makeElement=function(ns,id,tag,attr,text) {
+		var el=ns?document.createElementNS(ns,tag):document.createElement(tag);
+		el.id=id;
+		for (var k in attr)
+			el.setAttribute(k,attr[k]);
+		if (text!=null) el.textContent=text;
+		return el;
+	};
+	var installpartdom=function(dom,domNS) {
+		for (var k in dom) {
+		     var v=dom[k];
+		     var el;
+		     if (typeof(v) === 'string') el=makeElement(domNS,k,v);
+		     else if (v instanceof Object) el=makeElement(domNS,k,v.tag,v.attr,v.text);
+		     else { console.warn("Maggi.js: installpart: unhandled dom: ",p.dom); continue; }
+		     m[k]=$(el).appendTo(m.dom);
+		}
+		//for (var k in p.dom)
+        	//    m[k]=$('<'+p.dom[k]+'>',{id:k}).appendTo(m.dom);
+	}
+
     var installpart=function(p) {
         if (p==null) return null;
         //console.log(p.name);
@@ -38,9 +59,7 @@ Maggi.UI2=function(m) {
             var v=p.parts[k];
             deinstallParts[v]=installpart(Maggi.UI.parts[v]);
         }
-        //install dom
-        for (var k in p.dom)
-            m[k]=$('<'+p.dom[k]+'>',{id:k}).appendTo(m.dom);
+        installpartdom(p.dom,p.domNS);
         //run builder
         var backbuilder=null;
         if (p.builder) backbuilder=p.builder(m);
@@ -186,7 +205,8 @@ Maggi.UI.parts.input={
         placeholder:"",
         onReturnKey:null,
         focus:false,
-        selectOnFocus:false
+        selectOnFocus:false,
+        alerting:false,
     },
     description:"The Part Input is so great because...",
     caption:"The Part Input",
@@ -272,7 +292,8 @@ Maggi.UI.parts.input={
         eas:  ["set","data","as"],
         as:   ["set","autosize","as"],
         f:    ["set","ui.focus",function(m,k,v) { if (v===true) m.i.focus(); }],
-        g:    ["set","ui.enabled",function(m,k,v) { var r="readonly"; if (v===false) m.i.attr(r,r); else m.i.removeAttr(r); }]
+        g:    ["set","ui.enabled",function(m,k,v) { var r="readonly"; if (v===false) m.i.attr(r,r); else m.i.removeAttr(r); }],
+        alerting:["set","ui.alerting",function(m,k,v) { if (v===true) m.dom.addClass("alerting"); else m.dom.removeClass("alerting"); }]
     },
     dom:{prefix:"div",midfix:"div",postfix:"div",i:"input"},
     as:function(m) {
@@ -332,7 +353,7 @@ Maggi.UI.parts.children={
     name:"children",
     partclass:"children",
     parts:"common",
-    members:{children:{},childdefault:null,order:null},
+    members:{children:{},childdefault:null,order:null,domNS:null,domtag:"div"},
     order:function(m) {
         var o=m.ui.order;
         if (o) return Object2Array(o);
@@ -341,7 +362,14 @@ Maggi.UI.parts.children={
             o=Array_unique(Object.keys(m.data).concat(o));
         }
         return o;
-    },    
+    },
+    makeElement:function(m,id) {
+	var tag=m.ui.domtag;
+	var ns=m.ui.domNS;
+        var el=ns?document.createElementNS(ns,tag):document.createElement(tag);
+        el.id=id;
+        return el;
+    },
     place:function(m,k) {
         var i=m.inner[k];
         if (i==null) return;
@@ -364,9 +392,14 @@ Maggi.UI.parts.children={
         if (k instanceof Array) k=k[k.length-1];
         //console.log(m.inner);
         if (m.inner[k]==null) {
-            var z={fromdefault:false,dom:$("<div>",{id:k})};
+            var z={fromdefault:false,dom:$(Maggi.UI.parts.children.makeElement(m,k))};
             var ui=m.ui.children[k];
-            if (ui==null&&m.ui.childdefault) {ui=m.ui.childdefault; z.fromdefault=m.ui.children; }
+            if (ui==null&&m.ui.childdefault) {
+		var cd=m.ui.childdefault;
+		ui=(cd instanceof Function)?function() { return cd(m,k);}:cd;
+		//ui=cd;
+	        z.fromdefault=m.ui.children;
+	    }
             //console.log(k,ui,m.ui);
             z.m=Maggi({data:m.data[k],ui:ui});
             z.m.parent=m;
@@ -703,9 +736,13 @@ Maggi.UI.parts.childselect={
     bindings:{
         e:["set","ui.children",function(m,k,v,ov,e) {
             for (var k in m.inner) Maggi.UI.parts.childselect.add(m,k);
+            var v=m.ui.selected;
+            if (m.inner[v]) m.inner[v].m.dom.addClass("selected");
         }],
         f:["set","data",function(m,k,v,ov,e) {
             for (var k in m.inner) Maggi.UI.parts.childselect.add(m,k);
+            var v=m.ui.selected;
+            if (m.inner[v]) m.inner[v].m.dom.addClass("selected");
         }],
         h:["add","ui.children.*","add"],
         r:["remove","ui.children.*","remove"],
@@ -894,22 +931,27 @@ Maggi.UI.parts.switchable={
 };
 
 Maggi.UI.parts.popup={
-    name:"popup",
-    parts:["switchable","domwrap"],
-    partclass:"popup scroll visibilityanimate",
-    members:{
-        switchstate:false, 
-        switchclass:{false:"invisible"}
-    },
-    bindings:{
-        e:["set","ui.toggler",function(m,k,v,ov) {
-            if (m.togglerElement) 
-                m.observer.observe(m.togglerElement[0], { childList:true });
-        }],
-        f:["set","ui.switchstate","place"]
-    },
+	name:"popup",
+	parts:["switchable","domwrap"],
+	partclass:"popup scroll visibilityanimate",
+	members:{
+		switchstate:false, 
+		switchclass:{false:"invisible"}
+	},
+	bindings:{
+		e:["set","ui.toggler",function(m,k,v,ov) {
+			if (m.togglerElement) 
+				m.observer.observe(m.togglerElement[0], { childList:true });
+		}],
+		s:["set","ui.switchstate","onswitchstate"]
+	},
+	onswitchstate:function(m) {
+		//Maggi.UI.parts.popup.place(m);
+		if (m.ui.switchstate==true)
+			m.popupdom.focus();
+	},
 	place:function(m) {
-      var getInnerClientRect = function(dom) {
+		var getInnerClientRect = function(dom) {
 			var outer=dom[0].getBoundingClientRect();
 			var pad = function(dom,dir) {
 				return parseInt(dom.css("padding-"+dir).replace("px",""));
@@ -925,9 +967,9 @@ Maggi.UI.parts.popup={
 			return {left:left,right:right,top:top,bottom:bottom};
 		};
 		m.deco.css("margin-left",0);
-	    var togglerElement=m.togglerElement;
-	    if (togglerElement===undefined) return;
-	    var dom=m.popupdom;
+		var togglerElement=m.togglerElement;
+		if (togglerElement===undefined) return;
+		var dom=m.popupdom;
 		var spacing=16;
 		var pt=togglerElement.offset();
 		var rect=getInnerClientRect(togglerElement);
@@ -951,17 +993,22 @@ Maggi.UI.parts.popup={
 		if (ml<mlmin) ml=mlmin;
 		m.deco.css("margin-left",ml);
 	},
-    builder(m) {
-        m.popupdom=m.wrap;
-        m.deco=$("<div>").prependTo(m.wrap);
-        m.deco2=$("<div>").appendTo(m.deco);
-        m.deco.addClass("popup-triangle-wrapper");
-        m.deco2.addClass("popup-triangle-inner");
-        var place=function() { Maggi.UI.parts.popup.place(m); };
+	builder(m) {
+		m.popupdom=m.wrap;
+		var keyup=function (e) { if (e.keyCode==27) m.ui.switchstate=false; };
+		m.popupdom.on("keyup", keyup);
+		m.deco=$("<div>").prependTo(m.wrap);
+		m.deco2=$("<div>").appendTo(m.deco);
+		m.deco.addClass("popup-triangle-wrapper");
+		m.deco2.addClass("popup-triangle-inner");
+		var place=function() { Maggi.UI.parts.popup.place(m); };
 		m.observer = new MutationObserver(place);
 		m.observer.observe(m.dom[0], { childList:true, subtree:true, attributes:true, characterData:true});
 		$(window).resize(place);
-    }
+		return function() {
+			m.popupdom.off("keyup",keyup);
+		}
+	}
 };
 
 Maggi.UI.parts.actionbar={

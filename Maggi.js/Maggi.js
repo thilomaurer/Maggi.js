@@ -11,7 +11,7 @@ var Maggi=function(other) {
 	var bubbles={};
 
 	if (!(other instanceof Date)) if (!(other instanceof Function)) if (other instanceof Object) if (other._hasMaggi) return other;
-	//if (other instanceof jQuery) return other;
+	if (typeof jQuery !== 'undefined' && other instanceof jQuery) return other;
 	
 	var indexOf = function(keys,key) {
 		if (key==null) return -1;
