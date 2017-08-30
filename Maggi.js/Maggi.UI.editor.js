@@ -27,6 +27,7 @@ Maggi.UI.editor=function(dom,data,setdata,outer_ui,onDataChange) {
 				if (type=="application/javascript") mode="javascript";
 				if (type=="text/css") mode="css";
 				if (type=="text/html") mode="html";
+				if (type=="text/markdown") mode="markdown";
 				if (type=="image/svg+xml") mode="svg";
 				if (type=="application/json") mode="json";
 			}
@@ -34,26 +35,34 @@ Maggi.UI.editor=function(dom,data,setdata,outer_ui,onDataChange) {
 		}
 
 		editor.on("change", function(e) {
-			if (!disableEvents) data.file.data=editor.getValue();
+			if (disableEvents) return;
+			disableEvents=true;
+			data.file.data=editor.getValue();
+			disableEvents=false;
 		});
 		editor.getSession().selection.on('changeCursor', function() {
 			if (disableEvents) return;
+			disableEvents=true;
 			data.file.cursor=editor.getCursorPosition();
+			disableEvents=false;
 		});
 		editor.getSession().on("changeAnnotation", function() {
 			var annot=editor.getSession().getAnnotations();
 			d.annot=annot.slice(0,16);
 		});	
 
-		var updateText = function() {
+		var updateText = function(undo_enable) {
 			var text=null;
 			if (data.file) {
 				text=data.file.data;
 				if (editor.getValue()==text) return;
 			}
-			disableEvents=true; //hack to work around ACE issue.
+			disableEvents=true;
 			if (text==null) text="";
-			editor.session.setValue(text);
+			if (undo_enable)
+				editor.setValue(text);
+			else
+				editor.session.setValue(text);
 			disableEvents=false;
 		};
 		var updateCursor = function() {
@@ -70,15 +79,16 @@ Maggi.UI.editor=function(dom,data,setdata,outer_ui,onDataChange) {
 			var file=data.file;
 			editor.setReadOnly(file==null);
 			fmt.children.annot.selected=null;
-			updateText();
+			updateText(false);
 			updateMode();
 			updateCursor();
 			editor.centerSelection();
 		};
 		var sethandler=function(k,v) {
+			if (disableEvents) return;
 			if (k=="file") updateFile(); 
 			if (k[0]=="file"&&k[1]=="type") updateMode();
-			if (k[0]=="file"&&k[1]=="data") updateText();
+			if (k[0]=="file"&&k[1]=="data") updateText(true);
 			if (k[0]=="file"&&k[1]=="cursor") updateCursor();
 		};
 		var setKeyboard=function(v) {
