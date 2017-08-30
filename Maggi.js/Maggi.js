@@ -18,9 +18,8 @@ var Maggi=function(other) {
 	var trigger = function(e,key,value,oldv) {
 		var fns=events[e];
 		if (fns==null) return;
-		//since fns may be changed during a trigger, may result in infinite loop
-		//BUG: take fixed length for now
-		//TODO: trigger by copy of fns
+		//since fns may be changed during a trigger, make copy of fns
+		fns=fns.slice();
 		var fnsl=fns.length; 
 		if (Maggi.log==true) 
 			console.log("Maggi.log: trigger "+fnsl+" "+e+" for "+JSON.stringify(key));

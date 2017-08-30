@@ -392,8 +392,12 @@ Maggi.UI.link=function(dom,data,setdata,ui,onDataChange) {
 Maggi.UI.image=function(dom,data,setdata,ui,onDataChange) {
 	var update = function(data) {
 		var url=data;
-		if (ui.urls!=null) url=ui.urls[data];
-		img.attr("src",url);
+		if (ui.urls!=null)
+			url=ui.urls[data];
+		if (url)
+			img.attr("src",url);
+		else
+			img.css("display","none");
 	};
 	var unbase=Maggi.UI.BaseFunctionality(dom,data,setdata,ui,onDataChange);
 	var img=$('<img>').appendTo(dom);

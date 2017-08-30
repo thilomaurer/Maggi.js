@@ -454,6 +454,10 @@
 .mui-light .button.red {
 	background: hsla(12, 87%, 50%, 1);
 }
+.mui .button.orange,
+.mui-light .button.orange {
+	background: hsla(45, 87%, 50%, 1);
+}
 .mui .button.green,
 .mui-light .button.green {
 	background: hsla(100, 87%, 50%, 1);
