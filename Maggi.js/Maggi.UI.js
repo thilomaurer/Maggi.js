@@ -64,12 +64,11 @@ Maggi.UI2=function(m) {
         var backbuilder=null;
         if (p.builder) backbuilder=p.builder(m);
         //install bindings
-        var deinstallBindings=null;
-        deinstallBindings=installPartBindings(p,m);
+        var deinstallBindings=installPartBindings(p,m);
         //return backbuilder
         return function() {
-            if (deinstallBindings) deinstallBindings();
-            if (backbuilder) backbuilder();
+            if (deinstallBindings) { deinstallBindings(); deinstallBindings=null; }
+            if (backbuilder) { backbuilder(); backbuilder=null; }
             //remove dom
             for (var k in p.dom)
                 m[k].remove();
@@ -946,9 +945,10 @@ Maggi.UI.parts.popup={
 		s:["set","ui.switchstate","onswitchstate"]
 	},
 	onswitchstate:function(m) {
-		//Maggi.UI.parts.popup.place(m);
-		if (m.ui.switchstate==true)
+		if (m.ui.switchstate==true) {
+			Maggi.UI.parts.popup.place(m);
 			m.popupdom.focus();
+		}
 	},
 	place:function(m) {
 		var getInnerClientRect = function(dom) {
@@ -1001,7 +1001,7 @@ Maggi.UI.parts.popup={
 		m.deco2=$("<div>").appendTo(m.deco);
 		m.deco.addClass("popup-triangle-wrapper");
 		m.deco2.addClass("popup-triangle-inner");
-		var place=function() { Maggi.UI.parts.popup.place(m); };
+		var place=function() { if (m.ui.switchstate==true) Maggi.UI.parts.popup.place(m); };
 		m.observer = new MutationObserver(place);
 		m.observer.observe(m.dom[0], { childList:true, subtree:true, attributes:true, characterData:true});
 		$(window).resize(place);
