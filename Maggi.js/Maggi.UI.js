@@ -357,8 +357,11 @@ Maggi.UI.parts.children={
         var o=m.ui.order;
         if (o) return Object2Array(o);
         o=Object.keys(m.ui.children);
+	function onlyUnique(value, index, self) {
+	    return self.indexOf(value) === index;
+	}
         if (m.ui.childdefault) {
-            o=Array_unique(Object.keys(m.data).concat(o));
+            o=Object.keys(m.data).concat(o).filter(onlyUnique);
         }
         return o;
     },
