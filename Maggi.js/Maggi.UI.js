@@ -577,7 +577,7 @@ Maggi.UI.parts.onClick={
     	    var handled=(ui.onClick!==null)&&(ui.enabled!==false);
     	    if (!handled) return true;
     	    if (typeof ui.onClick === "function")
-    	        ui.onClick(m);
+               ui.onClick.apply(m.parent.data,m);
     	    /*
     	    if (typeof ui.onClick === "string") {
     	        var a=ui.onClick.split(".");
