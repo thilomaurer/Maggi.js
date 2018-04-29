@@ -782,16 +782,18 @@ Maggi.UI.parts.childswitcher={
 Maggi.UI.parts.wrap={
     name:"wrap",
     members:{
-        innerui:null
+        innerui:null,
+        data:undefined
     },
     bindings:{
-        d:["set","data",function(m,k,v) {m.i.data=v;}],
-        e:["set","ui.data",function(m,k,v) {m.i.data=v;}],
-        f:["add","ui.data",function(m,k,v) {m.i.data=v;}],
-        g:["remove","ui.data",function(m,k,v) {m.i.data=m.data;}]
+        d:["set","data",function(m,k,v) {m.i.data=(m.ui.data===undefined)?m.data:m.ui.data;}],
+        e:["set","ui.data",function(m,k,v) {m.i.data=(m.ui.data===undefined)?m.data:m.ui.data;}],
+        f:["add","ui.data",function(m,k,v) {m.i.data=(m.ui.data===undefined)?m.data:m.ui.data;}],
+        g:["remove","ui.data",function(m,k,v) {m.i.data=(m.ui.data===undefined)?m.data:m.ui.data;}]
     },
     builder(m) {
-        var x=Maggi({data:m.data,ui:m.ui.innerui});
+        var innerdata=(m.ui.data===undefined)?m.data:m.ui.data;
+        var x=Maggi({data:innerdata,ui:m.ui.innerui});
         x.dom=m.dom;
         x.bind("set","ui",function(k,v) {m.ui.innerui=v;})
         Maggi.UI2(x);        
