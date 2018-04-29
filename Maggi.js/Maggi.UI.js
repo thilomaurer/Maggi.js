@@ -742,7 +742,6 @@ Maggi.UI.parts.childselect={
             if (m.inner[v]) m.inner[v].m.dom.addClass("selected");
         }],
         f:["set","data",function(m,k,v,ov,e) {
-            for (var k in m.inner) Maggi.UI.parts.childselect.add(m,k);
             var v=m.ui.selected;
             if (m.inner[v]) m.inner[v].m.dom.addClass("selected");
         }],
