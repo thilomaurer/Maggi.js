@@ -429,7 +429,7 @@ Maggi.UI.parts.children={
         if (z==null) return;
         m.inner[k].dom.remove();
         if (z.m.backbuild) z.m.backbuild();
-        if (z.fromdefault===m.ui.children) m.ui.children.remove(k);
+        if (m.ui&&(z.fromdefault===m.ui.children)) m.ui.children.remove(k);
         delete m.inner[k];
     },
     placeall:function(m) {
@@ -577,7 +577,7 @@ Maggi.UI.parts.onClick={
     	    var handled=(ui.onClick!==null)&&(ui.enabled!==false);
     	    if (!handled) return true;
     	    if (typeof ui.onClick === "function")
-               ui.onClick.apply(m.parent.data,m);
+    	        ui.onClick.call(m.parent.data,m);
     	    /*
     	    if (typeof ui.onClick === "string") {
     	        var a=ui.onClick.split(".");
@@ -672,11 +672,11 @@ Maggi.UI.parts.checkbox={
 
 Maggi.UI.parts.function={
     name:"function",
-    members:{label:null},
+    members:{label:null, visible:false},
     parts:"common",
     bindings:{
         f:["set","ui.label",function(m) {m.dom.text(m.ui.label);}],
-        e:["set","data",function(m) { m.ui.onClick=m.data; }]
+        e:["set","data",function(m) { m.ui.onClick=m.data; m.ui.visible=(m.data!=null); }]
     }
 };
 
@@ -697,7 +697,7 @@ Maggi.UI.parts.select={
             m.dom.on("click",function(event) { event.stopPropagation(); });
             $.each(m.ui.choices,function(key,value) {
                 var id=name+"_"+key.toString();
-                m.chld[key]=$("<input>",{name:name,id:id,value:key,type:"radio"}).appendTo(m.dom).change(function() {
+                m.chld[key]=$("<input>",{name:name,id:id,value:key,type:"radio",enabled:m.ui.enabled}).appendTo(m.dom).change(function() {
                     if (this.checked) m.data=key;
                 });
                 var text=value.label;
@@ -710,6 +710,9 @@ Maggi.UI.parts.select={
         d:["set","data",function(m,k,v,oldv) { 
             if (m.chld[oldv]) m.chld[oldv][0].checked=false;
             if (m.chld[v]) m.chld[v][0].checked=true;
+        }],
+        g:["set","ui.enabled",function(m,k,v,oldv) { 
+	    Object.keys(m.chld).forEach(key => m.chld[key].prop('disabled', !v));
         }],
     },
     counter:0
@@ -789,16 +792,16 @@ Maggi.UI.parts.wrap={
         d:["set","data",function(m,k,v) {m.i.data=(m.ui.data===undefined)?m.data:m.ui.data;}],
         e:["set","ui.data",function(m,k,v) {m.i.data=(m.ui.data===undefined)?m.data:m.ui.data;}],
         f:["add","ui.data",function(m,k,v) {m.i.data=(m.ui.data===undefined)?m.data:m.ui.data;}],
-        g:["remove","ui.data",function(m,k,v) {m.i.data=(m.ui.data===undefined)?m.data:m.ui.data;}]
+        g:["remove","ui.data",function(m,k,v) {m.i.data=(m.ui.data===undefined)?m.data:m.ui.data;}],
+        h:["set","ui.innerui",function(m,k,v) {m.i.ui=v;}]
     },
     builder(m) {
         var innerdata=(m.ui.data===undefined)?m.data:m.ui.data;
         var x=Maggi({data:innerdata,ui:m.ui.innerui});
         x.dom=m.dom;
-        x.bind("set","ui",function(k,v) {m.ui.innerui=v;})
+        x.bind("set","ui",function(k,v) {m.ui.innerui=v;});
         Maggi.UI2(x);        
         m.i=x;
-        //m.i=Maggi.UI(m.dom,m.data,m.ui.innerui,m);
         return m.i.backbuild;
     }
 };
@@ -1043,6 +1046,12 @@ Maggi.UI.parts.actionbar={
                 inner:null
             }
         },m);
+	m.i.data.bind("set","inner",function(k,v,ov) {
+		if (m.ui.data===undefined)
+			m.data=v;
+		else
+			m.ui.data=v;
+	});
         return m.i.backbuild;
     },
     bindings: {

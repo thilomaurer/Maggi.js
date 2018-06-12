@@ -140,7 +140,7 @@
 .mui.disabled,
 .mui .disabled,
 .mui .input.disabled input {
-	color:gray;
+	color:darkgray;
 }
 /*
 .mui-light .popup > #title,
@@ -253,86 +253,50 @@
 
 .mui-light .selectable.selected,
 .mui .selectable.selected,
-.mui-light .simplelist.selectable > .selected,
-.mui .simplelist.selectable > .selected,
 .mui-light.tablelist.selectable > .selected,
 .mui-light .tablelist.selectable > .selected,
 .mui.tablelist.selectable > .selected,
 .mui .tablelist.selectable > .selected {
 	background: hsla(200, 87%, 50%, 1);
 	color:inherit;
+}
+
+.mui-light .simplelist > .selectable.selected,
+.mui .simplelist > .selectable.selected,
+.mui-light.tablelist.selectable > .selected,
+.mui-light .tablelist.selectable > .selected,
+.mui.tablelist.selectable > .selected,
+.mui .tablelist.selectable > .selected {
 	border-left: 15px solid hsla(200, 87%, 50%, 1);
 	margin-left: 0;
 }
-/*
-.mui-light .selectable.selected:hover,
-.mui .selectable.selected:hover,
-.mui-light .simplelist.selectable > .selected:hover,
-.mui .simplelist.selectable > .selected:hover,
-.mui-light.tablelist.selectable > .selected:hover,
-.mui-light .tablelist.selectable > .selected:hover,
-.mui.tablelist.selectable > .selected:hover,
-.mui .tablelist.selectable > .selected:hover {
-	background: hsla(200, 87%, 50%, 1);
-	border-left: 15px solid hsla(200, 87%, 50%, 1);
-	margin-left: 0;
+
+.mui .simplelist > .selectable.disabled:hover,
+.mui.tablelist.selectable > *.disabled:hover,
+.mui .tablelist.selectable > *.disabled:hover{
+	border-left: 0;
+	margin-left: 15px;
 }
-*/
-.mui .selectable:hover,
-.mui .simplelist.selectable > *:hover,
+
+.mui .simplelist > .selectable:hover,
 .mui.tablelist.selectable > *:hover,
 .mui .tablelist.selectable > *:hover{
-	background:hsla(224, 8%, 50%, 1);
 	border-left: 15px solid hsla(224, 8%, 50%, 1);
 	margin-left: 0;
 }
 
-/*
-.mui .selectable {
-    position: relative;
-
+.mui .selectable:hover,
+.mui.tablelist.selectable > *:hover,
+.mui .tablelist.selectable > *:hover{
+	background:hsla(224, 8%, 50%, 1);
 }
-
-.mui .selectable.selected:before {
-    content: "";
-    position: absolute;
-    left: -15px;
-    right: 0;
-    background: hsla(200, 87%, 50%, .5);
-    display: block;
-    top: 0;
-    bottom: 0;
-}
-
-.mui .selectable:hover:after {
-    content: "";
-    position: absolute;
-    left: -15px;
-    right: 0;
-    background: hsla(0,100%,100%,0.3);
-    display: block;
-    top: 0;
-    bottom: 0;
-}
-
-.mui .selectable.selected:hover:after {
-    content: "";
-    position: absolute;
-    left: -15px;
-    right: 0;
-    background: hsla(0,100%,100%,0.5);
-    display: block;
-    top: 0;
-    bottom: 0;
-}
-*/
 
 .mui-light .selectable.disabled:hover,
 .mui .selectable.disabled:hover,
-.mui-light .simplelist.selectable > *.disabled:hover,
+.mui-light .simplelist > .selectable.disabled:hover,
 .mui-light .tablelist.selectable > *.disabled:hover,
 .mui-light.tablelist.selectable > *.disabled:hover,
-.mui .simplelist.selectable > *.disabled:hover,
+.mui .simplelist > .selectable.disabled:hover,
 .mui .tablelist.selectable > *.disabled:hover,
 .mui.tablelist.selectable > *.disabled:hover{
 	background:inherit;
@@ -667,7 +631,7 @@
 .mui-light .input > #prefix {
     margin-left: 5px;
     margin-right: 5px;
-	flex:0 0 auto;
+    flex:0 0 auto;
 }
  
 .mui .input input,
@@ -770,13 +734,24 @@
 	background:hsla(224, 8%, 42%, 1);
 }
 
+.mui .select.disabled label:hover {
+	background:inherit;
+}
+
 .mui .select input:checked + label {
 	background:white;
 	color:black;
 }
 
+.mui .select.disabled input:checked + label {
+	background:white;
+	color:black;
+}
 .mui-light .select label:hover {
 	background:#aaa;
+}
+.mui-light .select.disabled label:hover {
+	background:inherit;
 }
 
 .mui-light .select input:checked + label {

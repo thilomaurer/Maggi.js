@@ -37,11 +37,11 @@ var Maggi = function(other) {
 	var trigger = function(e, key, value, oldv) {
 		var fns = events[e];
 		if (fns == null) return;
-		//trigger by copy of fns, since fns may be changed during a trigger, may result in infinite loop
-		fns = fns.slice();
-		var fnsl = fns.length;
 		if (Maggi.log == true) {
-			console.log("Maggi.trigger:", fnsl, "triggers of " + e + " for ", key, d);
+			var keytrace=key;
+			if (key instanceof Array)
+				keytrace=key.slice().reverse().join("->");
+			console.log("Maggi.trigger:", fns.length, "triggers of " + e + " for ", keytrace, p);
 			if (Maggi.logtrace == true) {
 				var stacktrace = function() {
 					var s = (new Error()).stack.split("\n");
@@ -54,11 +54,21 @@ var Maggi = function(other) {
 				console.log(stacktrace());
 			}
 		}
-		for (var i = 0; i < fnsl; i++) {
-			var f = fns[i];
-			if (Maggi.trace === true) console.log("Maggi.trigger:", f.keys, key);
-			if (!f.keys || (indexOf(f.keys, key) > -1))
-				f.fn(key, value, oldv, e);
+		//trigger all fns once, even those newly added or removed during execution of these
+		var fns_complete=[];
+		var fns_complete_added=true;
+		while (fns_complete_added) {
+			fns_complete_added=false;
+			for (var i=0;i<fns.length;i++) {
+				var f = fns[i];
+				if (fns_complete.indexOf(f)==-1) {
+					if (Maggi.trace === true) console.log("Maggi.trigger:", f.keys, key);
+					if (!f.keys || (indexOf(f.keys, key) > -1))
+						f.fn(key, value, oldv, e);
+					fns_complete.push(f);
+					fns_complete_added=true;
+				}
+			}
 		}
 	};
 
@@ -110,9 +120,9 @@ var Maggi = function(other) {
 			};
 			var bubbleFuncs = {};
 			bubbles[key] = bubbleFuncs;
-			bubbleEvents.forEach(function(e) {
-				bubbleFuncs[e] = function(k, v, oldv) { bubble(e, key, k, v, oldv) };
-			});
+			bubbleFuncs.set = function set_bubble(k, v, oldv) { bubble("set", key, k, v, oldv) };
+			bubbleFuncs.add = function add_bubble(k, v, oldv) { bubble("add", key, k, v, oldv) };
+			bubbleFuncs.remove = function remove_bubble(k, v, oldv) { bubble("remove", key, k, v, oldv) };
 			if (p.hasOwnProperty(key)) {
 				//console.log('Maggi.add: set by add for property "'+key+'" of '+JSON.stringify(p)+'.');
 				set(value);
@@ -387,11 +397,25 @@ Maggi.db.create = function(server, dbreq, cb, useroptions) {
 		db.bind("set", saveFS);
 	};
 
+	var stringify = function(db) { return JSON.stringify(db, null, '\t'); };
+	
+	var save_active=false;
+	var delay=10000;
+
+	function save(db) {
+		if (save_active) return;
+		save_active=true;
+		setTimeout(() => {
+			save_now(db);
+			save_active=false;
+		},delay);
+	}
+
+	function save_now(db) {
+		writefile(dbjson, stringify(db), options.enc);
+	};
 	function bindsave(db) {
-		var stringify = function() { return JSON.stringify(db, null, '\t'); };
-		db.bind("set", "rev", function() {
-			writefile(dbjson, stringify, options.enc);
-		});
+		db.bind("set", "rev", function() { save(db) });
 	};
 
 	function engage(db) {
@@ -425,8 +449,11 @@ Maggi.db.create = function(server, dbreq, cb, useroptions) {
 		if (fs.existsSync(dbjson)) {
 			console.log("loading " + dbname + " from file");
 			Maggi.db.load(dbjson, options.enc, initcomplete);
-		} else
-			initcomplete({ data: options.initialdata, rev: options.initialrev });
+		} else {
+			var db={ data: options.initialdata, rev: options.initialrev };
+			save(db);
+			initcomplete(db);
+		}
 	}
 };
 
@@ -525,10 +552,14 @@ Maggi.db.sync = function(socket, dbreq, db, client, events, onsync, synclog) {
 				console.log(socket.id, key, mk);
 	};
 	log({ true: "client", false: "serve" }[client]);
-	var emit = function(d) { log("emit", d);
-		socket.emit(mk, d); };
+	var emit = function(d) {
+		log("emit", d);
+		socket.emit(mk, d);
+	};
 	var handler = function(k, v, oldv, e) {
 		if (applying) return;
+		if (v instanceof Function)
+			v=null;
 		emit({ f: "delta", e: e, k: k, rev: db.rev, v: v });
 	};
 	var apply = function(d) {
@@ -537,25 +568,39 @@ Maggi.db.sync = function(socket, dbreq, db, client, events, onsync, synclog) {
 		db.rev = d.rev;
 		applying = false;
 	};
+	var resync = function() {
+		db.insync = false;
+		console.log("requesting", dbname);
+		emit({ f: "request" });
+		db.waitsync = true;
+	};
 	db.data.bind("set", handler);
 	db.data.bind("add", handler);
 	db.data.bind("remove", handler);
 	socket.on(mk, function(d) {
 		log("recv", d);
 		if (d.f == "delta") {
-			if (insync && d.rev == db.rev + 1) {
+			if (db.insync && d.rev == db.rev + 1) {
 				apply(d);
 			} else {
-				log("out-of-sync");
-				if (!waitsync) resync();
-				//emit({f:"error",id:"old_rev", cur_rev:db.rev, req_rev:d.rev});
+				if (client) {
+					db.insync=false;
+					if (!db.waitsync) {
+						log("out-of-sync client; requesting resync");
+						resync();
+					}
+				} else {
+					log("rejecting out-of-sync client request");
+					emit({f:"error",id:"old_rev", cur_rev:db.rev, req_rev:d.rev});
+				}
 			}
 		}
 		if (d.f == "request")
 			emit({ f: "response", e: "add", k: null, v: db.data, rev: db.rev });
-		if (d.f == "response" && waitsync) {
+		if (d.f == "response" && db.waitsync) {
 			apply(d);
-			insync = true;
+			db.insync = true;
+			db.sync_count++;
 			if (onsync) onsync();
 			if (events && events.ready) events.ready(dbname, db.data);
 		}
@@ -571,14 +616,8 @@ Maggi.db.sync = function(socket, dbreq, db, client, events, onsync, synclog) {
 			db.data.unbind("remove",handler);
 		});
 	*/
-	var insync = true;
-	var waitsync = false;
-	var resync = function() {
-		insync = false;
-		console.log("requesting", dbname);
-		emit({ f: "request" });
-		waitsync = true;
-	}
+	db.insync = !client;
+	db.waitsync = false;
 };
 
 clientdbs = {};
@@ -595,47 +634,61 @@ Maggi.db.client = function(dbreq, events, defs, options) {
 	if (typeof dbreq === 'string') dbreq = { id: dbreq };
 	if (dbreq.id_str === undefined) dbreq.id_str = JSON.stringify(dbreq.id);
 	var dbname = dbreq.id_str;
+	var raise_event=function(eventname) {
+		if (options.eventlog === true)
+			console.log(socket.id, eventname, dbname);
+		var args=[].slice.call(arguments,1);
+		db.events.forEach(function(evt) {
+			if (evt[eventname]) evt[eventname].apply(null,args);
+		});
+	}
 	if (clientdbs[dbname] !== undefined) {
+		var db=clientdbs[dbname];
+		if (db.events===undefined) db.events=[];
+		if (events) db.events.push(events);
 		if (dbreq.attr) {
 			socket.emit("Maggi.db", dbreq);
 		}
-		return clientdbs[dbname].data;
+		var dbdata=db.data;
+		if (db.insync) raise_event("ready",dbname,dbdata);
+		if (db.insync) raise_event("first_sync",dbname,dbdata);
+		return dbdata;
 	}
 
 	var add_unset = function(o, def) {
 		for (var k in def) {
-			if (o[k] == null) o.add(k, def[k]);
-			else
-			if (o[k] instanceof Object) add_unset(o[k], def[k]);
+			var v=def[k];
+			if (v instanceof Function) continue;
+			if (o[k] == null) o.add(k, v);
+			else if (o[k] instanceof Object) add_unset(o[k], v);
 		}
 	};
 
-	if (events == null) events = {};
 	var data = Maggi({});
-	var db = { data: data, rev: 0 };
+	var db = { data: data, rev: 0, insync: false, sync_count:0, events:[] };
+	if (events) db.events.push(events);
 	clientdbs[dbname] = db;
+
 	var handler = function() { db.rev += 1; };
 	data.bind("set", handler);
 	data.bind("add", handler);
 	data.bind("remove", handler);
+
 	var onsync = function() {
-		add_unset(data, defs);
+		if (db.rev == 0)
+			add_unset(data, defs);
+		if (db.sync_count==1) raise_event("first_sync",dbname,data);
 	};
 	var register = function() {
 		socket.emit("Maggi.db", dbreq);
-		var v = "connecting";
-		if (options.eventlog === true)
-			console.log(socket.id, v, dbname);
-		if (events[v]) events[v](dbname);
+		raise_event("connecting",dbname);
 	};
 
 	socket.on("reconnect", register);
 	var evs = ['error', 'disconnect', 'reconnect', 'reconnect_attempt', 'reconnect_error', 'reconnect_failed'];
 	evs.forEach(function(v) {
 		socket.on(v, function(e) {
-			if (options.eventlog === true)
-				console.log(socket.id, v, dbname, e);
-			if (events[v]) events[v](dbname, e);
+			raise_event(v, dbname, e);
 		});
 	});
 	Maggi.db.sync(socket, dbreq, db, true, events, onsync, options && options.synclog);
