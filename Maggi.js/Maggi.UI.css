@@ -415,7 +415,7 @@
 	text-align:center;
 	cursor:pointer;
 	border-radius:5px;
-	padding:5px;
+	padding:5px 10px;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	-khtml-user-select: none;

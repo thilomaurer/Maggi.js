@@ -108,6 +108,7 @@ Maggi.UI.BaseFunctionality=function(dom,data,setdata,ui,onDataChange) {
 
 		if (triggerElement==null) { console.log("Maggi.UI: triggerelement not found."); return; }
 		var triggerElementClick=function() {
+			deco.prependTo(dom);
 			ui.visible=!ui.visible;
 			return false;
 		};
