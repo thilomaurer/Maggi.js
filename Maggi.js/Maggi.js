@@ -397,7 +397,7 @@ Maggi.db.create = function(server, dbreq, cb, useroptions) {
 		db.bind("set", saveFS);
 	};
 
-	var stringify = function(db) { return JSON.stringify(db, null, '\t'); };
+	var stringify = function(db) { return JSON.stringify(db, null, '\t')+'\n'; };
 	
 	var save_active=false;
 	var delay=10000;
@@ -509,7 +509,7 @@ Maggi.db.server = function(io, dbnames) {
 Maggi.db.server.path = "db";
 
 Maggi.db.server.vive = function(server, dbreq, callback) {
-	if (dbreq.id_str === undefined) dbreq.id_str = JSON.stringify(dbreq.id);
+	if (dbreq.id_str === undefined) dbreq.id_str = (typeof dbreq.id === "string") ? dbreq.id: JSON.stringify(dbreq.id);
 	var db = server.dbs[dbreq.id_str];
 	var dbns = server.dbnames;
 	if (db === undefined) {
@@ -632,7 +632,7 @@ Maggi.db.client = function(dbreq, events, defs, options) {
 		Maggi.db.client.socket = socket;
 	}
 	if (typeof dbreq === 'string') dbreq = { id: dbreq };
-	if (dbreq.id_str === undefined) dbreq.id_str = JSON.stringify(dbreq.id);
+	if (dbreq.id_str === undefined) dbreq.id_str = (typeof dbreq.id === "string") ? dbreq.id: JSON.stringify(dbreq.id);
 	var dbname = dbreq.id_str;
 	var raise_event=function(eventname) {
 		if (options.eventlog === true)
