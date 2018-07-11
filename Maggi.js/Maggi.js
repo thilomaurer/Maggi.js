@@ -419,7 +419,7 @@ Maggi.db.create = function(server, dbreq, cb, useroptions) {
 	};
 
 	function engage(db) {
-		if (Maggi.db.server.dbs[dbname] !== undefined) return;
+		if (server.dbs[dbname].state != "vive") return;
 		var handler = function() {
 			db.rev += 1;
 		};
@@ -430,7 +430,7 @@ Maggi.db.create = function(server, dbreq, cb, useroptions) {
 		if (options.bindfs) bindfs(db);
 		if (options.persistant) bindsave(db);
 
-		Maggi.db.server.dbs[dbname] = db;
+		server.dbs[dbname] = db;
 		if (Maggi.db.server.log)
 			console.log("engage", dbreq);
 		if (cb) cb(db);
@@ -438,7 +438,7 @@ Maggi.db.create = function(server, dbreq, cb, useroptions) {
 
 	function initcomplete(db) {
 		if (db == null) return;
-		if (Maggi.db.server.dbs[dbname] !== undefined) return;
+		if (server.dbs[dbname].state != "vive") return;
 		db = Maggi(db);
 		var ch = options.createhook;
 		if (ch) ch(server, dbreq, db, function() { engage(db); });
@@ -460,15 +460,13 @@ Maggi.db.create = function(server, dbreq, cb, useroptions) {
 Maggi.db.ionamespace = "/Maggi.db";
 
 Maggi.db.server = function(io, dbnames) {
-	var dbs = {};
-	Maggi.db.server.dbs = dbs;
-
 	if (typeof dbnames === 'string') dbnames = [dbnames];
 	var server = {
-		dbs: dbs,
-		dbnames: dbnames,
+		dbs: {},
+		dbnames: dbnames||[],
 		io: io,
 		clients: {},
+		requesthook: null
 	};
 
 	io.of(Maggi.db.ionamespace).on('connection', function(socket) {
@@ -503,7 +501,7 @@ Maggi.db.server = function(io, dbnames) {
 				console.log(socket.id, "disconnect", e);
 		});
 	});
-	return dbs;
+	return server;
 };
 
 Maggi.db.server.path = "db";
@@ -513,14 +511,15 @@ Maggi.db.server.vive = function(server, dbreq, callback) {
 	var db = server.dbs[dbreq.id_str];
 	var dbns = server.dbnames;
 	if (db === undefined) {
+		server.dbs[dbreq.id_str] = {state:"vive"};
 		var accept = function(options) {
 			Maggi.db.create(server, dbreq, callback, options);
 		};
-		var rh = Maggi.db.server.requesthook;
+		var rh = server.requesthook;
 		if (dbns && dbns.indexOf(dbreq.id_str) != -1) accept();
 		else if (rh) rh(dbreq, accept);
 		else
-			console.log("rejected");
+			console.log("rejected", dbreq);
 	} else
 		callback(db);
 }
