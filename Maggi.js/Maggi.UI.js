@@ -938,8 +938,8 @@ Maggi.UI.parts.switchable={
 
 Maggi.UI.parts.popup={
 	name:"popup",
-	parts:["switchable","domwrap"],
-	partclass:"popup scroll visibilityanimate",
+	parts:["switchable"],
+	partclass:"popup visibilityanimate",
 	members:{
 		switchstate:false, 
 		switchclass:{false:"invisible"}
@@ -954,7 +954,7 @@ Maggi.UI.parts.popup={
 	onswitchstate:function(m) {
 		if (m.ui.switchstate==true) {
 			Maggi.UI.parts.popup.place(m);
-			m.popupdom.focus();
+			m.outer.focus();
 		}
 	},
 	place:function(m) {
@@ -976,7 +976,7 @@ Maggi.UI.parts.popup={
 		m.deco.css("margin-left",0);
 		var togglerElement=m.togglerElement;
 		if (togglerElement===undefined) return;
-		var dom=m.popupdom;
+		var dom=m.outer;
 		var spacing=16;
 		var pt=togglerElement.offset();
 		var rect=getInnerClientRect(togglerElement);
@@ -1001,10 +1001,14 @@ Maggi.UI.parts.popup={
 		m.deco.css("margin-left",ml);
 	},
 	builder(m) {
-		m.popupdom=m.wrap;
+		m.outer=m.dom;
+		m.inner=$("<div>").appendTo(m.outer);
+		m.inner.addClass("popup-content");
+		m.dom=$("<div>").appendTo(m.inner);
+
 		var keyup=function (e) { if (e.keyCode==27) m.ui.switchstate=false; };
-		m.popupdom.on("keyup", keyup);
-		m.deco=$("<div>").prependTo(m.wrap);
+		m.outer.on("keyup", keyup);
+		m.deco=$("<div>").prependTo(m.outer);
 		m.deco2=$("<div>").appendTo(m.deco);
 		m.deco.addClass("popup-triangle-wrapper");
 		m.deco2.addClass("popup-triangle-inner");
@@ -1013,8 +1017,8 @@ Maggi.UI.parts.popup={
 		m.observer.observe(m.dom[0], { childList:true, subtree:true, attributes:true, characterData:true});
 		$(window).resize(place);
 		return function() {
-			m.popupdom.off("keyup",keyup);
-		}
+			m.outer.off("keyup",keyup);
+		};
 	}
 };
 

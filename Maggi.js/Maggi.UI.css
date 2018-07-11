@@ -74,10 +74,16 @@
 	transition: opacity 350ms ease, visibility 0s linear 350ms;
 }
 
+.mui-light .popup > .popup-content,
+.mui .popup > .popup-content {
+	overflow: auto;
+	height: 100%;
+}
+
 .mui-light .popup > .popup-triangle-wrapper,
 .mui .popup > .popup-triangle-wrapper {
 	overflow: hidden;
-	position: fixed;
+	position: relative;
 	height:17px;
 	margin: 0px;
 	margin-top:-17px;
