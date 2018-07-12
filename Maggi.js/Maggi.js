@@ -511,17 +511,26 @@ Maggi.db.server.vive = function(server, dbreq, callback) {
 	var db = server.dbs[dbreq.id_str];
 	var dbns = server.dbnames;
 	if (db === undefined) {
-		server.dbs[dbreq.id_str] = {state:"vive"};
+		server.dbs[dbreq.id_str] = {state:"vive", callbacks:[callback]};
+		db = server.dbs[dbreq.id_str];
 		var accept = function(options) {
-			Maggi.db.create(server, dbreq, callback, options);
+			var pdb=db;
+			Maggi.db.create(server, dbreq, function(db) {
+				for (var i in pdb.callbacks) {
+					var cb = pdb.callbacks[i];
+					if (cb) cb(db);
+				}
+			}, options);
 		};
 		var rh = server.requesthook;
 		if (dbns && dbns.indexOf(dbreq.id_str) != -1) accept();
 		else if (rh) rh(dbreq, accept);
 		else
 			console.log("rejected", dbreq);
+	} else if (db.state == "vive") {
+		if (callback) db.callbacks.push(callback);
 	} else
-		callback(db);
+		if (callback) callback(db);
 }
 
 Maggi.db.sync = function(socket, dbreq, db, client, events, onsync, synclog) {
