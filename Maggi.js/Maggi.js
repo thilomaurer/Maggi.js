@@ -364,7 +364,7 @@ Maggi.db.load = function(filename, enc, cb) {
 }
 
 Maggi.db.create = function(server, dbreq, cb, useroptions) {
-	if (Maggi.db.server.log)
+	if (server.log)
 		console.log("create", dbreq);
 	var dbname = dbreq.id_str;
 	var options = {
@@ -431,7 +431,7 @@ Maggi.db.create = function(server, dbreq, cb, useroptions) {
 		if (options.persistant) bindsave(db);
 
 		server.dbs[dbname] = db;
-		if (Maggi.db.server.log)
+		if (server.log)
 			console.log("engage", dbreq);
 		if (cb) cb(db);
 	};
@@ -459,18 +459,20 @@ Maggi.db.create = function(server, dbreq, cb, useroptions) {
 
 Maggi.db.ionamespace = "/Maggi.db";
 
-Maggi.db.server = function(io, dbnames) {
+Maggi.db.server = function(io, dbnames, options) {
 	if (typeof dbnames === 'string') dbnames = [dbnames];
 	var server = {
 		dbs: {},
 		dbnames: dbnames||[],
 		io: io,
 		clients: {},
-		requesthook: null
+		requesthook: null,
+		log: false || options&&options.log,
+		synclog: false || options&&options.synclog
 	};
 
 	io.of(Maggi.db.ionamespace).on('connection', function(socket) {
-		if (Maggi.db.server.log)
+		if (server.log)
 			console.log(socket.id, "connected");
 		clientdbs = [];
 		server.clients[socket.id] = clientdbs;
@@ -484,12 +486,12 @@ Maggi.db.server = function(io, dbnames) {
 				var dbid = dbreq.id_str;
 				if (clientdbs.indexOf(dbid) == -1) {
 					clientdbs.push(dbid);
-					if (Maggi.db.server.log)
+					if (server.log)
 						console.log("startsync", dbreq);
-					Maggi.db.sync(socket, dbreq, db, false, null, null, dbreq.stockChart == "AAPL");
+					Maggi.db.sync(socket, dbreq, db, false, null, null, server.synclog);
 					socket.emit("Maggi.db." + dbid, { f: "connected" });
 				} else {
-					if (Maggi.db.server.log)
+					if (server.log)
 						console.log("command", dbreq);
 					if (db.req) db.req(dbreq);
 				}
@@ -497,7 +499,7 @@ Maggi.db.server = function(io, dbnames) {
 			Maggi.db.server.vive(server, dbreq, startsync);
 		});
 		socket.on('disconnect', function(e) {
-			if (Maggi.db.server.log)
+			if (server.log)
 				console.log(socket.id, "disconnect", e);
 		});
 	});
