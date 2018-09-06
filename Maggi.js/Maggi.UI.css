@@ -117,7 +117,7 @@
 	font-family: 'Open Sans';
 	font-style: normal;
 	font-weight: 400;
-	src: local('Open Sans'), local('OpenSans'), url(Open Sans.woff) format('woff'), url(https://themes.googleusercontent.com/static/fonts/opensans/v8/cJZKeOuBrn4kERxqtaUH3T8E0i7KZn-EPnyo3HZu7kw.woff) format('woff');
+	src: local('Open Sans'), local('OpenSans'), url('Open Sans.woff') format('woff'), url('https://themes.googleusercontent.com/static/fonts/opensans/v8/cJZKeOuBrn4kERxqtaUH3T8E0i7KZn-EPnyo3HZu7kw.woff') format('woff');
 }
 
 .mui {
@@ -639,6 +639,12 @@
     margin-right: 5px;
     flex:0 0 auto;
 }
+
+.mui .input > #midfix,
+.mui-light .input > #midfix {
+    margin-left: 5px;
+    margin-right: 5px;
+}
  
 .mui .input input,
 .mui-light .input input {
@@ -671,25 +677,28 @@
 	box-shadow: 0 0 0 1px red;
 }
 
-.mui .input.first,
-.mui-light .input.first {
-	margin-bottom:0px;
-	border-bottom-left-radius:0px;
-	border-bottom-right-radius:0px;
+.mui .input.adjacent-top,
+.mui-light .input.adjacent-top {
+	margin-bottom: 0px;
+	border-bottom-left-radius: 0px;
+	border-bottom-right-radius: 0px;
 }
 
-.mui .input + .input,
-.mui-light .input + .input {
-	margin-top:1px;
-	border-top-left-radius:0px;
-	border-top-right-radius:0px;
+.mui .input.adjacent-middle,
+.mui-light .input.adjacent-middle {
+	margin-top: 1px;
+	margin-bottom: 0px;
+	border-bottom-left-radius: 0px;
+	border-bottom-right-radius: 0px;
+	border-top-left-radius: 0px;
+	border-top-right-radius: 0px;
 }
 
-.mui .input.invisible + .input,
-.mui-light .input.invisible + .input {
-	margin-top:0px;
-	border-top-left-radius:5px;
-	border-top-right-radius:5px;
+.mui .input.adjacent-bottom,
+.mui-light .input.adjacent-bottom {
+	margin-top: 1px;
+	border-top-left-radius: 0px;
+	border-top-right-radius: 0px;
 }
 
 /* SELECT */
