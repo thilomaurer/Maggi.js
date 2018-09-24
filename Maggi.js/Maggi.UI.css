@@ -5,6 +5,8 @@
  * LAGPL-3.0 - https://github.com/thilomaurer/Maggi.js/blob/master/LICENSE
  */
 
+@import "./node_modules/typeface-open-sans/index.css";
+
 :root {
 	--mui-dark-color: hsla(224, 8%, 15%, 1);
 	--mui-gray-color: hsla(224, 8%, 22%, 1);
@@ -110,14 +112,6 @@
 .mui.popup > .popup-triangle-wrapper > .popup-triangle-inner {
 	border: 1px solid hsla(224, 8%, 15%, 1);
 	background: hsla(224, 8%, 30%, 1); //var(--mui-normal-color);
-}
-
-
-@font-face {
-	font-family: 'Open Sans';
-	font-style: normal;
-	font-weight: 400;
-	src: local('Open Sans'), local('OpenSans'), url('Open Sans.woff') format('woff'), url('https://themes.googleusercontent.com/static/fonts/opensans/v8/cJZKeOuBrn4kERxqtaUH3T8E0i7KZn-EPnyo3HZu7kw.woff') format('woff');
 }
 
 .mui {

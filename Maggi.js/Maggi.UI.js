@@ -292,7 +292,8 @@ Maggi.UI.parts.input={
         as:   ["set","autosize","as"],
         f:    ["set","ui.focus",function(m,k,v) { if (v===true) m.i.focus(); }],
         g:    ["set","ui.enabled",function(m,k,v) { var r="readonly"; if (v===false) m.i.attr(r,r); else m.i.removeAttr(r); }],
-        alerting:["set","ui.alerting",function(m,k,v) { if (v===true) m.dom.addClass("alerting"); else m.dom.removeClass("alerting"); }]
+        alerting:["set","ui.alerting",function(m,k,v) { if (v===true) m.dom.addClass("alerting"); else m.dom.removeClass("alerting"); }],
+        vis:  ["set","ui.visible",function(m,k,v) { if (m.ui.focus==true) m.i.focus(); }]
     },
     dom:{prefix:"div",midfix:"div",postfix:"div",i:"input"},
     as:function(m) {
