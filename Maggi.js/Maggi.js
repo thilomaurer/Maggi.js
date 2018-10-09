@@ -363,147 +363,170 @@ Maggi.db.load = function(filename, enc, cb) {
 	cb(db);
 }
 
-Maggi.db.create = function(server, dbreq, cb, useroptions) {
-	if (server.log)
-		console.log("create", dbreq);
-	var dbname = dbreq.id_str;
-	var options = {
-		bindfs: false,
-		persistant: true,
-		loadexisting: true,
-		initialdata: {},
-		initialrev: 0,
-		enc: "utf8"
-	};
-	for (var k in useroptions)
-		options[k] = useroptions[k];
-
-	var dirname = process.cwd();
-	var basename = dirname + "/" + Maggi.db.server.path + "/" + dbname;
-	var dbjson = basename + ".json";
-
-	function bindfs(db) {
-		var dbdir = basename + ".fs/";
-		var saveFS = function(k, v) {
-			if (v instanceof Object) {
-				for (var k1 in v)
-					saveFS(k.concat(k1), v[k1]);
-				return;
-			}
-			if (k instanceof Array) k = k.join("/");
-			var fp = dbdir + k;
-			writefile(fp, v, options.enc);
+Maggi.db.create = function(server, dbreq, useroptions) {
+	return new Promise((resolve,reject) => {
+		var dbname = dbreq.id_str;
+		dbreq.log("create");
+		var options = {
+			bindfs: false,
+			persistant: true,
+			loadexisting: true,
+			initialdata: {},
+			initialrev: 0,
+			enc: "utf8",
+			allow_create: false
 		};
-		db.bind("set", saveFS);
-	};
+		for (var k in useroptions)
+			options[k] = useroptions[k];
 
-	var stringify = function(db) { return JSON.stringify(db, null, '\t')+'\n'; };
-	
-	var save_active=false;
-	var delay=10000;
+		var basename = Maggi.db.server.fulldbpath() + "/" + dbname;
+		var dbjson = Maggi.db.server.dbpathname(dbname);
 
-	function save(db) {
-		if (save_active) return;
-		save_active=true;
-		setTimeout(() => {
-			save_now(db);
-			save_active=false;
-		},delay);
-	}
-
-	function save_now(db) {
-		writefile(dbjson, stringify(db), options.enc);
-	};
-	function bindsave(db) {
-		db.bind("set", "rev", function() { save(db) });
-	};
-
-	function engage(db) {
-		if (server.dbs[dbname].state != "vive") return;
-		var handler = function() {
-			db.rev += 1;
-		};
-		db.data.bind("set", handler);
-		db.data.bind("add", handler);
-		db.data.bind("remove", handler);
-
-		if (options.bindfs) bindfs(db);
-		if (options.persistant) bindsave(db);
-
-		server.dbs[dbname] = db;
-		if (server.log)
-			console.log("engage", dbreq);
-		if (cb) cb(db);
-	};
-
-	function initcomplete(db) {
-		if (db == null) return;
-		if (server.dbs[dbname].state != "vive") return;
-		db = Maggi(db);
-		var ch = options.createhook;
-		if (ch) ch(server, dbreq, db, function() { engage(db); });
-		else engage(db);
-	};
-
-	var reject = function(message) {
-		console.warn(`db create for ${dbreq.id_str} rejected: ${message}`);
-	};
-
-	if (options.persistant || options.loadexisting) {
-		if (fs.existsSync(dbjson)) {
-			if (dbreq.create !== undefined && dbreq.create==true) {
-				reject("db already exists, but creation requested");
-			} else {
-				console.log("loading " + dbname + " from file");
-				Maggi.db.load(dbjson, options.enc, initcomplete);
-			}
-		} else {
-			if (dbreq.create !== undefined && dbreq.create==false) {
-				reject("db not yet existing, but creation excluded");
-			} else {
-				var db = {
-					data: options.initialdata,
-					rev: options.initialrev
-				};
-				if (dbreq.credentials != null) {
-					var username = dbreq.credentials.username;
-					db.users = {}
-					db.users[username] ={
-						role: "admin",
-						username: username,
-						password_hash: dbreq.credentials.password_hash,
-					}
+		function bindfs(db) {
+			var dbdir = basename + ".fs/";
+			var saveFS = function(k, v) {
+				if (v instanceof Object) {
+					for (var k1 in v)
+						saveFS(k.concat(k1), v[k1]);
+					return;
 				}
-				save(db);
-				initcomplete(db);
+				if (k instanceof Array) k = k.join("/");
+				var fp = dbdir + k;
+				writefile(fp, v, options.enc);
+			};
+			db.bind("set", saveFS);
+		};
+
+		var stringify = function(db) { return JSON.stringify(db, null, '\t')+'\n'; };
+		
+		var save_active=false;
+		var delay=10000;
+
+		function save(db) {
+			if (save_active) return;
+			save_active=true;
+			setTimeout(() => {
+				save_now(db);
+				save_active=false;
+			},delay);
+		}
+
+		function save_now(db) {
+			writefile(dbjson, stringify(db), options.enc);
+		};
+		function bindsave(db) {
+			db.bind("set", "rev", function() { save(db) });
+		};
+
+		function engage(db) {
+			if (server.dbs[dbname].state != "vive") return;
+			dbreq.log("engage");
+			var handler = function() {
+				db.rev += 1;
+			};
+			db.data.bind("set", handler);
+			db.data.bind("add", handler);
+			db.data.bind("remove", handler);
+
+			if (options.bindfs) bindfs(db);
+			if (options.persistant) bindsave(db);
+
+			server.dbs[dbname] = db;
+			resolve(db);
+		};
+
+		function initcomplete(db) {
+			dbreq.log("init complete");
+			if (db == null) return;
+			if (server.dbs[dbname].state != "vive") return;
+			db = Maggi(db);
+			var ch = options.createhook;
+			if (ch) {
+				dbreq.log("create hook");
+				ch(server, db, options.pathmatch, function() { engage(db); });
+			}
+			else engage(db);
+		};
+
+		var r = function(message) {
+			var msg=`create rejected: ${message}`;
+			dbreq.log(msg);
+			reject(new Error(msg));
+		};
+
+		if (options.persistant || options.loadexisting) {
+			if (fs.existsSync(dbjson)) {
+				if (dbreq.create !== undefined && dbreq.create==true) {
+					r("db already exists, but creation requested");
+				} else {
+					dbreq.log("loading from file");
+					Maggi.db.load(dbjson, options.enc, initcomplete);
+				}
+			} else {
+				if (dbreq.create !== undefined && dbreq.create==false) {
+					r("database not found, creation not requested");
+				} else if (options.allow_create == false) {
+					r("creation not permitted"); 
+				} else {
+					dbreq.log("initializing new database");
+					var db = {
+						data: options.initialdata,
+						rev: options.initialrev
+					};
+					if (dbreq.credentials != null) {
+						var username = dbreq.credentials.username;
+						db.users = {}
+						db.users[username] ={
+							role: "admin",
+							username: username,
+							password_hash: dbreq.credentials.password_hash,
+						}
+					}
+					save(db);
+					initcomplete(db);
+				}
 			}
 		}
-	}
+	});
 };
 
 Maggi.db.ionamespace = "/Maggi.db";
 
-Maggi.db.server = function(io, userpaths, options) {
-	var paths = {};
-	if (typeof userpaths === 'string') userpaths=[userpaths];
-	if (userpaths instanceof Array)
-		for (var i in userpaths)
-			paths[userpaths[i]]=null;
+Maggi.db.server = function(io, options) {
 	var server = {
 		dbs: {},
 		dbnames: [],
 		io: io,
 		clients: {},
-		requesthook: null,
+		providers: [
+			{
+				paths: options.paths,
+				allow_create: options.allow_create
+			}
+		],
 		log: false || options&&options.log,
 		synclog: false || options&&options.synclog,
 		db: function(dbreq) {
-			return new Promise((resolve,reject) => {
-				dbreq = gen_id_str(dbreq);
-				Maggi.db.server.vive(server, dbreq, db => resolve(db.data) );
+			dbreq = gen_id_str(dbreq);
+			var dbid = dbreq.id_str;
+			return Maggi.db.server.vive(server, dbreq).then(db => {
+				dbreq.log("provide");
+				return db.data;
 			});
 		},
-		paths: paths
+		list: function(g) {
+			g = g || "*";
+			g = Maggi.db.server.dbpathname(g);
+			var basename = Maggi.db.server.fulldbpath() + "/";
+			return new Promise((resolve,reject) => {
+				glob(g, function (err, files) {
+					if (err)
+						reject(err);
+					else
+						resolve(files.map(f => f.substring(basename.length,f.length-".json".length)));
+				});
+			});
+		},
 	};
 
 	io.of(Maggi.db.ionamespace).on('connection', function(socket) {
@@ -514,36 +537,47 @@ Maggi.db.server = function(io, userpaths, options) {
 		socket.on("Maggi.db", function(dbreq) {
 			dbreq = gen_id_str(dbreq);
 			var dbid = dbreq.id_str;
+			var log = msg => {
+				if (server.log)
+					console.log(`${socket.id}, db ${dbid}:`,msg);
+			};
+			var warn = msg => {
+				console.warn(`${socket.id}, db ${dbid}:`,msg);
+			};
+			dbreq.log = log;
 			var startsync = function(db) {
 				if (clientdbs.indexOf(dbid) == -1) {
 					clientdbs.push(dbid);
-					if (server.log)
-						console.log("startsync", dbreq);
+					log("startsync");
 					Maggi.db.sync(socket, dbreq, db, false, null, null, server.synclog);
 					socket.emit("Maggi.db." + dbid, { f: "connected" });
 				} else {
-					if (server.log)
-						console.log("command", dbreq);
+					log("command "+JSON.stringify(dbreq));
 					if (db.req) db.req(dbreq);
 				}
 			};
-			var reject = (message, id) => {
-				socket.emit("Maggi.db." + dbid, { f: "error", id: id, message: message });
+			var reject = err => {
+				warn("error:" + err.message);
+				socket.emit("Maggi.db." + dbid, { f: "error",  message: err.message });
 			};
 			var validate_credentials = function(db) {
 				if (db.users && Object.keys(db.users).length > 0) {
 					if (dbreq.credentials == undefined)
-						return reject("access denied: user credentials required", "access_denied");
+						return Promise.reject(new Error("access denied: no credentials provided"));
 					var user = db.users[dbreq.credentials.username];
 					if (user === undefined || user.password_hash != dbreq.credentials.password_hash) {
-						var msg = "access denied: user not authorized";
-						console.warn(`client ${socket.id}, db ${dbid}, username ${dbreq.credentials.username}: ${msg}`);
-						return reject(msg, "access_denied");
+						var msg = `access denied for ${dbreq.credentials.username}: user not authorized`;
+						warn(msg);
+						return Promise.reject(new Error(msg));
 					}
+					log("credentials valid");
 				}
-				startsync(db);
+				return db;
 			}
-			Maggi.db.server.vive(server, dbreq, validate_credentials, reject);
+			Maggi.db.server.vive(server, dbreq)
+				.then(validate_credentials)
+				.then(startsync)
+				.catch(reject);
 		});
 		socket.on('disconnect', function(e) {
 			if (server.log)
@@ -554,6 +588,12 @@ Maggi.db.server = function(io, userpaths, options) {
 };
 
 Maggi.db.server.path = "db";
+Maggi.db.server.fulldbpath = function() {
+	return process.cwd() + "/" + Maggi.db.server.path;
+};
+Maggi.db.server.dbpathname = function(dbname) {
+	return Maggi.db.server.fulldbpath() + "/" + dbname + ".json";
+};
 
 var gen_id_str = function(dbreq) {
 	if (dbreq == null) {
@@ -578,67 +618,81 @@ var jsonpathmatch = function(base, requ) {
 	return match;
 };
 
-function requesthook_local(dbreq, accept, paths) {
-	if (typeof dbreq.id === "string") {
-		var path = dbreq.id.split("/");
+function get_create_options(server, dbreq) {
+	var path = dbreq.id;
+	if (typeof path != "string") return false;
+	for (var idx in server.providers) {
+		var pvd = server.providers[idx];
+		var paths = pvd.paths;
+		if (paths instanceof Array)
+			paths = paths.reduce((acc,val,idx) => {
+				acc[val]=null;
+				return acc;
+			},{});
 		for (var p in paths) {
-			var match = jsonpathmatch(p, dbreq.id);
+			var match = jsonpathmatch(p, path);
 			if (match) {
-				var sub = paths[p];
-				var key = match[0];
-				if (key == null || key == "") return false;
-				if (sub === null)
-					sub = (server, db, key, accept) => accept();
-				accept({
-					createhook: (server, dbreq, db, accept) => sub(server, db, key, accept)
-				});
-
-				return true;
+				var ac = pvd.allow_create;
+				if (ac == null) ac = false;
+				if (ac instanceof Array)
+					ac = ac.map(x=>jsonpathmatch(x,path)).findIndex(x=>(x!==false))!=-1;
+				return { 
+					pathmatch: match, 
+					createhook: paths[p], 
+					allow_create: ac
+				};
 			}
 		}
 	}
-	return false;
+	return null;
 }
 
-Maggi.db.server.vive = function(server, dbreq, callback, cberror) {
+Maggi.db.server.vive = function(server, dbreq) {
+	var serverlog = msg => {
+		if (server.log)
+			console.log(`server, db ${dbreq.id_str}:`,msg);
+	};
 	if (dbreq.id_str === undefined) dbreq = gen_id_str(dbreq);
-	var db = server.dbs[dbreq.id_str];
-	if (db === undefined) {
-		server.dbs[dbreq.id_str] = {state:"vive", callbacks:[callback]};
-		db = server.dbs[dbreq.id_str];
-		var accept = function(options) {
-			console.log(`db request for ${dbreq.id_str} accepted`);
-			var pdb=db;
-			Maggi.db.create(server, dbreq, function(db) {
-				for (var i in pdb.callbacks) {
-					var cb = pdb.callbacks[i];
-					if (cb) cb(db);
-				}
-			}, options);
-		};
-		var reject = function(message) {
-			var errmsg = `db request for ${dbreq.id_str} rejected: ${message}`
-			console.warn(errmsg);
-			if (cberror) cberror(errmsg);
+	if (dbreq.log === undefined) dbreq.log = serverlog;
+	return new Promise((resolve,reject) => {
+		var r = function(message) {
+			var errmsg = `rejected: ${message}`;
+			dbreq.log(errmsg);
+			reject(new Error(errmsg));
 		}
-		var rh = server.requesthook;
-		var dbns = server.dbnames;
-		if (dbns && dbns.indexOf(dbreq.id) != -1) {
-			if (dbreq.create !== undefined && dbreq.create == true) {
-				reject("db already exists, but creation requested");
-			} else
-				accept();
+		var db = server.dbs[dbreq.id_str];
+		if (db === undefined) {
+			dbreq.log("vive");
+			server.dbs[dbreq.id_str] = {state:"vive", callbacks:[]};
+			db = server.dbs[dbreq.id_str];
+			var accept = function(options) {
+				dbreq.log("accept");
+				var pdb = db;
+				var res = Maggi.db.create(server, dbreq, options).then(db => {
+					for (var i in pdb.callbacks) {
+						var cb = pdb.callbacks[i];
+						if (cb) cb(db);
+					}
+					return db;
+				});
+				resolve(res);
+			};
+			var options = get_create_options(server, dbreq);
+			if (options)
+				accept(options);
+			else
+				r("db not served");
+		} else if (db.state == "vive") {
+			dbreq.log("enqueued");
+			db.callbacks.push(resolve);
+		} else {
+			dbreq.log("already active");
+			if (dbreq.create !== undefined && dbreq.create == true)
+				r("db already exists, but creation requested");
+			else
+				resolve(db);
 		}
-		else if (requesthook_local(dbreq, accept, server.paths)) {
-		}
-		else if (rh && rh(dbreq, accept)) {
-		}
-		else
-			reject("no match");
-	} else if (db.state == "vive") {
-		if (callback) db.callbacks.push(callback);
-	} else
-		if (callback) callback(db);
+	});
 }
 
 Maggi.db.sync = function(socket, dbreq, db, client, raise_event, onsync, synclog) {
@@ -830,6 +884,7 @@ Maggi.db.client.default_options = {};
 
 if (typeof module !== 'undefined') {
 	var fs = require('fs'),
-		writefile = require('./writefile.js');
+		writefile = require('./writefile.js'),
+		glob = require('glob');
 	module.exports = Maggi;
 }

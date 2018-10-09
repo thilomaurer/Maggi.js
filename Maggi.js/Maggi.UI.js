@@ -197,6 +197,10 @@ Maggi.UI.parts.input={
     partclass:"input cols",
     members:{
         autosize:true,
+	autofill:null,
+	autofilled:false,
+	required:false,
+	name:null,
         prefix:"",
         postfix:"",
         postfixui:null,
@@ -290,6 +294,9 @@ Maggi.UI.parts.input={
         e:    ["set","data","datachange"],
         eas:  ["set","data","as"],
         as:   ["set","autosize","as"],
+        af:   ["set","ui.autofill",function(m,k,v) { m.i.attr("autofill",v); if (v) Maggi.UI.parts.input.enable_autofill(m); else Maggi.UI.parts.input.disable_autofill(m);}],
+        name:   ["set","ui.name",function(m,k,v) { m.i.attr("name",v); }],
+        required:   ["set","ui.required",function(m,k,v) { m.i.attr("required",v); }],
         f:    ["set","ui.focus",function(m,k,v) { if (v===true) m.i.focus(); }],
         g:    ["set","ui.enabled",function(m,k,v) { var r="readonly"; if (v===false) m.i.attr(r,r); else m.i.removeAttr(r); }],
         alerting:["set","ui.alerting",function(m,k,v) { if (v===true) m.dom.addClass("alerting"); else m.dom.removeClass("alerting"); }],
@@ -312,34 +319,55 @@ Maggi.UI.parts.input={
 	if (m.ui.kind=="file") return;
 	var newvalue=(m.data!=null)&&(m.data.toString());
 	if (i[0].value!=newvalue) i[0].value=newvalue;
-    },  
+    },
+    enable_autofill(m) {
+	m.intervalId = window.setInterval(function() {
+		var i=m.dom;
+		var hasValue = i.find("input").val().length > 0; //Normal
+		if (!hasValue) {
+			hasValue = i.find("input:-webkit-autofill").length > 0; //Chrome
+			m.ui.autofilled = hasValue;
+			if (hasValue) {
+				m.dom.addClass("autofilled");
+			} else {
+				m.dom.removeClass("autofilled");
+			}
+		} else
+			m.dom.removeClass("autofilled");
+	}, 120);
+    },
+    disable_autofill(m) {
+	window.clearInterval(m.intervalId);
+    },
     builder(m) {
-        var i=m.i.appendTo(m.midfix);
-    	i.on("input",function(event) {
-    	    var v=this.value;
-    	    if (m.ui.kind=="number"&v!="") v=parseFloat(v);
-    		m.data=v;
-    		event.stopPropagation();
-    	}).on("keypress",function(event) { 
-    		if (event.keyCode == '13') { if (m.ui.onReturnKey) m.ui.onReturnKey(this.value); }
-    		event.stopPropagation();
-    	}).keydown(function(event) {
-    		event.stopPropagation();
-    	}).focus(function() {
-    		m.dom.addClass('focused');
-    		m.ui.focus=true;
-    		if (m.ui.selectOnFocus===true) m.i.select();
-    	}).blur(function() {
-    		m.dom.removeClass('focused');
-    		m.ui.focus=false;
-    	});
+	var i=m.i.appendTo(m.midfix);
+	i.attr("id",null);
+	i.on("input",function(event) {
+		var v=this.value;
+		if (m.ui.kind=="number"&v!="") v=parseFloat(v);
+		m.data=v;
+		event.stopPropagation();
+	}).on("keypress",function(event) { 
+		if (event.keyCode == '13') { if (m.ui.onReturnKey) m.ui.onReturnKey(this.value); }
+		event.stopPropagation();
+	}).keydown(function(event) {
+		event.stopPropagation();
+	}).focus(function() {
+		m.dom.addClass('focused');
+		m.ui.focus=true;
+		if (m.ui.selectOnFocus===true) m.i.select();
+	}).blur(function() {
+		m.dom.removeClass('focused');
+		m.ui.focus=false;
+	});
 	var onClick=function(event) {
 		m.i.focus();
 		if (event!=null) event.stopPropagation();
 	};
-    	m.dom.on("click",onClick);
-    	return function() {
-    	    m.dom.off("click",onClick);
+	m.dom.on("click",onClick);
+	return function() {
+		Maggi.UI.parts.input.disable_autofill(m);
+		m.dom.off("click",onClick);
     	};
     }
 };
@@ -810,9 +838,12 @@ Maggi.UI.parts.wrap={
 Maggi.UI.parts.domwrap={
     name:"domwrap",
     partclass:"domwrap",
+    members: {
+	    wrap_element: "div",
+    },
     builder(m) {
         m.wrap=m.dom;
-        m.dom=$("<div>").appendTo(m.wrap);
+        m.dom=$("<"+m.ui.wrap_element+">").appendTo(m.wrap);
         return function() {
             m.dom.remove();
         };        
@@ -821,10 +852,13 @@ Maggi.UI.parts.domwrap={
 
 Maggi.UI.parts.p={
     name:"domwrap",
+    members: {
+	    wrap_element: "div",
+    },
     builder(m) {
         //make previous dom to inner-dom
         m.wrapped=m.dom;
-        m.dom=$("<div>").insertAfter(m.dom);
+        m.dom=$("<"+m.ui.wrap_element+">").insertAfter(m.dom);
         m.wrapped.appendTo(m.dom);
         return function() {
             m.dom.remove();
@@ -875,14 +909,16 @@ Maggi.UI.parts.overlay={
         toggler:null,
         togglerselect:true,
         switchstate:false,
-        switchclass:{false:"invisible"}
+        switchclass:{false:"invisible"},
+	initialanimate:true,
     },
     bindings:{
         f:["set","ui.switchstate",function(m,k,v,ov) {
             if (v) 
-                m.overlayeddom.addClass("overlayed allanimate");
+	        m.overlayeddom.addClass("overlayed"+(m.ui.initialanimate?" allanimate":""));
             else
-                m.overlayeddom.removeClass("overlayed");        }]
+                m.overlayeddom.removeClass("overlayed");        
+	}]
     },
     builder(m) {
         //console.log("o",stacktrace());

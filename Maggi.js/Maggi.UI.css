@@ -695,6 +695,28 @@
 	border-top-right-radius: 0px;
 }
 
+
+.mui .input input:-webkit-autofill
+{
+  box-shadow: 0 0 0 30px #383940 inset;
+  caret-color: rgb(250, 255, 189);
+  -webkit-text-fill-color: rgb(250, 255, 189);
+  /*
+  background-color: transparent !important;
+  color:rgb(250, 255, 189) !important;
+  */
+}
+
+.mui-light .input input:-webkit-autofill {
+  box-shadow: 0 0 0 30px #ebebeb inset;
+  caret-color: hsl(42, 100%, 40%);
+  -webkit-text-fill-color: hsl(42, 100%, 40%);
+  /*
+  background-color: transparent !important;
+  color:rgb(250, 255, 189) !important;
+  */
+}
+
 /* SELECT */
 .mui .select,
 .mui-light .select {
