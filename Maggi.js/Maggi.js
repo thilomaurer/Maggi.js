@@ -98,13 +98,9 @@ var Maggi = function(other) {
 	};
 
 	func = {
-		add: function(key, value) {
+		add: function(key, value, notriggerbubble) {
 			if (key == null) return console.warn("Maggi.js: ignoring add of member (null)");
-			var get = function() {
-				var v = d[key];
-				trigger("get", key, v);
-				return v;
-			};
+			var get = () => d[key];
 			var set = function(v) {
 				if (!(v instanceof Date))
 					if (!(v instanceof Function))
@@ -136,7 +132,7 @@ var Maggi = function(other) {
 				var prop = { get: get, set: set, enumerable: true, configurable: true };
 				Object.defineProperty(p, key, prop);
 				installBubble(value, bubbleFuncs);
-				trigger("add", key, value);
+				if (notriggerbubble!=true) trigger("add", key, value);
 			}
 		},
 		remove: function(key) {
@@ -674,6 +670,9 @@ Maggi.db.server.vive = function(server, dbreq) {
 						if (cb) cb(db);
 					}
 					return db;
+				}).catch(err => {
+					delete server.dbs[dbreq.id_str];
+					return Promise.reject(err);
 				});
 				resolve(res);
 			};
