@@ -79,6 +79,7 @@
 .mui-light .popup > .popup-content,
 .mui .popup > .popup-content {
 	overflow: auto;
+	-webkit-overflow-scrolling: touch;
 	height: 100%;
 }
 
@@ -142,30 +143,6 @@
 .mui .input.disabled input {
 	color:darkgray;
 }
-/*
-.mui-light .popup > #title,
-.mui .popup > #title {
-	text-align: center;
-	margin: 0px;
-	padding: 10px;
-	background: hsla(224, 8%, 40%, 0.5);
-	border-top-left-radius: 7px;
-	border-top-right-radius: 7px;
-}
-
-.mui .popup > #title {
-	background: hsla(224, 8%, 36%, 1);
-}
-
-.mui-light .popup > #title {
-	background: hsla(0, 0%, 80%, 1);
-}
-
-.mui-light .popup > *,
-.mui .popup > * {
-	margin:10px;
-}
-*/
 
 .mui .popup,
 .mui.popup {
@@ -173,6 +150,7 @@
 	border-radius:8px;
 	border:1px solid hsla(224, 8%, 15%, 1);
 	box-shadow:0 0 100px black;
+	max-height:calc(100% - 32px);
 }
 
 .mui-light .popup,
@@ -218,15 +196,13 @@
 .mui-light .tablelist > * > * {
 	border-bottom:1px solid gray;
 }
-/*
-.mui .simplelist > .cols > *:first-child {
-    border-bottom:1px solid black;
-} 
-*/
+
 .mui .simplelist > *,
 .mui-light .simplelist > * {
     margin-left: 15px;
 	padding:5px 10px 5px 0;
+	overflow:auto;
+	-webkit-overflow-scrolling: touch;
 }
  
 .mui .simplelist > .cols > *:first-child,
@@ -517,14 +493,13 @@
 
 .childswitcher > #container {
 	flex: 1;
-	height:100%;
 	width:100%;
+	overflow:auto;
+	-webkit-overflow-scrolling: touch;
 }
 
 .childswitcher > #container > * {
 	display: none;
-	height:100%;
-	overflow:auto;
 }
 
 .childswitcher > #container > .selected {
@@ -715,26 +690,34 @@
 	border-top-right-radius: 0px;
 }
 
+.mui-light .input input,
+.mui .input input {
+	padding:0.1em 0px;
+}
+
+
+.mui-light .input input:-webkit-autofill,
+.mui-light .input input:-webkit-autofill:hover,
+.mui-light .input input:-webkit-autofill:focus,
+.mui-light .input input:-webkit-autofill:active,
+.mui .input input:-webkit-autofill,
+.mui .input input:-webkit-autofill:hover,
+.mui .input input:-webkit-autofill:focus,
+.mui .input input:-webkit-autofill:active {
+   -webkit-transition-delay: 9999s;
+   transition-delay: 9999s;
+}
+
 
 .mui .input input:-webkit-autofill
 {
-  box-shadow: 0 0 0 30px #383940 inset;
   caret-color: rgb(250, 255, 189);
   -webkit-text-fill-color: rgb(250, 255, 189);
-  /*
-  background-color: transparent !important;
-  color:rgb(250, 255, 189) !important;
-  */
 }
 
 .mui-light .input input:-webkit-autofill {
-  box-shadow: 0 0 0 30px #ebebeb inset;
   caret-color: hsl(42, 100%, 40%);
   -webkit-text-fill-color: hsl(42, 100%, 40%);
-  /*
-  background-color: transparent !important;
-  color:rgb(250, 255, 189) !important;
-  */
 }
 
 /* SELECT */
@@ -745,6 +728,11 @@
 	border-radius:5px;
 	vertical-align:bottom;
 	overflow:hidden;
+}
+
+.mui .select.scroll,
+.mui-light .select.scroll {
+	flex-wrap:nowrap;
 }
 
 .mui .select {
@@ -814,6 +802,22 @@
 	display: flex;
 }
 
+.mui-light .select.disabled,
+.mui .select.disabled {
+	border: 1px solid #aaa;
+}
+
+.mui-light .select.disabled input:checked+label,
+.mui .select.disabled input:checked+label {
+	background: #aaa;
+	color: black;
+}
+
+.mui-light .select.disabled label,
+.mui .select.disabled label {
+	color: #aaa;
+}
+
 
 /* OVERLAY */
 .overlayed {
@@ -840,7 +844,9 @@
 .overlay > .popup {
 	position:initial;
 	overflow:auto;
+	-webkit-overflow-scrolling: touch;
 }
+
 .debug:hover #inspector {
     display:block;
 }

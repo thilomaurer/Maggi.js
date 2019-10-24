@@ -312,7 +312,7 @@ Maggi.UI.parts.input={
         e:    ["set","data","datachange"],
         eas:  ["set","data","as"],
         as:   ["set","autosize","as"],
-        af:   ["set","ui.autofill",function(m,k,v) { m.i.attr("autofill",v); if (v) Maggi.UI.parts.input.enable_autofill(m); else Maggi.UI.parts.input.disable_autofill(m);}],
+        af:   ["set","ui.autocomplete",function(m,k,v) { m.i.attr("autocomplete",v); }],
         name:   ["set","ui.name",function(m,k,v) { m.i.attr("name",v); }],
         required:   ["set","ui.required",function(m,k,v) { m.i.attr("required",v); }],
         f:    ["set","ui.focus",function(m,k,v) { if (v===true) m.i.focus(); }],
@@ -338,55 +338,44 @@ Maggi.UI.parts.input={
 	var newvalue=(m.data!=null)&&(m.data.toString());
 	if (i[0].value!=newvalue) i[0].value=newvalue;
     },
-    enable_autofill(m) {
-	m.intervalId = window.setInterval(function() {
-		var i=m.dom;
-		var hasValue = i.find("input").val().length > 0; //Normal
-		if (!hasValue) {
-			hasValue = i.find("input:-webkit-autofill").length > 0; //Chrome
-			m.ui.autofilled = hasValue;
-			if (hasValue) {
+	builder(m) {
+		var i=m.i.appendTo(m.midfix);
+		i.attr("id",null);
+		var checkAutofill = function() {
+			m.ui.autofilled = m.dom.find("input:-webkit-autofill").length > 0;
+			if (m.ui.autofilled) {
 				m.dom.addClass("autofilled");
 			} else {
 				m.dom.removeClass("autofilled");
 			}
-		} else
-			m.dom.removeClass("autofilled");
-	}, 120);
-    },
-    disable_autofill(m) {
-	window.clearInterval(m.intervalId);
-    },
-    builder(m) {
-	var i=m.i.appendTo(m.midfix);
-	i.attr("id",null);
-	i.on("input",function(event) {
-		var v=this.value;
-		if (m.ui.kind=="number"&v!="") v=parseFloat(v);
-		m.data=v;
-		event.stopPropagation();
-	}).on("keypress",function(event) { 
-		if (event.keyCode == '13') { if (m.ui.onReturnKey) m.ui.onReturnKey(this.value); }
-		event.stopPropagation();
-	}).keydown(function(event) {
-		event.stopPropagation();
-	}).focus(function() {
-		m.dom.addClass('focused');
-		m.ui.focus=true;
-		if (m.ui.selectOnFocus===true) m.i.select();
-	}).blur(function() {
-		m.dom.removeClass('focused');
-		m.ui.focus=false;
-	});
-	var onClick=function(event) {
-		m.i.focus();
-		if (event!=null) event.stopPropagation();
-	};
-	m.dom.on("click",onClick);
-	return function() {
-		Maggi.UI.parts.input.disable_autofill(m);
-		m.dom.off("click",onClick);
-    	};
+		};
+		i.on("input",function(event) {
+			var v=this.value;
+			if (m.ui.kind=="number"&v!="") v=parseFloat(v);
+			setTimeout(checkAutofill, 0);
+			m.data=v;
+			event.stopPropagation();
+		}).on("keypress",function(event) { 
+			if (event.keyCode == '13') { if (m.ui.onReturnKey) m.ui.onReturnKey(this.value); }
+			event.stopPropagation();
+		}).keydown(function(event) {
+			event.stopPropagation();
+		}).focus(function() {
+			m.dom.addClass('focused');
+			m.ui.focus=true;
+			if (m.ui.selectOnFocus===true) m.i.select();
+		}).blur(function() {
+			m.dom.removeClass('focused');
+			m.ui.focus=false;
+		});
+		var onClick=function(event) {
+			m.i.focus();
+			if (event!=null) event.stopPropagation();
+		};
+		m.dom.on("click",onClick);
+		return function() {
+			m.dom.off("click",onClick);
+	   	};
     }
 };
 
@@ -1053,20 +1042,22 @@ Maggi.UI.parts.popup={
 		var pt=togglerElement.offset();
 		var rect=getInnerClientRect(togglerElement);
 		dom.css("left",0);
-		var wh=dom.width()/2+spacing;
+		var halfPopupWidth=dom.width()/2+spacing;
 
 		var attach={x:(rect.left+rect.right)/2,y:rect.bottom};
-		var overlap=attach.x+wh-$('body').width();
-		var left=attach.x-wh;
-		if (overlap>0) left=left-overlap;
+		var documentWidth=window.innerWidth;
+		var documentHeight=window.innerHeight;
+		var overflowWidth=attach.x+halfPopupWidth-documentWidth;
+		var left=attach.x-halfPopupWidth;
+		if (overflowWidth>0) left=left-overflowWidth;
 		if (left<0) left=0;
 
 		dom.css("top",attach.y);
 		dom.css("left",left);
-		if (attach.y+dom.height()+2*spacing-$('body').height()>0)
+		if (attach.y+dom.height()+2*spacing-documentHeight>0)
 			dom.css("bottom",0);
 		var ml=attach.x-left-2*spacing;
-		var mlmax=2*(wh-spacing)-2*spacing-8;
+		var mlmax=2*(halfPopupWidth-spacing)-2*spacing-8;
 		var mlmin=8;
 		if (ml>mlmax) ml=mlmax;
 		if (ml<mlmin) ml=mlmin;
