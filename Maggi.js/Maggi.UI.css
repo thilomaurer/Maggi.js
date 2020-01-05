@@ -72,6 +72,8 @@
 
 .visibilityanimate.invisible {
 	visibility: hidden;
+	pointer-events: none;
+	touch-action: none;
 	opacity: 0;
 	transition: opacity 350ms ease, visibility 0s linear 350ms;
 }
@@ -711,11 +713,13 @@
 
 .mui .input input:-webkit-autofill
 {
+  color: rgb(250, 255, 189);
   caret-color: rgb(250, 255, 189);
   -webkit-text-fill-color: rgb(250, 255, 189);
 }
 
 .mui-light .input input:-webkit-autofill {
+  color: hsl(42, 100%, 40%);
   caret-color: hsl(42, 100%, 40%);
   -webkit-text-fill-color: hsl(42, 100%, 40%);
 }
