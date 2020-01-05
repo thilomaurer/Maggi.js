@@ -12,10 +12,10 @@ var log=function(o) { if (o instanceof Object) o=clone(o); console.warn(o); };
 var Object2Array=function(o) { return Object.keys(o).map(function(k) { return parseInt(k); }).sort(function(a,b) {return a-b;}).map(function(k) { return o[k]; }); };
 
 Maggi.UI=function(dom,data,ui,parent) {
-	if (!dom) return;
-	var m=Maggi({data:data,ui:ui});
-	m.dom=dom;
-	if (parent!==null) m.parent=parent;
+    if (!dom) return;
+    var m=Maggi({data:data,ui:ui});
+    m.dom=dom;
+    if (parent!==null) m.parent=parent;
     Maggi.UI2(m);
     return m;
 };
@@ -23,26 +23,26 @@ Maggi.UI=function(dom,data,ui,parent) {
 
 Maggi.UI2=function(m) {
 
-	var makeElement=function(ns,id,tag,attr,text) {
-		var el=ns?document.createElementNS(ns,tag):document.createElement(tag);
-		el.id=id;
-		for (var k in attr)
-			el.setAttribute(k,attr[k]);
-		if (text!=null) el.textContent=text;
-		return el;
-	};
-	var installpartdom=function(dom,domNS) {
-		for (var k in dom) {
-		     var v=dom[k];
-		     var el;
-		     if (typeof(v) === 'string') el=makeElement(domNS,k,v);
-		     else if (v instanceof Object) el=makeElement(domNS,k,v.tag,v.attr,v.text);
-		     else { console.warn("Maggi.js: installpart: unhandled dom: ",p.dom); continue; }
-		     m[k]=$(el).appendTo(m.dom);
-		}
-		//for (var k in p.dom)
-        	//    m[k]=$('<'+p.dom[k]+'>',{id:k}).appendTo(m.dom);
-	}
+    var makeElement=function(ns,id,tag,attr,text) {
+        var el=ns?document.createElementNS(ns,tag):document.createElement(tag);
+        el.id=id;
+        for (var k in attr)
+            el.setAttribute(k,attr[k]);
+        if (text!=null) el.textContent=text;
+        return el;
+    };
+    var installpartdom=function(dom,domNS) {
+        for (var k in dom) {
+             var v=dom[k];
+             var el;
+             if (typeof(v) === 'string') el=makeElement(domNS,k,v);
+             else if (v instanceof Object) el=makeElement(domNS,k,v.tag,v.attr,v.text);
+             else { console.warn("Maggi.js: installpart: unhandled dom: ",p.dom); continue; }
+             m[k]=$(el).appendTo(m.dom);
+        }
+        //for (var k in p.dom)
+            //    m[k]=$('<'+p.dom[k]+'>',{id:k}).appendTo(m.dom);
+    }
 
     var installpart=function(p) {
         if (p==null) return null;
@@ -86,89 +86,89 @@ Maggi.UI2=function(m) {
         if (m.backbuild) m.backbuild();
         if (m.ui==null) return;
         //inflate ui shortcuts
-    	if (typeof m.ui === "function") {m.ui=m.ui(); return;}
-    	if (typeof m.ui === "string") {m.ui={parts:[m.ui]}; return;}
-    	//console.log(m.dom);
+        if (typeof m.ui === "function") {m.ui=m.ui(); return;}
+        if (typeof m.ui === "string") {m.ui={parts:[m.ui]}; return;}
+        //console.log(m.dom);
         var deinstallpart=installpart(m.ui);
-    	//console.log(m.dom);
+        //console.log(m.dom);
         m.backbuild=function() {
-    	    if (deinstallpart) deinstallpart();
-    	};
+            if (deinstallpart) deinstallpart();
+        };
     };
     m.bind("set","ui",build);
-	build();
+    build();
 };
 
 var installBindings=function(handlers) {
-	$.each(handlers,function(idx,v) {
-		var o=v[0];
-		var e=v[1];
-		var k=v[2];
-		var f=v[3];
-		if (o!=null) {
-			o.bind(e,k,f);
-			f(k,o[k]);
-		} else console.log("bind to null ignored");
-	});
-	return function() {
-		$.each(handlers,function(idx,v) {
-			var o=v[0];
-			var e=v[1];
-			var k=v[2];
-			var f=v[3];
-			if (o!=null) {
-				o.unbind(e,f); //TODO: (e,k,f);
-			} else console.log("unbind from null ignored");
-		});
-	};
+    $.each(handlers,function(idx,v) {
+        var o=v[0];
+        var e=v[1];
+        var k=v[2];
+        var f=v[3];
+        if (o!=null) {
+            o.bind(e,k,f);
+            f(k,o[k]);
+        } else console.log("bind to null ignored");
+    });
+    return function() {
+        $.each(handlers,function(idx,v) {
+            var o=v[0];
+            var e=v[1];
+            var k=v[2];
+            var f=v[3];
+            if (o!=null) {
+                o.unbind(e,f); //TODO: (e,k,f);
+            } else console.log("unbind from null ignored");
+        });
+    };
 };
 
 var installPartBindings=function(p,m) {
     var b=p.bindings;
     if (b==null) return null;
     var x=[];
-	$.each(b,function(idx,v) {
-	    var l=v.length;
-	    if (v instanceof Object) l=Object.keys(v).length;
-	    if (l!=3) return;
-	    var e=v[0];
-	    var f=v[2];
-	    var o=m;
-	    var keys=v[1];
-	    var k;
-	    if (keys instanceof Object) {
-	        k=[];
-	        for (var ki in keys)
-	            k.push(keys[ki].split("."));
-	    } else k=[keys.split(".")];
-	    //console.log("install",k); 
-	    //if (k.length>1) o=o[k.shift()]; 
-		if (typeof f === "string") f=p[f];
-		if (typeof f !== "function") console.log("not a function:",f,m);
-		if (o!=null) {
-		    var f2=function(k,v,ov,e) {
-		        if (Maggi.UI.log==true) console.log("Maggi.UI.js: trigger "+e+" for ",k);
-			    f(m,k,v,ov,e);
-			};
-			k=k[0]; //TODO: fix : use all keys
-			x.push({o:o,e:e,k:k,f:f2});
-			//console.log(e,k);
-			o.bind(e,k,f2);
-			if (e=="set") {
-			    //k=k[0]; //install-trigger with first key only
-    			for (var i=0;i<k.length;i++){
-    			    o=o[k[i]];
-    			    if (o==null) return;
-    			}
-    			f2(k,o);
-			}
-		} else console.log("bind to null ignored");
-	});
-	return function() {
-	    $.each(x,function(idx,v) {
-			v.o.unbind(v.e,v.f);
-	    });
-	};
+    $.each(b,function(idx,v) {
+        var l=v.length;
+        if (v instanceof Object) l=Object.keys(v).length;
+        if (l!=3) return;
+        var e=v[0];
+        var f=v[2];
+        var o=m;
+        var keys=v[1];
+        var k;
+        if (keys instanceof Object) {
+            k=[];
+            for (var ki in keys)
+                k.push(keys[ki].split("."));
+        } else k=[keys.split(".")];
+        //console.log("install",k); 
+        //if (k.length>1) o=o[k.shift()]; 
+        if (typeof f === "string") f=p[f];
+        if (typeof f !== "function") console.log("not a function:",f,m);
+        if (o!=null) {
+            var f2=function(k,v,ov,e) {
+                if (Maggi.UI.log==true) console.log("Maggi.UI.js: trigger "+e+" for ",k);
+                f(m,k,v,ov,e);
+            };
+            k=k[0]; //TODO: fix : use all keys
+            x.push({o:o,e:e,k:k,f:f2});
+            //console.log(e,k);
+            o.bind(e,k,f2);
+            if (e=="set") {
+                //k=k[0]; //install-trigger with first key only
+                for (var i=0;i<k.length;i++){
+                    o=o[k[i]];
+                    if (o==null) return;
+                }
+                f2(k,o);
+            }
+        } else console.log("bind to null ignored");
+    });
+    return function() {
+        $.each(x,function(idx,v) {
+            v.o.unbind(v.e,v.f);
+        });
+    };
 };
 
 
@@ -216,75 +216,75 @@ Maggi.UI.parts.input={
     description:"The Part Input is so great because...",
     caption:"The Part Input",
     member_description:{
-    	autosize:{
-    		name:"autosize",
-    		type:"boolean",
-    		caption:"Autosize Length",
-    		description:"Have the width (number of characters) of the input matching the length of its content, i.e. the attribute 'size' of the input HTMLElement is kept in sync with the content-length.",
-    		example:"true"
-    	},
-    	placeholder:{
-    		caption:"Placeholder",
-    		name:"placeholder",
-    		type:"string",
-    		description: "String to show as a placeholder in the input when it is empty edit",
-    		example:'placeholder:"username"'
-    	},
-    	kind:{
-    		caption:"Input Kind",
-    		name:"kind",
-    		type:"string",
-    		description: "The kind of input is set to the type attribute of the input element. Common values are text, number, email, etc... See current HTML standard for a full list. ",
-    		example:'kind:"email"'
-    	},
-    	onReturnKey:{
-    		caption:"Return Key Action",
-    		name:"onReturnKey",
-    		type:"function(value)",
-    		description: "The function called with the current value of the input when the 'Return' key is being input by the user.",
-    		example:"function(v) { alert(v); }"
-    	},
+        autosize:{
+            name:"autosize",
+            type:"boolean",
+            caption:"Autosize Length",
+            description:"Have the width (number of characters) of the input matching the length of its content, i.e. the attribute 'size' of the input HTMLElement is kept in sync with the content-length.",
+            example:"true"
+        },
+        placeholder:{
+            caption:"Placeholder",
+            name:"placeholder",
+            type:"string",
+            description: "String to show as a placeholder in the input when it is empty edit",
+            example:'placeholder:"username"'
+        },
+        kind:{
+            caption:"Input Kind",
+            name:"kind",
+            type:"string",
+            description: "The kind of input is set to the type attribute of the input element. Common values are text, number, email, etc... See current HTML standard for a full list. ",
+            example:'kind:"email"'
+        },
+        onReturnKey:{
+            caption:"Return Key Action",
+            name:"onReturnKey",
+            type:"function(value)",
+            description: "The function called with the current value of the input when the 'Return' key is being input by the user.",
+            example:"function(v) { alert(v); }"
+        },
         prefix:{
-    		caption:"Prefix Text",
-    		name:"prefix",
-    		type:"string",
-    		description: "The text prefixing the editable text.",
-    		example:"value:"
+            caption:"Prefix Text",
+            name:"prefix",
+            type:"string",
+            description: "The text prefixing the editable text.",
+            example:"value:"
         },
         prefixui:{
-    		caption:"Prefix UI",
-    		name:"prefixui",
-    		type:"maggi.UI object",
-    		description: "The UI prefixing the editable text. Overrides prefix.",
-    		example:'{parts:"label",label:"Dollar"}'
+            caption:"Prefix UI",
+            name:"prefixui",
+            type:"maggi.UI object",
+            description: "The UI prefixing the editable text. Overrides prefix.",
+            example:'{parts:"label",label:"Dollar"}'
         },
         postfix:{
-    		caption:"Postfix Text",
-    		name:"postfix",
-    		type:"string",
-    		description: "The text postfixing the editable text.",
-    		example:"Dollar"
+            caption:"Postfix Text",
+            name:"postfix",
+            type:"string",
+            description: "The text postfixing the editable text.",
+            example:"Dollar"
         },
         postfixui:{
-    		caption:"Postfix UI",
-    		name:"postfixui",
-    		type:"maggi.UI object",
-    		description: "The UI postfixing the editable text. Overrides postfix.",
-    		example:'{parts:"label",label:"Dollar"}'
+            caption:"Postfix UI",
+            name:"postfixui",
+            type:"maggi.UI object",
+            description: "The UI postfixing the editable text. Overrides postfix.",
+            example:'{parts:"label",label:"Dollar"}'
         },
         focus:{
-    		caption:"Focus State",
-    		name:"focus",
-    		type:"boolean",
-    		description: "Determines the focus state of the element.",
-    		example:true
+            caption:"Focus State",
+            name:"focus",
+            type:"boolean",
+            description: "Determines the focus state of the element.",
+            example:true
         },
         selectOnFocus:{
-    		caption:"Select on Focus",
-    		name:"selectOnFocus",
-    		type:"boolean",
-    		description: "When true, all content of the input is selected on receiving focus.",
-    		example:true
+            caption:"Select on Focus",
+            name:"selectOnFocus",
+            type:"boolean",
+            description: "When true, all content of the input is selected on receiving focus.",
+            example:true
         }
     },
     parts:"common",
@@ -321,60 +321,60 @@ Maggi.UI.parts.input={
     },
     dom:{prefix:"div",midfix:"div",postfix:"div",i:"input"},
     as:function(m) {
-		var i=m.i;
-		if (m.ui.autosize) {
-			var l=0;
-			if (m.data!==null) l=m.data.toString().length;
-			if (m.ui.placeholder!==null) if (l<m.ui.placeholder.length) l=m.ui.placeholder.length;
-			if (l===0) i.addClass("empty"); else i.removeClass("empty");
-			if (l===0) l=1;
-			i.attr("size",l);
-		} else i.removeAttr("size");
+        var i=m.i;
+        if (m.ui.autosize) {
+            var l=0;
+            if (m.data!==null) l=m.data.toString().length;
+            if (m.ui.placeholder!==null) if (l<m.ui.placeholder.length) l=m.ui.placeholder.length;
+            if (l===0) i.addClass("empty"); else i.removeClass("empty");
+            if (l===0) l=1;
+            i.attr("size",l);
+        } else i.removeAttr("size");
     },
     datachange: function(m) {
-		var i=m.i;
-		if (m.ui.kind=="file") return;
-		var newvalue=(m.data!=null)&&(m.data.toString());
-		if (i[0].value!=newvalue) i[0].value=newvalue;
+        var i=m.i;
+        if (m.ui.kind=="file") return;
+        var newvalue=(m.data!=null)&&(m.data.toString());
+        if (i[0].value!=newvalue) i[0].value=newvalue;
     },
-	builder(m) {
-		var i=m.i.appendTo(m.midfix);
-		i.attr("id",null);
-		var checkAutofill = function() {
-			m.ui.autofilled = m.dom.find("input:-webkit-autofill").length > 0;
-			if (m.ui.autofilled) {
-				m.dom.addClass("autofilled");
-			} else {
-				m.dom.removeClass("autofilled");
-			}
-		};
-		i.on("input",function(event) {
-			var v=this.value;
-			if (m.ui.kind=="number"&v!="") v=parseFloat(v);
-			setTimeout(checkAutofill, 0);
-			m.data=v;
-			event.stopPropagation();
-		}).on("keypress",function(event) { 
-			if (event.keyCode == '13') { if (m.ui.onReturnKey) m.ui.onReturnKey(this.value); }
-			event.stopPropagation();
-		}).keydown(function(event) {
-			event.stopPropagation();
-		}).focus(function() {
-			m.dom.addClass('focused');
-			m.ui.focus=true;
-			if (m.ui.selectOnFocus===true) m.i.select();
-		}).blur(function() {
-			m.dom.removeClass('focused');
-			m.ui.focus=false;
-		});
-		var onClick=function(event) {
-			m.i.focus();
-			if (event!=null) event.stopPropagation();
-		};
-		m.dom.on("click",onClick);
-		return function() {
-			m.dom.off("click",onClick);
-	   	};
+    builder(m) {
+        var i=m.i.appendTo(m.midfix);
+        i.attr("id",null);
+        var checkAutofill = function() {
+            m.ui.autofilled = m.dom.find("input:-webkit-autofill").length > 0;
+            if (m.ui.autofilled) {
+                m.dom.addClass("autofilled");
+            } else {
+                m.dom.removeClass("autofilled");
+            }
+        };
+        i.on("input",function(event) {
+            var v=this.value;
+            if (m.ui.kind=="number"&v!="") v=parseFloat(v);
+            setTimeout(checkAutofill, 0);
+            m.data=v;
+            event.stopPropagation();
+        }).on("keypress",function(event) { 
+            if (event.keyCode == '13') { if (m.ui.onReturnKey) m.ui.onReturnKey(this.value); }
+            event.stopPropagation();
+        }).keydown(function(event) {
+            event.stopPropagation();
+        }).focus(function() {
+            m.dom.addClass('focused');
+            m.ui.focus=true;
+            if (m.ui.selectOnFocus===true) m.i.select();
+        }).blur(function() {
+            m.dom.removeClass('focused');
+            m.ui.focus=false;
+        });
+        var onClick=function(event) {
+            m.i.focus();
+            if (event!=null) event.stopPropagation();
+        };
+        m.dom.on("click",onClick);
+        return function() {
+            m.dom.off("click",onClick);
+           };
     }
 };
 
@@ -391,18 +391,18 @@ Maggi.UI.parts.children={
     order:function(m) {
         var o=m.ui.order;
         if (o) return Object2Array(o);
-	o=Object.keys(m.ui.children);
+    o=Object.keys(m.ui.children);
 
         if (m.ui.childdefault)
-	for (var k in m.data)
-		if (!(k in m.ui.children))
-			o.push(k);
+    for (var k in m.data)
+        if (!(k in m.ui.children))
+            o.push(k);
 
         return o;
     },
     makeElement:function(m,id) {
-	var tag=m.ui.domtag;
-	var ns=m.ui.domNS;
+    var tag=m.ui.domtag;
+    var ns=m.ui.domNS;
         var el=ns?document.createElementNS(ns,tag):document.createElement(tag);
         el.id=id;
         return el;
@@ -591,7 +591,7 @@ Maggi.UI.parts.text={
         m.dom.text(s);
     },
     builder(m) {
-	return function() { m.dom.empty() };
+    return function() { m.dom.empty() };
     }
 };
 
@@ -599,40 +599,40 @@ Maggi.UI.parts.onClick={
     name:"onClick",
     members:{onClick:null,click:null},
     builder(m) {
-    	var onClick=function(e) {
-    	    m.ui.click++;
-    	    /*
-    	    var MaggiUIPATH=function(m,p) {
-    	        console.log(m,p); 
-    	        if (p.length==1) {
-    	            var k=p[0];
-    	            var f=m[k];
-    	            return f();
-    	        }
-    	        var k=p.shift();
-    	        if (k=="<") MaggiUIPATH(m.parent,p)
-    	        else
-    	            MaggiUIPATH(m.inner[k].m,p);
-    	    }
-    	    */
-    	    var ui=m.ui;
-    	    var handled=(ui.onClick!==null)&&(ui.enabled!==false);
-    	    if (!handled) return true;
-    	    if (typeof ui.onClick === "function")
-    	        ui.onClick.call(m.parent&&m.parent.data,m);
-    	    /*
-    	    if (typeof ui.onClick === "string") {
-    	        var a=ui.onClick.split(".");
-    	        MaggiUIPATH(m,a);
-    	    }
-    	    */
-    	    e.stopPropagation();
-    	    //return false;
-    	};
+        var onClick=function(e) {
+            m.ui.click++;
+            /*
+            var MaggiUIPATH=function(m,p) {
+                console.log(m,p); 
+                if (p.length==1) {
+                    var k=p[0];
+                    var f=m[k];
+                    return f();
+                }
+                var k=p.shift();
+                if (k=="<") MaggiUIPATH(m.parent,p)
+                else
+                    MaggiUIPATH(m.inner[k].m,p);
+            }
+            */
+            var ui=m.ui;
+            var handled=(ui.onClick!==null)&&(ui.enabled!==false);
+            if (!handled) return true;
+            if (typeof ui.onClick === "function")
+                ui.onClick.call(m.parent&&m.parent.data,m);
+            /*
+            if (typeof ui.onClick === "string") {
+                var a=ui.onClick.split(".");
+                MaggiUIPATH(m,a);
+            }
+            */
+            e.stopPropagation();
+            //return false;
+        };
         m.dom.on("click",onClick);
-    	return function() {
-    	        m.dom.off("click",onClick);
-    	};
+        return function() {
+                m.dom.off("click",onClick);
+        };
     }
 };
 
@@ -647,9 +647,9 @@ Maggi.UI.parts.label={
         }]
     },
     builder(m) {
-	    return () => {
-		    m.dom.text("");
-	    }
+        return () => {
+            m.dom.text("");
+        }
     }
 };
 
@@ -676,7 +676,7 @@ Maggi.UI.parts.link={
     members:{
         label:"",
         target:null,
-	onClick:true,
+    onClick:true,
     },
     parts:"common",
     dom:{a:"a"},
@@ -763,7 +763,7 @@ Maggi.UI.parts.select={
             if (m.chld[v]) m.chld[v][0].checked=true;
         }],
         g:["set","ui.enabled",function(m,k,v,oldv) { 
-	    Object.keys(m.chld).forEach(key => m.chld[key].prop('disabled', !v));
+        Object.keys(m.chld).forEach(key => m.chld[key].prop('disabled', !v));
         }],
     },
     counter:0
@@ -862,11 +862,11 @@ Maggi.UI.parts.wrap={
         Maggi.UI2(x);        
         m.i=x;
         return function() {
-			if (m.i.backbuild)
-				m.i.backbuild()
-			else
-				console.warn("missing backbuild");
-		};
+            if (m.i.backbuild)
+                m.i.backbuild()
+            else
+                console.warn("missing backbuild");
+        };
     }
 };
 
@@ -874,7 +874,7 @@ Maggi.UI.parts.domwrap={
     name:"domwrap",
     partclass:"domwrap",
     members: {
-	    wrap_element: "div",
+        wrap_element: "div",
     },
     builder(m) {
         m.wrap=m.dom;
@@ -888,7 +888,7 @@ Maggi.UI.parts.domwrap={
 Maggi.UI.parts.p={
     name:"domwrap",
     members: {
-	    wrap_element: "div",
+        wrap_element: "div",
     },
     builder(m) {
         //make previous dom to inner-dom
@@ -950,15 +950,15 @@ Maggi.UI.parts.overlay={
         togglerselect:true,
         switchstate:false,
         switchclass:{false:"invisible"},
-	initialanimate:true,
+    initialanimate:true,
     },
     bindings:{
         f:["set","ui.switchstate",function(m,k,v,ov) {
             if (v) 
-	        m.overlayeddom.addClass("overlayed"+(m.ui.initialanimate?" allanimate":""));
+            m.overlayeddom.addClass("overlayed"+(m.ui.initialanimate?" allanimate":""));
             else
                 m.overlayeddom.removeClass("overlayed");        
-	}]
+    }]
     },
     builder(m) {
         //console.log("o",stacktrace());
@@ -1014,139 +1014,139 @@ Maggi.UI.parts.switchable={
 };
 
 Maggi.UI.parts.popup={
-	name:"popup",
-	parts:["switchable"],
-	partclass:"popup visibilityanimate",
-	members:{
-		switchstate:false, 
-		switchclass:{false:"invisible"}
-	},
-	bindings:{
-		e:["set","ui.toggler",function(m,k,v,ov) {
-			if (m.togglerElement) 
-				m.observer.observe(m.togglerElement[0], { childList:true });
-		}],
-		s:["set","ui.switchstate","onswitchstate"]
-	},
-	onswitchstate:function(m) {
-		if (m.ui.switchstate==true) {
-			Maggi.UI.parts.popup.place(m);
-			m.outer.focus();
-		}
-	},
-	place:function(m) {
-		var getInnerClientRect = function(dom) {
-			var pad = function(dom,dir) {
-				return parseInt(dom.css("padding-"+dir).replace("px",""));
-			};
-			var outer={};
-			outer.left=dom[0].offsetLeft;
-			outer.top=dom[0].offsetTop;
-			outer.bottom=outer.top+dom[0].offsetHeight;
-			outer.right=outer.left+dom[0].offsetWidth;
-			var left=outer.left+pad(dom,"left");
-			var top=outer.top+pad(dom,"top");
-			var bottom=outer.bottom-pad(dom,"bottom");
-			var right=outer.right-pad(dom,"right");
-			return {left:left,right:right,top:top,bottom:bottom};
-		};
-		m.deco.css("margin-left",0);
-		var togglerElement=m.togglerElement;
-		if (togglerElement===undefined) return;
-		var dom=m.outer;
-		var spacing=16;
-		var pt=togglerElement.offset();
-		var rect=getInnerClientRect(togglerElement);
-		dom.css("left",0);
-		var halfPopupWidth=dom.width()/2+spacing;
+    name:"popup",
+    parts:["switchable"],
+    partclass:"popup visibilityanimate",
+    members:{
+        switchstate:false, 
+        switchclass:{false:"invisible"}
+    },
+    bindings:{
+        e:["set","ui.toggler",function(m,k,v,ov) {
+            if (m.togglerElement) 
+                m.observer.observe(m.togglerElement[0], { childList:true });
+        }],
+        s:["set","ui.switchstate","onswitchstate"]
+    },
+    onswitchstate:function(m) {
+        if (m.ui.switchstate==true) {
+            Maggi.UI.parts.popup.place(m);
+            m.outer.focus();
+        }
+    },
+    place:function(m) {
+        var getInnerClientRect = function(dom) {
+            var pad = function(dom,dir) {
+                return parseInt(dom.css("padding-"+dir).replace("px",""));
+            };
+            var outer={};
+            outer.left=dom[0].offsetLeft;
+            outer.top=dom[0].offsetTop;
+            outer.bottom=outer.top+dom[0].offsetHeight;
+            outer.right=outer.left+dom[0].offsetWidth;
+            var left=outer.left+pad(dom,"left");
+            var top=outer.top+pad(dom,"top");
+            var bottom=outer.bottom-pad(dom,"bottom");
+            var right=outer.right-pad(dom,"right");
+            return {left:left,right:right,top:top,bottom:bottom};
+        };
+        m.deco.css("margin-left",0);
+        var togglerElement=m.togglerElement;
+        if (togglerElement===undefined) return;
+        var dom=m.outer;
+        var spacing=16;
+        var pt=togglerElement.offset();
+        var rect=getInnerClientRect(togglerElement);
+        dom.css("left",0);
+        var halfPopupWidth=dom.width()/2+spacing;
 
-		var attach={x:(rect.left+rect.right)/2,y:rect.bottom};
-		var documentWidth=window.innerWidth;
-		var documentHeight=window.innerHeight;
-		var overflowWidth=attach.x+halfPopupWidth-documentWidth;
-		var left=attach.x-halfPopupWidth;
-		if (overflowWidth>0) left=left-overflowWidth;
-		if (left<0) left=0;
+        var attach={x:(rect.left+rect.right)/2,y:rect.bottom};
+        var documentWidth=window.innerWidth;
+        var documentHeight=window.innerHeight;
+        var overflowWidth=attach.x+halfPopupWidth-documentWidth;
+        var left=attach.x-halfPopupWidth;
+        if (overflowWidth>0) left=left-overflowWidth;
+        if (left<0) left=0;
 
-		dom.css("top",attach.y);
-		dom.css("left",left);
-		if (attach.y+dom.height()+2*spacing-documentHeight>0)
-			dom.css("bottom",0);
-		var ml=attach.x-left-2*spacing;
-		var mlmax=2*(halfPopupWidth-spacing)-2*spacing-8;
-		var mlmin=8;
-		if (ml>mlmax) ml=mlmax;
-		if (ml<mlmin) ml=mlmin;
-		m.deco.css("margin-left",ml);
-	},
-	builder(m) {
-		m.outer=m.dom;
-		m.inner=$("<div>").appendTo(m.outer);
-		m.inner.addClass("popup-content");
-		m.dom=$("<div>").appendTo(m.inner);
+        dom.css("top",attach.y);
+        dom.css("left",left);
+        if (attach.y+dom.height()+2*spacing-documentHeight>0)
+            dom.css("bottom",0);
+        var ml=attach.x-left-2*spacing;
+        var mlmax=2*(halfPopupWidth-spacing)-2*spacing-8;
+        var mlmin=8;
+        if (ml>mlmax) ml=mlmax;
+        if (ml<mlmin) ml=mlmin;
+        m.deco.css("margin-left",ml);
+    },
+    builder(m) {
+        m.outer=m.dom;
+        m.inner=$("<div>").appendTo(m.outer);
+        m.inner.addClass("popup-content");
+        m.dom=$("<div>").appendTo(m.inner);
 
-		var keyup=function (e) { if (e.keyCode==27) m.ui.switchstate=false; };
-		m.outer.on("keyup", keyup);
-		m.deco=$("<div>").prependTo(m.outer);
-		m.deco2=$("<div>").appendTo(m.deco);
-		m.deco.addClass("popup-triangle-wrapper");
-		m.deco2.addClass("popup-triangle-inner");
-		var place=function() { if (m.ui.switchstate==true) Maggi.UI.parts.popup.place(m); };
-		m.observer = new MutationObserver(place);
-		m.observer.observe(m.dom[0], { childList:true, subtree:true, attributes:true, characterData:true});
-		$(window).resize(place);
-		return function() {
-			m.outer.off("keyup",keyup);
-		};
-	}
+        var keyup=function (e) { if (e.keyCode==27) m.ui.switchstate=false; };
+        m.outer.on("keyup", keyup);
+        m.deco=$("<div>").prependTo(m.outer);
+        m.deco2=$("<div>").appendTo(m.deco);
+        m.deco.addClass("popup-triangle-wrapper");
+        m.deco2.addClass("popup-triangle-inner");
+        var place=function() { if (m.ui.switchstate==true) Maggi.UI.parts.popup.place(m); };
+        m.observer = new MutationObserver(place);
+        m.observer.observe(m.dom[0], { childList:true, subtree:true, attributes:true, characterData:true});
+        $(window).resize(place);
+        return function() {
+            m.outer.off("keyup",keyup);
+        };
+    }
 };
 
 Maggi.UI.parts.actionbar={
-	name:"actionbar",
-	partclass:"actionbar",
-	members:{
-		left:null,
-		center:null,
-		right:null,
-		inner:null
-	},
-	builder(m) {
-		m.i = Maggi.UI(m.dom,{
-			bar:{left:{},center:{},right:{}},
-			inner:null
-		}, {
-			parts:"children",
-			class:"rows",
-			children:{
-				bar:{
-					parts:"children",
-					class:"cols",
-					children:{
-						left:null,
-						center:null,
-						right:null
-					}
-				},
-				inner:null
-			}
-		},m);
-		m.i.data.bind("set","inner",function(k,v,ov) {
-			if (m.ui.data===undefined)
-				m.data=v;
-			else
-				m.ui.data=v;
-		});
-		return m.i.backbuild;
-	},
-	bindings: {
-		a:["set","data",function(m,k,v) {m.i.data.inner=m.ui.data===undefined?m.data:m.ui.data;}],
-		b:["set","ui.data",function(m,k,v) {m.i.data.inner=m.ui.data===undefined?m.data:m.ui.data;}],
-		c:["add","ui.data",function(m,k,v) {m.i.data.inner=m.ui.data===undefined?m.data:m.ui.data;}],
-		e:["set","ui.left",function(m,k,v) {m.i.ui.children.bar.children.left=v;}],
-		f:["set","ui.right",function(m,k,v) {m.i.ui.children.bar.children.right=v;}],
-		g:["set","ui.center",function(m,k,v) {m.i.ui.children.bar.children.center=v;}],
-		h:["set","ui.inner",function(m,k,v) {m.i.ui.children.inner=v;}],
-	}
+    name:"actionbar",
+    partclass:"actionbar",
+    members:{
+        left:null,
+        center:null,
+        right:null,
+        inner:null
+    },
+    builder(m) {
+        m.i = Maggi.UI(m.dom,{
+            bar:{left:{},center:{},right:{}},
+            inner:null
+        }, {
+            parts:"children",
+            class:"rows",
+            children:{
+                bar:{
+                    parts:"children",
+                    class:"cols",
+                    children:{
+                        left:null,
+                        center:null,
+                        right:null
+                    }
+                },
+                inner:null
+            }
+        },m);
+        m.i.data.bind("set","inner",function(k,v,ov) {
+            if (m.ui.data===undefined)
+                m.data=v;
+            else
+                m.ui.data=v;
+        });
+        return m.i.backbuild;
+    },
+    bindings: {
+        a:["set","data",function(m,k,v) {m.i.data.inner=m.ui.data===undefined?m.data:m.ui.data;}],
+        b:["set","ui.data",function(m,k,v) {m.i.data.inner=m.ui.data===undefined?m.data:m.ui.data;}],
+        c:["add","ui.data",function(m,k,v) {m.i.data.inner=m.ui.data===undefined?m.data:m.ui.data;}],
+        e:["set","ui.left",function(m,k,v) {m.i.ui.children.bar.children.left=v;}],
+        f:["set","ui.right",function(m,k,v) {m.i.ui.children.bar.children.right=v;}],
+        g:["set","ui.center",function(m,k,v) {m.i.ui.children.bar.children.center=v;}],
+        h:["set","ui.inner",function(m,k,v) {m.i.ui.children.inner=v;}],
+    }
 };
 
 Maggi.UI.parts.clone={
@@ -1240,21 +1240,21 @@ Maggi.UI.parts.labelwrap={
 
 Maggi.UI.parts.labeledlist={
     name:"labeledlist",
-	parts:["domwrap2","children"],
-	partclass:"labeledlist",
-	members:{
-	    label:null,
+    parts:["domwrap2","children"],
+    partclass:"labeledlist",
+    members:{
+        label:null,
         wrapperchildren:{
             label:{parts:"label",class:"listlabel"}
         },
         wrapperclass:"settings",
-	    class:"simplelist",
-	},
-	builder(m) { 
+        class:"simplelist",
+    },
+    builder(m) { 
         var t=m.ui.label;
         if (t==null) t=m.dom.parent().attr("id");
         m.ui.wrapperchildren.label.label=t;
-	}
+    }
 };
 
 
@@ -1269,17 +1269,17 @@ Maggi.UI.parts.debug={
         var text_ui=function() { return {
                         parts:["labelwrap","text"],
                         wrapperclass:"member",
-                	    builder(m) { 
-                	        var t=m.dom.parent().attr("id");
-                	        m.ui.wrapperchildren.label.label=t;
-                	    }
+                        builder(m) { 
+                            var t=m.dom.parent().attr("id");
+                            m.ui.wrapperchildren.label.label=t;
+                        }
                     }};
         var object_ui={
             parts:["labelwrap"],
             wrapperclass:"member",
             builder(m) {
-    	        var t=m.dom.parent().attr("id");
-    	        m.ui.wrapperchildren.label.label=t;
+                var t=m.dom.parent().attr("id");
+                m.ui.wrapperchildren.label.label=t;
                 var ui={
                     parts:"children",children:{}
                 };
