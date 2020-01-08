@@ -739,9 +739,10 @@ Maggi.db.sync = function(socket, dbreq, db, client, raise_event, onsync, synclog
     };
     var resync = function() {
         db.insync = false;
-        console.log("requesting", dbname);
+        console.log("requesting resync", dbname);
         emit({ f: "request" });
         db.waitsync = true;
+        if (raise_event) raise_event("resyncing", dbname);
     };
     db.data.bind("set", handler);
     db.data.bind("add", handler);
@@ -760,12 +761,12 @@ Maggi.db.sync = function(socket, dbreq, db, client, raise_event, onsync, synclog
                 if (client) {
                     db.insync=false;
                     if (!db.waitsync) {
-                        log("out-of-sync client; requesting resync");
+                        console.log("this client is out-of-sync");
                         resync();
                     }
                 } else {
-                    log("rejecting out-of-sync client request");
-                    emit({f:"error",id:"old_rev", cur_rev:db.rev, req_rev:d.rev});
+                    console.log(socket.id,"rejecting request from out-of-sync client");
+                    emit({f:"error",id:"old_rev", cur_rev:db.rev, req:d});
                 }
             }
         }
@@ -780,9 +781,10 @@ Maggi.db.sync = function(socket, dbreq, db, client, raise_event, onsync, synclog
         }
         if (d.f == "error")
             if (client) {
-                if (d.id == "old_rev")
-                    emit({ f: "request" });
-                else {
+                if (d.id == "old_rev") {
+                    console.log("received out-of-sync notice");
+                    resync();
+                } else {
                     console.warn(socket.id, dbname, d.message);
                     detach();
                     socket.off(mk, msghandler);

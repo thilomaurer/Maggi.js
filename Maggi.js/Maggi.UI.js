@@ -88,15 +88,17 @@ Maggi.UI2=function(m) {
         //inflate ui shortcuts
         if (typeof m.ui === "function") {m.ui=m.ui(); return;}
         if (typeof m.ui === "string") {m.ui={parts:[m.ui]}; return;}
-        //console.log(m.dom);
         var deinstallpart=installpart(m.ui);
-        //console.log(m.dom);
         m.backbuild=function() {
             if (deinstallpart) deinstallpart();
         };
     };
     m.bind("set","ui",build);
     build();
+    return function() {
+        m.unbind(build);
+        if (m.backbuild) m.backbuild();
+    }
 };
 
 var installBindings=function(handlers) {
@@ -858,14 +860,14 @@ Maggi.UI.parts.wrap={
         var innerdata=(m.ui.data===undefined)?m.data:m.ui.data;
         var x=Maggi({data:innerdata,ui:m.ui.innerui});
         x.dom=m.dom;
-        x.bind("set","ui",function(k,v) {m.ui.innerui=v;});
-        Maggi.UI2(x);        
+        var upui=function(k,v) {m.ui.innerui=v;};
+        x.bind("set","ui",upui);
+        var backbuild=Maggi.UI2(x);        
         m.i=x;
         return function() {
-            if (m.i.backbuild)
-                m.i.backbuild()
-            else
-                console.warn("missing backbuild");
+            x.unbind(upui);
+            backbuild();
+            m.i=undefined;
         };
     }
 };
