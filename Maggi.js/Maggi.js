@@ -361,7 +361,7 @@ Maggi.db.load = function(filename, enc, cb) {
 
 Maggi.db.create = function(server, dbreq, useroptions) {
     return new Promise((resolve,reject) => {
-        var dbname = dbreq.id_str;
+        var dbname = dbreq.name;
         dbreq.log("create");
         var options = {
             bindfs: false,
@@ -436,6 +436,9 @@ Maggi.db.create = function(server, dbreq, useroptions) {
             if (db == null) return;
             if (server.dbs[dbname].state != "vive") return;
             db = Maggi(db);
+			db.flush=function() {
+				save_now(db);
+			};
             var ch = options.createhook;
             if (ch) {
                 dbreq.log("create hook");
@@ -503,8 +506,7 @@ Maggi.db.server = function(io, options) {
         log: false || options&&options.log,
         synclog: false || options&&options.synclog,
         db: function(dbreq) {
-            dbreq = gen_id_str(dbreq);
-            var dbid = dbreq.id_str;
+            dbreq = fill_dbreq(dbreq);
             return Maggi.db.server.vive(server, dbreq).then(db => {
                 dbreq.log("provide");
                 return db.data;
@@ -531,30 +533,72 @@ Maggi.db.server = function(io, options) {
         clientdbs = [];
         server.clients[socket.id] = clientdbs;
         socket.on("Maggi.db", function(dbreq) {
-            dbreq = gen_id_str(dbreq);
-            var dbid = dbreq.id_str;
+			var resaddr="Maggi.db." + dbreq.reqid;
             var log = msg => {
                 if (server.log)
-                    console.log(`${socket.id}, db ${dbid}:`,msg);
+                    console.log(`${socket.id}, db ${dbname}:`,msg);
             };
             var warn = msg => {
-                console.warn(`${socket.id}, db ${dbid}:`,msg);
+                console.warn(`${socket.id}, db ${dbname}:`,msg);
             };
+            var error = msg => {
+                console.error(`${socket.id}, db ${dbname}:`,msg);
+            };
+			var emit = function(d) {
+				log("emit", d);
+				socket.emit(resaddr, d);
+			};
+            var dbname = dbreq.name;
+		    if (typeof dbname != "string" || dbname=="") {
+        		res={f:"error",id:"missing_db_name", req:dbreq};
+				emit(res);
+				return;
+			}
             dbreq.log = log;
-            var startsync = function(db) {
-                if (clientdbs.indexOf(dbid) == -1) {
-                    clientdbs.push(dbid);
-                    log("startsync");
-                    Maggi.db.sync(socket, dbreq, db, false, null, null, server.synclog);
-                    socket.emit("Maggi.db." + dbid, { f: "connected" });
-                } else {
+            var process_request = function(db) {
+				var t=dbreq.type;
+				if (t==null||t=="data") {
+				    if (clientdbs.indexOf(dbname) == -1) {
+            	        clientdbs.push(dbname);
+            	        log("process_request: startsync");
+            	        Maggi.db.sync(socket, dbreq, db, false, null, null, server.synclog);
+            	        res={ f: "connected" };
+					}
+				} else if (t=="req") {
                     log("command "+JSON.stringify(dbreq));
-                    if (db.req) db.req(dbreq);
-                }
+                    if (db.req)
+						db.req(dbreq);
+                } else if (t=="modify_user") {
+					var newuser=dbreq.user;
+					var username=newuser.username;
+					var user=db.users[username];
+					if (user==null) {
+            		    res={f:"error",id:"unknown_user", req:dbreq};
+					} else {
+						var changed=false;
+						if (newuser.role!=null) {
+	        		        user.role=newuser.role;
+							changed=true;
+						}
+						if (newuser.password_hash!=null) {
+							user.password_hash=newuser.password_hash;
+							changed=true;
+						}
+						if (changed) {
+							db.flush();
+							res={f:"success", req:dbreq};
+						}
+						else
+	        		        res={f:"error",id:"no_changes_requested", req:dbreq};
+					}
+				} else {
+	        		res={f:"error",id:"unknown_type", req:dbreq};
+				}
+				socket.emit(resaddr,res);
             };
             var reject = err => {
-                warn("error:" + err.message);
-                socket.emit("Maggi.db." + dbid, { f: "error",  message: err.message });
+                error("error:" + err.message);
+                emit({ f: "error",  message: err.message });
             };
             var validate_credentials = function(db) {
                 if (db.users && Object.keys(db.users).length > 0) {
@@ -572,7 +616,7 @@ Maggi.db.server = function(io, options) {
             }
             Maggi.db.server.vive(server, dbreq)
                 .then(validate_credentials)
-                .then(startsync)
+                .then(process_request)
                 .catch(reject);
         });
         socket.on('disconnect', function(e) {
@@ -591,14 +635,29 @@ Maggi.db.server.dbpathname = function(dbname) {
     return Maggi.db.server.fulldbpath() + "/" + dbname + ".json";
 };
 
-var gen_id_str = function(dbreq) {
+var hashCode = function(s) {
+    var hash = 0;
+    if (s.length == 0) {
+        return hash;
+    }
+    for (var i = 0; i < s.length; i++) {
+        var char = s.charCodeAt(i);
+        hash = ((hash<<5)-hash)+char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    return hash;
+}
+
+var fill_dbreq = function(dbreq) {
     if (dbreq == null) {
         console.warn("empty Maggi.db request received");
         return null;
     }
-    if (typeof dbreq === 'string') dbreq = { id: dbreq };
-    var username = dbreq.credentials && dbreq.credentials.username;
-    if (dbreq.id_str === undefined) dbreq.id_str = dbreq.id;
+    if (typeof dbreq === 'string') dbreq = { name: dbreq };
+    if (dbreq.type==null)
+        dbreq.type="data";
+	dbreq.req_date = new Date().getTime();
+    dbreq.reqid = hashCode(JSON.stringify(dbreq));
     return dbreq;
 }
 
@@ -615,7 +674,7 @@ var jsonpathmatch = function(base, requ) {
 };
 
 function get_create_options(server, dbreq) {
-    var path = dbreq.id;
+    var path = dbreq.name;
     if (typeof path != "string") return false;
     for (var idx in server.providers) {
         var pvd = server.providers[idx];
@@ -646,9 +705,8 @@ function get_create_options(server, dbreq) {
 Maggi.db.server.vive = function(server, dbreq) {
     var serverlog = msg => {
         if (server.log)
-            console.log(`server, db ${dbreq.id_str}:`,msg);
+            console.log(`server, db ${dbreq.name}:`,msg);
     };
-    if (dbreq.id_str === undefined) dbreq = gen_id_str(dbreq);
     if (dbreq.log === undefined) dbreq.log = serverlog;
     return new Promise((resolve,reject) => {
         var r = function(message) {
@@ -656,11 +714,11 @@ Maggi.db.server.vive = function(server, dbreq) {
             dbreq.log(errmsg);
             reject(new Error(errmsg));
         }
-        var db = server.dbs[dbreq.id_str];
+        var db = server.dbs[dbreq.name];
         if (db === undefined) {
             dbreq.log("vive");
-            server.dbs[dbreq.id_str] = {state:"vive", callbacks:[]};
-            db = server.dbs[dbreq.id_str];
+            server.dbs[dbreq.name] = {state:"vive", callbacks:[]};
+            db = server.dbs[dbreq.name];
             var accept = function(options) {
                 dbreq.log("accept");
                 var pdb = db;
@@ -671,7 +729,7 @@ Maggi.db.server.vive = function(server, dbreq) {
                     }
                     return db;
                 }).catch(err => {
-                    delete server.dbs[dbreq.id_str];
+                    delete server.dbs[dbreq.name];
                     return Promise.reject(err);
                 });
                 resolve(res);
@@ -695,7 +753,7 @@ Maggi.db.server.vive = function(server, dbreq) {
 }
 
 Maggi.db.sync = function(socket, dbreq, db, client, raise_event, onsync, synclog) {
-    var dbname = dbreq.id_str;
+    var dbname = dbreq.name;
     var applying = false;
     var mk = "Maggi.db." + dbname;
     var dshort = function(d) {
@@ -791,8 +849,6 @@ Maggi.db.sync = function(socket, dbreq, db, client, raise_event, onsync, synclog
                     if (raise_event) raise_event("error", dbname, d);
                 }
             }
-        if (d.f == "connected")
-            resync();
     };
     socket.on(mk,msghandler);
     /*
@@ -800,6 +856,7 @@ Maggi.db.sync = function(socket, dbreq, db, client, raise_event, onsync, synclog
     */
     db.insync = !client;
     db.waitsync = false;
+	return resync;
 };
 
 clientdbs = {};
@@ -813,8 +870,14 @@ Maggi.db.client = function(dbreq, events, defs, options) {
         socket = io(url);
         Maggi.db.client.socket = socket;
     }
-    dbreq = gen_id_str(dbreq);
-    var dbname = dbreq.id_str;
+    dbreq = fill_dbreq(dbreq);
+    if (dbreq.type!="data") {
+		return new Promise((resolve,reject) => {
+			socket.on("Maggi.db."+dbreq.reqid,resolve);
+		    socket.emit("Maggi.db", dbreq);
+		});
+    }
+    var dbname = dbreq.name;
     var raise_event=function(eventname) {
         if (options.eventlog === true)
             console.log(socket.id, eventname, dbname);
@@ -831,9 +894,6 @@ Maggi.db.client = function(dbreq, events, defs, options) {
         var db=clientdbs[dbname];
         if (db.events===undefined) db.events=[];
         if (events) db.events.push(events);
-        if (dbreq.attr) {
-            socket.emit("Maggi.db", dbreq);
-        }
         var dbdata=db.data;
         if (db.insync) raise_event("ready",dbname,dbdata);
         if (db.insync) raise_event("first_sync",dbname,dbdata);
@@ -864,9 +924,20 @@ Maggi.db.client = function(dbreq, events, defs, options) {
             add_unset(data, defs);
         if (db.sync_count==1) raise_event("first_sync",dbname,data);
     };
+	
+	var response = function(d) {
+        if (d.f == "connected")
+            resync();
+		else if (d.f == "error")
+			raise_event(d.f, dbname, d);
+		else
+			console.error("unknown event",d);
+	};
+
     var register = function() {
         socket.emit("Maggi.db", dbreq);
         raise_event("connecting",dbname);
+		socket.on("Maggi.db."+dbreq.reqid,response);
     };
 
     socket.on("reconnect", register);
@@ -876,7 +947,7 @@ Maggi.db.client = function(dbreq, events, defs, options) {
             raise_event(v, dbname, e);
         });
     });
-    Maggi.db.sync(socket, dbreq, db, true, raise_event, onsync, options && options.synclog);
+    var resync = Maggi.db.sync(socket, dbreq, db, true, raise_event, onsync, options && options.synclog);
     register();
     return data;
 };
