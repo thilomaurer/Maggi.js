@@ -97,7 +97,7 @@ var Maggi = function(other) {
         trigger(e, bubblekey, v, oldv);
     };
 
-    func = {
+    var func = {
         add: function(key, value, notriggerbubble) {
             if (key == null) return console.warn("Maggi.js: ignoring add of member (null)");
             var get = () => d[key];
@@ -436,9 +436,9 @@ Maggi.db.create = function(server, dbreq, useroptions) {
             if (db == null) return;
             if (server.dbs[dbname].state != "vive") return;
             db = Maggi(db);
-			db.flush=function() {
-				save_now(db);
-			};
+            db.flush=function() {
+                save_now(db);
+            };
             var ch = options.createhook;
             if (ch) {
                 dbreq.log("create hook");
@@ -533,7 +533,7 @@ Maggi.db.server = function(io, options) {
         clientdbs = [];
         server.clients[socket.id] = clientdbs;
         socket.on("Maggi.db", function(dbreq) {
-			var resaddr="Maggi.db." + dbreq.reqid;
+            var resaddr="Maggi.db." + dbreq.reqid;
             var log = msg => {
                 if (server.log)
                     console.log(`${socket.id}, db ${dbname}:`,msg);
@@ -544,57 +544,57 @@ Maggi.db.server = function(io, options) {
             var error = msg => {
                 console.error(`${socket.id}, db ${dbname}:`,msg);
             };
-			var emit = function(d) {
-				log("emit", d);
-				socket.emit(resaddr, d);
-			};
+            var emit = function(d) {
+                log("emit", d);
+                socket.emit(resaddr, d);
+            };
             var dbname = dbreq.name;
-		    if (typeof dbname != "string" || dbname=="") {
-        		res={f:"error",id:"missing_db_name", req:dbreq};
-				emit(res);
-				return;
-			}
+            if (typeof dbname != "string" || dbname=="") {
+                res={f:"error",id:"missing_db_name", req:dbreq};
+                emit(res);
+                return;
+            }
             dbreq.log = log;
             var process_request = function(db) {
-				var t=dbreq.type;
-				if (t==null||t=="data") {
-				    if (clientdbs.indexOf(dbname) == -1) {
-            	        clientdbs.push(dbname);
-            	        log("process_request: startsync");
-            	        Maggi.db.sync(socket, dbreq, db, false, null, null, server.synclog);
-            	        res={ f: "connected" };
-					}
-				} else if (t=="req") {
+                var t=dbreq.type;
+                if (t==null||t=="data") {
+                    if (clientdbs.indexOf(dbname) == -1) {
+                        clientdbs.push(dbname);
+                        log("process_request: startsync");
+                        Maggi.db.sync(socket, dbreq, db, false, null, null, server.synclog);
+                        res={ f: "connected" };
+                    }
+                } else if (t=="req") {
                     log("command "+JSON.stringify(dbreq));
                     if (db.req)
-						db.req(dbreq);
+                        db.req(dbreq);
                 } else if (t=="modify_user") {
-					var newuser=dbreq.user;
-					var username=newuser.username;
-					var user=db.users[username];
-					if (user==null) {
-            		    res={f:"error",id:"unknown_user", req:dbreq};
-					} else {
-						var changed=false;
-						if (newuser.role!=null) {
-	        		        user.role=newuser.role;
-							changed=true;
-						}
-						if (newuser.password_hash!=null) {
-							user.password_hash=newuser.password_hash;
-							changed=true;
-						}
-						if (changed) {
-							db.flush();
-							res={f:"success", req:dbreq};
-						}
-						else
-	        		        res={f:"error",id:"no_changes_requested", req:dbreq};
-					}
-				} else {
-	        		res={f:"error",id:"unknown_type", req:dbreq};
-				}
-				socket.emit(resaddr,res);
+                    var newuser=dbreq.user;
+                    var username=newuser.username;
+                    var user=db.users[username];
+                    if (user==null) {
+                        res={f:"error",id:"unknown_user", req:dbreq};
+                    } else {
+                        var changed=false;
+                        if (newuser.role!=null) {
+                            user.role=newuser.role;
+                            changed=true;
+                        }
+                        if (newuser.password_hash!=null) {
+                            user.password_hash=newuser.password_hash;
+                            changed=true;
+                        }
+                        if (changed) {
+                            db.flush();
+                            res={f:"success", req:dbreq};
+                        }
+                        else
+                            res={f:"error",id:"no_changes_requested", req:dbreq};
+                    }
+                } else {
+                    res={f:"error",id:"unknown_type", req:dbreq};
+                }
+                socket.emit(resaddr,res);
             };
             var reject = err => {
                 error("error:" + err.message);
@@ -656,7 +656,7 @@ var fill_dbreq = function(dbreq) {
     if (typeof dbreq === 'string') dbreq = { name: dbreq };
     if (dbreq.type==null)
         dbreq.type="data";
-	dbreq.req_date = new Date().getTime();
+    dbreq.req_date = new Date().getTime();
     dbreq.reqid = hashCode(JSON.stringify(dbreq));
     return dbreq;
 }
@@ -796,7 +796,8 @@ Maggi.db.sync = function(socket, dbreq, db, client, raise_event, onsync, synclog
         applying = false;
     };
     var resync = function() {
-        db.insync = false;
+        if (db.insync == true)
+            return;
         console.log("requesting resync", dbname);
         emit({ f: "request" });
         db.waitsync = true;
@@ -832,15 +833,18 @@ Maggi.db.sync = function(socket, dbreq, db, client, raise_event, onsync, synclog
             emit({ f: "response", e: "add", k: null, v: db.data, rev: db.rev });
         if (d.f == "response" && db.waitsync) {
             apply(d);
+            if (db.insync == true)
+                console.warn("resynced though already in-sync");
             db.insync = true;
+            db.waitsync = false;
             db.sync_count++;
             if (onsync) onsync();
-            if (raise_event) raise_event("ready", dbname, db.data);
         }
         if (d.f == "error")
             if (client) {
                 if (d.id == "old_rev") {
                     console.log("received out-of-sync notice");
+                    db.insync=false;
                     resync();
                 } else {
                     console.warn(socket.id, dbname, d.message);
@@ -851,12 +855,9 @@ Maggi.db.sync = function(socket, dbreq, db, client, raise_event, onsync, synclog
             }
     };
     socket.on(mk,msghandler);
-    /*
-        socket.on('disconnect',detach);
-    */
     db.insync = !client;
     db.waitsync = false;
-	return resync;
+    return resync;
 };
 
 clientdbs = {};
@@ -872,11 +873,18 @@ Maggi.db.client = function(dbreq, events, defs, options) {
     }
     dbreq = fill_dbreq(dbreq);
     if (dbreq.type!="data") {
-		return new Promise((resolve,reject) => {
-			socket.on("Maggi.db."+dbreq.reqid,resolve);
-		    socket.emit("Maggi.db", dbreq);
-		});
+        return new Promise((resolve,reject) => {
+            socket.on("Maggi.db."+dbreq.reqid,function(res) {
+                if (res.f=="error")
+                    reject(res);
+                else
+                    resolve(res);
+            });
+            socket.emit("Maggi.db", dbreq);
+        });
     }
+    if (events==null) events=[];
+    if (!(events instanceof Array)) events=[events];
     var dbname = dbreq.name;
     var raise_event=function(eventname) {
         if (options.eventlog === true)
@@ -889,14 +897,21 @@ Maggi.db.client = function(dbreq, events, defs, options) {
         db.events.forEach(function(evt) {
             if (evt[eventname]) evt[eventname].apply(null,args);
         });
+        if (eventname=="ready") {
+            db.events=db.events.map(evt => {
+                if (evt.ready !== undefined)
+                    delete evt.ready;
+                return evt;
+            });
+        }
     }
     if (clientdbs[dbname] !== undefined) {
         var db=clientdbs[dbname];
         if (db.events===undefined) db.events=[];
-        if (events) db.events.push(events);
+        db.events.push(...events);
         var dbdata=db.data;
-        if (db.insync) raise_event("ready",dbname,dbdata);
-        if (db.insync) raise_event("first_sync",dbname,dbdata);
+        if (db.insync) 
+            raise_event("ready",dbname,dbdata);
         return dbdata;
     }
 
@@ -911,7 +926,7 @@ Maggi.db.client = function(dbreq, events, defs, options) {
 
     var data = Maggi({});
     var db = { data: data, rev: 0, insync: false, sync_count:0, events:[] };
-    if (events) db.events.push(events);
+    db.events.push(...events);
     clientdbs[dbname] = db;
 
     var handler = function() { db.rev += 1; };
@@ -922,26 +937,35 @@ Maggi.db.client = function(dbreq, events, defs, options) {
     var onsync = function() {
         if (db.rev == 0)
             add_unset(data, defs);
-        if (db.sync_count==1) raise_event("first_sync",dbname,data);
+        raise_event("ready",dbname,data);
+        if (db.sync_count>1)
+            raise_event("resynced",dbname,data);
     };
-	
-	var response = function(d) {
-        if (d.f == "connected")
+    
+    var response = function(d) {
+        if (d.f == "connected") {
+            console.log("req response",dbname,d.f);
             resync();
-		else if (d.f == "error")
-			raise_event(d.f, dbname, d);
-		else
-			console.error("unknown event",d);
-	};
+        }
+        else if (d.f == "error")
+            raise_event(d.f, dbname, d);
+        else
+            console.error("unknown event",d);
+    };
 
     var register = function() {
         socket.emit("Maggi.db", dbreq);
         raise_event("connecting",dbname);
-		socket.on("Maggi.db."+dbreq.reqid,response);
+        socket.on("Maggi.db."+dbreq.reqid,response);
     };
+
+    var nosync = function() {
+        db.insync=false;
+    }
 
     socket.on("reconnect", register);
     var evs = ['error', 'disconnect', 'reconnect', 'reconnect_attempt', 'reconnect_error', 'reconnect_failed'];
+    socket.on('disconnect', nosync);
     evs.forEach(function(v) {
         socket.on(v, function(e) {
             raise_event(v, dbname, e);

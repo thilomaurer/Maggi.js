@@ -52,6 +52,9 @@ Maggi.UI2=function(m) {
         for (var mbr in p.members)
             if (m.ui[mbr]===undefined) 
                 m.ui.add(mbr,p.members[mbr],true);
+        //run prebuilder
+        var backprebuilder=null;
+        if (p.prebuilder) backprebuilder=p.prebuilder(m);
         //install parts
         var deinstallParts={};
         if (typeof p.parts === "string") p.parts=[p.parts];
@@ -67,6 +70,7 @@ Maggi.UI2=function(m) {
         var deinstallBindings=installPartBindings(p,m);
         //return backbuilder
         var deinstallPart=function() {
+            if (backprebuilder) { backprebuilder(); backprebuilder=null; }
             if (deinstallBindings) { deinstallBindings(); deinstallBindings=null; }
             if (backbuilder) { backbuilder(); backbuilder=null; }
             //remove dom
@@ -390,26 +394,26 @@ Maggi.UI.parts.children={
     partclass:"children",
     parts:"common",
     members:{children:{},childdefault:null,order:null,domNS:null,domtag:"div"},
-    order:function(m) {
+    order:function children_order(m) {
         var o=m.ui.order;
         if (o) return Object2Array(o);
-    o=Object.keys(m.ui.children);
+        o=Object.keys(m.ui.children);
 
         if (m.ui.childdefault)
-    for (var k in m.data)
+            for (var k in m.data)
         if (!(k in m.ui.children))
             o.push(k);
 
         return o;
     },
-    makeElement:function(m,id) {
-    var tag=m.ui.domtag;
-    var ns=m.ui.domNS;
+    makeElement:function children_makeElement(m,id) {
+        var tag=m.ui.domtag;
+        var ns=m.ui.domNS;
         var el=ns?document.createElementNS(ns,tag):document.createElement(tag);
         el.id=id;
         return el;
     },
-    place:function(m,k) {
+    place:function children_place(m,k) {
         var i=m.inner[k];
         if (i==null) return;
         var w=i.dom;
@@ -424,7 +428,7 @@ Maggi.UI.parts.children={
         }
         w.prependTo(m.dom); 
     },
-    add:function(m,k) {
+    add:function children_add(m,k) {
         //console.log("add",k);
         if (m.data==null) return; 
         if (m.ui.children==null) return;
@@ -459,7 +463,7 @@ Maggi.UI.parts.children={
             Maggi.UI.parts.children.place(m,k);
         }
     },
-    remove:function(m,k) {
+    remove:function children_remove(m,k) {
         //console.log("remove",k);
         if (k instanceof Array) k=k[k.length-1];
         var z=m.inner[k];
@@ -470,7 +474,7 @@ Maggi.UI.parts.children={
         if (m.ui&&(z.fromdefault===m.ui.children)) m.ui.children.remove(k);
         delete m.inner[k];
     },
-    placeall:function(m) {
+    placeall:function children_placeall function(m) {
         //console.log("placeall",m);
         for (var k in m.inner) {
             m.inner[k].dom.detach();
@@ -479,12 +483,12 @@ Maggi.UI.parts.children={
             Maggi.UI.parts.children.place(m,m.ui.order[k]);
         }
     }, 
-    removeall:function(m) {
+    removeall:function children_removeall function(m) {
         //console.log("removeall",m);
         for (var k in m.inner)
             Maggi.UI.parts.children.remove(m,k);
     },
-    remake:function(m,k,v,ov) {
+    remake:function children_remake function(m,k,v,ov) {
         //console.log("remake",k,v,ov);
         var add=function(k) { Maggi.UI.parts.children.add(m,k); };
         var remove=function(k) { Maggi.UI.parts.children.remove(m,k); };
@@ -498,7 +502,7 @@ Maggi.UI.parts.children={
         for (kk in m.ui.children)
             Maggi.UI.parts.children.add(m,kk);
     },
-    builder(m) {
+    builder:function children_builder(m) {
         m.inner={};
         return function() {
             Maggi.UI.parts.children.removeall(m);   
