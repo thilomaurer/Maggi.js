@@ -474,7 +474,7 @@ Maggi.UI.parts.children={
         if (m.ui&&(z.fromdefault===m.ui.children)) m.ui.children.remove(k);
         delete m.inner[k];
     },
-    placeall:function children_placeall function(m) {
+    placeall:function children_placeall(m) {
         //console.log("placeall",m);
         for (var k in m.inner) {
             m.inner[k].dom.detach();
@@ -483,12 +483,12 @@ Maggi.UI.parts.children={
             Maggi.UI.parts.children.place(m,m.ui.order[k]);
         }
     }, 
-    removeall:function children_removeall function(m) {
+    removeall:function children_removeall(m) {
         //console.log("removeall",m);
         for (var k in m.inner)
             Maggi.UI.parts.children.remove(m,k);
     },
-    remake:function children_remake function(m,k,v,ov) {
+    remake:function children_remake(m,k,v,ov) {
         //console.log("remake",k,v,ov);
         var add=function(k) { Maggi.UI.parts.children.add(m,k); };
         var remove=function(k) { Maggi.UI.parts.children.remove(m,k); };
