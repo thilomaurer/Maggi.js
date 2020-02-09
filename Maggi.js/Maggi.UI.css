@@ -48,7 +48,7 @@
 }
 
 .invisible {
-	display: none;
+	display: none !important;
 }
 
 .popup {
@@ -499,15 +499,6 @@
 	overflow:auto;
 	-webkit-overflow-scrolling: touch;
 }
-
-.childswitcher > #container > * {
-	display: none;
-}
-
-.childswitcher > #container > .selected {
-	display: block;
-}
-
 
 .mui .button,
 .mui-light .button {

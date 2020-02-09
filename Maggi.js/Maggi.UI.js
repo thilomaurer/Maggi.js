@@ -837,10 +837,17 @@ Maggi.UI.parts.childswitcher={
     },
     parts:["domwrap2","children"],
     bindings:{
+        3:["set","data",function(m) {
+			var v=m.ui.selected;
+			for (var i in m.inner)
+				m.inner[i].dom.addClass("invisible");
+            if (m.inner[v]) m.inner[v].dom.removeClass("invisible");
+		}],
         0:["set","ui.selected",function(m,k,v,ov) {
-            m.ui.wrapperdata.selector=v; 
-            if (m.inner[v]) m.inner[v].dom.addClass("selected");
-            if (m.inner[ov]) m.inner[ov].dom.removeClass("selected");
+            m.ui.wrapperdata.selector=v;
+			for (var i in m.inner)
+				m.inner[i].dom.addClass("invisible");
+            if (m.inner[v]) m.inner[v].dom.removeClass("invisible");
         }],
         1:["set","ui.wrapperdata.selector",function(m,k,v) {m.ui.selected=v;}],
         2:["set","ui.choices",function(m,k,v) {m.domwrap2.ui.children.selector.choices=v;}],
