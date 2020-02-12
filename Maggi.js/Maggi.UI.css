@@ -152,7 +152,6 @@
 	border-radius:8px;
 	border:1px solid hsla(224, 8%, 15%, 1);
 	box-shadow:0 0 100px black;
-	max-height:calc(100% - 32px);
 }
 
 .mui-light .popup,
