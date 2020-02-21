@@ -1,6 +1,6 @@
 {
   "name": "Maggi.js",
-  "version": "0.3.11",
+  "version": "0.3.12",
   "description": "rapid development of modern web applications using an object-centric client-server model",
   "main": "Maggi.js",
   "scripts": {

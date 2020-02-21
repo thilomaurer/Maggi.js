@@ -511,6 +511,7 @@
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
+	border: 1px solid transparent;
 }
 
 .mui .button {
@@ -524,11 +525,11 @@
 }
 
 .mui .button:hover {
-	box-shadow: 0px 0px 0px 1px white;
+	border: 1px solid white;
 }
 
 .mui-light .button:hover {
-	box-shadow: 0px 0px 0px 1px black;
+	border: 1px solid black;
 }
 
 .mui .button:active {
