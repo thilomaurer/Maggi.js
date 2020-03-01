@@ -571,7 +571,7 @@ Maggi.UI.parts.visible={
 Maggi.UI.parts.text={
     name:"text",
     partclass:"text",
-    members:{format:null,map:null},
+    members:{format:null,map:null, null:"(null)"},
     parts:"common",
     bindings:{
         e:["set","data","update"],
@@ -593,7 +593,8 @@ Maggi.UI.parts.text={
                 s=sprintf(fmt,d);
             else
                 s=d.toString();
-        }
+        } else
+            s=m.ui.null;
         m.dom.text(s);
     },
     builder(m) {

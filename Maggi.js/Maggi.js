@@ -462,7 +462,6 @@ Maggi.db.create = function(server, dbreq, useroptions) {
                 return v;
         }
 */
-        var stringify = function(db) { return JSON.stringify(db, null, '\t')+'\n'; };
         
         var save_active=false;
         var delay=10000;
@@ -478,7 +477,8 @@ Maggi.db.create = function(server, dbreq, useroptions) {
 
         function save_now(db) {
             d={data:db.data,rev:db.rev,users:db.users};
-            writefile(dbjson, stringify(d), options.enc);
+            var s = JSON.stringify(db, null, '\t')+'\n';
+            writefile(dbjson, s, options.enc);
         };
         function bindsave(db) {
             db.bind("set", "rev", function() { save(db) });

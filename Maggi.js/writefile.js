@@ -21,9 +21,14 @@ var writefile=function(fp,data,enc) {
 		mkdirp(dir,function(err) {
 			if (err) done(err);
 			else {
-				var d=x.data;
-				if (typeof d === "function") d=d();
-				fs.writeFile(x.fp, d, x.enc, done);
+				fs.rename(x.fp,x.fp+".backup", err => {
+					if (err) done(err);
+					else {
+						var d=x.data;
+						if (typeof d === "function") d=d();
+						fs.writeFile(x.fp, d, x.enc, done);
+					}
+				});
 			}
 		}); 
 	};
