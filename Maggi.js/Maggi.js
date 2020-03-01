@@ -379,6 +379,10 @@ Maggi.db = function(path,events,defs,options) {
 				},
 				resynced: db => {
 					resync_cb.forEach(f => f(db.data));
+				},
+				error: (db, err) => {
+					debugger;
+					reject(err);
 				}
             };
             if (events==null)
@@ -406,23 +410,34 @@ Maggi.db = function(path,events,defs,options) {
 	return p;
 };
 
+Maggi.db.load_json = function(filename, enc) {
+	return new Promise((resolve,reject) => {
+		fs.readFile(filename, enc, (err, db) => {
+			if (err) return reject(err);
+			try {
+				db = JSON.parse(db);
+			} catch (e) {
+				reject(new Error("Unable to parse Maggi.db '" + filename + "'"));
+			}
+			resolve(db);
+		});
+	});
+};
 
 Maggi.db.load = function(filename, enc) {
-    return new Promise((resolve, reject) => {
-        var db;
-        try {
-            db = fs.readFileSync(filename, enc);
-        } catch (e) {
-            reject(new Error("Error reading file '" + filename + "'"));
-        }
-        try {
-            db = JSON.parse(db);
-        } catch (e) {
-            reject(new Error("Unable to parse Maggi.db '" + filename + "'"));
-        }
-        resolve(db);
-    });
-}
+	return Maggi.db.load_json(filename, enc)
+		.catch(err => {
+			console.error(err);
+			var bfn = filename+".backup";
+			console.error("Restoring from backup "+bfn);
+			return new Promise((resolve,reject) => {
+				fs.copyFile(bfn, filename, err => {
+					if (err) reject(err);
+					Maggi.db.load_json(bfn, enc).then(resolve).catch(reject);
+				});
+			});
+		});
+};
 
 Maggi.db.create = function(server, dbreq, useroptions) {
     return new Promise((resolve,reject) => {
@@ -528,7 +543,7 @@ Maggi.db.create = function(server, dbreq, useroptions) {
         };
 
         if (options.persistant || options.loadexisting) {
-            if (fs.existsSync(dbjson)) {
+            if (fs.existsSync(dbjson)||fs.existsSync(dbjson+".backup")) {
                 if (dbreq.create !== undefined && dbreq.create==true) {
                     r("db already exists, but creation requested");
                 } else {
@@ -1016,7 +1031,7 @@ Maggi.db.client = function(dbreq, events, defs, options) {
         if (options.eventlog === true)
             console.log(socket.id, eventname, dbname);
         var args=[].slice.call(arguments,1);
-        var d=args[1];
+        var d=args[0];
         if (d && d.f=="error") {
             delete clientdbs[dbname];
         }
@@ -1081,9 +1096,9 @@ Maggi.db.client = function(dbreq, events, defs, options) {
     };
 
     var register = function() {
+        socket.on("Maggi.db."+dbreq.reqid,response);
         socket.emit("Maggi.db", dbreq);
         raise_event("connecting");
-        socket.on("Maggi.db."+dbreq.reqid,response);
     };
 
     var nosync = function() {
