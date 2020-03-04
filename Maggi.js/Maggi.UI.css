@@ -53,8 +53,6 @@
 
 .popup {
 	position: absolute;
-	top:0;
-	left:0;
 	margin:16px !important; 
 	z-index:99999;
 }
@@ -84,6 +82,12 @@
 	-webkit-overflow-scrolling: touch;
 	height: 100%;
 }
+
+.mui .popup > .popup-triangle-wrapper.bottom,
+.mui-light .popup > .popup-triangle-wrapper.bottom {
+    transform: scaleY(-1) translateY(-17px);
+}
+
 
 .mui-light .popup > .popup-triangle-wrapper,
 .mui .popup > .popup-triangle-wrapper {
