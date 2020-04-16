@@ -1051,7 +1051,10 @@ Maggi.UI.parts.popup={
     place:function(m) {
         var getInnerClientRect = function(dom) {
             var pad = function(dom,dir) {
-                return parseInt(dom.css("padding-"+dir).replace("px",""));
+				var css_size=dom.css("padding-"+dir);
+				if (css_size=="")
+					return 0;
+                return parseInt(css_size.replace("px",""));
             };
             var outer={};
             outer.left=dom[0].offsetLeft;
@@ -1106,7 +1109,7 @@ Maggi.UI.parts.popup={
                 dom.css("bottom","");
         } else {
             dom.css("bottom",documentHeight-1-attach.y);
-            if (attach.y-dom.height()-2*spacing<0)
+            if (attach.y-1-dom.height()-2*spacing<=0)
                 dom.css("top",0);
             else
                 dom.css("top","");

@@ -369,21 +369,21 @@ Maggi.db = function(path,events,defs,options) {
     var resync_cb=[];
     if (mdbs) 
         p = mdbs.db(path,events,defs,options)
-			.then(db => db.data);  //the server never resyncs it self - the truth is in the cloud
+            .then(db => db.data);  //the server never resyncs it self - the truth is in the cloud
     else
         p = new Promise((resolve, reject) => {
             var pevents = {
                 ready: db => {
-					resolve(db.data);
-					resync_cb.forEach(f => f(db.data));
-				},
-				resynced: db => {
-					resync_cb.forEach(f => f(db.data));
-				},
-				error: (db, err) => {
-					debugger;
-					reject(err);
-				}
+                    resolve(db.data);
+                    resync_cb.forEach(f => f(db.data));
+                },
+                resynced: db => {
+                    resync_cb.forEach(f => f(db.data));
+                },
+                error: (db, err) => {
+                    debugger;
+                    reject(err);
+                }
             };
             if (events==null)
                 events = [];
@@ -391,52 +391,52 @@ Maggi.db = function(path,events,defs,options) {
                 events = [events, pevents];
             else
                 events = [...events, pevents];
-			setTimeout(() => {
-	            Maggi.db.client(path,events,defs,options);
-			},0);
+            setTimeout(() => {
+                Maggi.db.client(path,events,defs,options);
+            },0);
         });
-	p.ondata = function(f) {
-		resync_cb.push(f);
-		return p;
-	};
-	p.offdata = function(f) {
-		resync_cb=resync_cb.filter(v => v!==f);
-		return p;
-	};
-	p.discard = function(f) {
-		resync_cb = [];
-		return p;
-	};
-	return p;
+    p.ondata = function(f) {
+        resync_cb.push(f);
+        return p;
+    };
+    p.offdata = function(f) {
+        resync_cb=resync_cb.filter(v => v!==f);
+        return p;
+    };
+    p.discard = function(f) {
+        resync_cb = [];
+        return p;
+    };
+    return p;
 };
 
 Maggi.db.load_json = function(filename, enc) {
-	return new Promise((resolve,reject) => {
-		fs.readFile(filename, enc, (err, db) => {
-			if (err) return reject(err);
-			try {
-				db = JSON.parse(db);
-			} catch (e) {
-				reject(new Error("Unable to parse Maggi.db '" + filename + "'"));
-			}
-			resolve(db);
-		});
-	});
+    return new Promise((resolve,reject) => {
+        fs.readFile(filename, enc, (err, db) => {
+            if (err) return reject(err);
+            try {
+                db = JSON.parse(db);
+            } catch (e) {
+                reject(new Error("Unable to parse Maggi.db '" + filename + "'"));
+            }
+            resolve(db);
+        });
+    });
 };
 
 Maggi.db.load = function(filename, enc) {
-	return Maggi.db.load_json(filename, enc)
-		.catch(err => {
-			console.error(err);
-			var bfn = filename+".backup";
-			console.error("Restoring from backup "+bfn);
-			return new Promise((resolve,reject) => {
-				fs.copyFile(bfn, filename, err => {
-					if (err) reject(err);
-					Maggi.db.load_json(bfn, enc).then(resolve).catch(reject);
-				});
-			});
-		});
+    return Maggi.db.load_json(filename, enc)
+        .catch(err => {
+            console.error(err);
+            var bfn = filename+".backup";
+            console.error("Restoring from backup "+bfn);
+            return new Promise((resolve,reject) => {
+                fs.copyFile(bfn, filename, err => {
+                    if (err) reject(err);
+                    Maggi.db.load_json(bfn, enc).then(resolve).catch(reject);
+                });
+            });
+        });
 };
 
 Maggi.db.create = function(server, dbreq, useroptions) {
@@ -450,7 +450,8 @@ Maggi.db.create = function(server, dbreq, useroptions) {
             initialdata: {},
             initialrev: 0,
             enc: "utf8",
-            allow_create: false
+            allow_create: false,
+            client_write: false
         };
         for (var k in useroptions)
             options[k] = useroptions[k];
@@ -565,6 +566,7 @@ Maggi.db.create = function(server, dbreq, useroptions) {
                         data: options.initialdata,
                         rev: options.initialrev
                     };
+                    db.client_write=options.client_write;
                     if (dbreq.credentials != null) {
                         var username = dbreq.credentials.username;
                         db.users = {}
@@ -593,7 +595,8 @@ Maggi.db.server = function(io, options) {
         providers: [
             {
                 paths: options.paths,
-                allow_create: options.allow_create
+                allow_create: options.allow_create,
+                client_write: options.client_write
             }
         ],
         log: false || options&&options.log,
@@ -785,10 +788,15 @@ function get_create_options(server, dbreq) {
                 if (ac == null) ac = false;
                 if (ac instanceof Array)
                     ac = ac.map(x=>jsonpathmatch(x,path)).findIndex(x=>(x!==false))!=-1;
+                var cw = pvd.client_write;
+                if (cw == null) cw = false;
+                if (cw instanceof Array)
+                    cw = cw.map(x=>jsonpathmatch(x,path)).findIndex(x=>(x!==false))!=-1;
                 return { 
                     pathmatch: match, 
-                    createhook: paths[p], 
-                    allow_create: ac
+                    createhook: paths[p],
+                    allow_create: ac,
+                    client_write: cw
                 };
             }
         }
@@ -946,13 +954,18 @@ Maggi.db.sync = function(socket, dbreq, db, client, raise_event, onsync, synclog
                     console.log(socket.id, dbname, "ignoring delta since out-of-sync");
             }
             else if (server) {
-                var incremental=true; //TODO
-                if (incremental) {
-                    apply(d);
+                if (db.client_write==false) {
+                    console.log(socket.id, dbname, "rejecting client delta request: read-only database");
+                    emit({f:"error",id:"delta_on_read_only_db", cur_rev:db.rev, req:d, cur_deltaid:deltaid});
                 } else {
-                    clientinsync=false;
-                    console.log(socket.id, dbname, "rejecting request from out-of-sync client");
-                    emit({f:"error",id:"bad_deltaid", cur_rev:db.rev, req:d, cur_deltaid:deltaid});
+                     var incremental=true; //TODO
+                     if (incremental) {
+                         apply(d);
+                     } else {
+                         clientinsync=false;
+                         console.log(socket.id, dbname, "rejecting request from out-of-sync client");
+                         emit({f:"error",id:"bad_deltaid", cur_rev:db.rev, req:d, cur_deltaid:deltaid});
+                     }
                 }
             }
         }
