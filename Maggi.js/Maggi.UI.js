@@ -395,15 +395,17 @@ Maggi.UI.parts.children={
     parts:"common",
     members:{children:{},childdefault:null,order:null,domNS:null,domtag:"div"},
     order:function children_order(m) {
-        var o=m.ui.order;
-        if (o) return Object2Array(o);
-        o=Object.keys(m.ui.children);
+        var ord=m.ui.order;
+        if (ord && typeof ord === 'object') return Object2Array(ord);
+        var o=Object.keys(m.ui.children);
 
         if (m.ui.childdefault)
             for (var k in m.data)
-        if (!(k in m.ui.children))
-            o.push(k);
+                if (!(k in m.ui.children))
+                    o.push(k);
 
+        if (ord == "reverse")
+			o=o.reverse();
         return o;
     },
     makeElement:function children_makeElement(m,id) {
