@@ -21,7 +21,7 @@
     "url": "https://github.com/thilomaurer/Maggi.js.git"
   },
   "dependencies": {
-    "jquery": "~3.4.1",
+    "jquery": "~3.5.0",
     "mkdirp": "~0.5.1",
     "sprintf-js": "~1.0.3",
     "typeface-open-sans": "0.0.54",
