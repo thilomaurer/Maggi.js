@@ -34,7 +34,7 @@ var Maggi = function(other) {
         return -1;
     };
 
-    var trigger = function(e, key, value, oldv) {
+    var trigger = function(e, key, value, oldv, flags) {
         var fns = events[e];
         if (fns == null) return;
         if (Maggi.log == true) {
@@ -54,6 +54,8 @@ var Maggi = function(other) {
                 console.log(stacktrace());
             }
         }
+		if (p._bubblelocal==true)
+		    flags={bubblelocal:true};
         //trigger all fns once, even those newly added or removed during execution of these
         var fns_complete=[];
         var fns_complete_added=true;
@@ -62,9 +64,9 @@ var Maggi = function(other) {
             for (var i=0;i<fns.length;i++) {
                 var f = fns[i];
                 if (fns_complete.indexOf(f)==-1) {
-                    if (Maggi.trace === true) console.log("Maggi.trigger:", f.keys, key);
+                    if (Maggi.trace === true) console.log("Maggi.trigger:", f.keys, key, flags);
                     if (!f.keys || (indexOf(f.keys, key) > -1))
-                        f.fn(key, value, oldv, e);
+                        f.fn(key, value, oldv, e, flags);
                     fns_complete.push(f);
                     fns_complete_added=true;
                 }
@@ -86,18 +88,37 @@ var Maggi = function(other) {
             });
     };
 
-    var bubble = function(e, key, k, v, oldv) {
+    var bubble = function(e, key, k, v, oldv, flags) {
+		/*
+		var pk=p[key];
+        if (pk != null && pk._hasMaggi == true && pk._bubble == false) {
+			//console.log("bubble inhibit",key,k,v,oldv);
+			return;
+		}
+		*/
         var bubblekey;
         if (k instanceof Array)
             bubblekey = k.slice(0);
+		else if (k === null)
+			bubblekey = [];
         else
             bubblekey = [k];
 
         bubblekey.unshift(key);
-        trigger(e, bubblekey, v, oldv);
+        trigger(e, bubblekey, v, oldv, flags);
     };
 
+	var pausebubble_data = null;
     var func = {
+		beginlocal: function() {
+			p._bubblelocal = true;
+			pausebubble_data = JSON.parse(JSON.stringify(p));
+		},
+		endlocal: function() {
+			p._bubblelocal = false;
+			trigger("set",null,p,pausebubble_data);
+			pausebubble_data = null;
+		},
         add: function(key, value, notriggerbubble) {
             if (key == null) return console.warn("Maggi.js: ignoring add of member (null)");
             var get = () => d[key];
@@ -116,9 +137,9 @@ var Maggi = function(other) {
             };
             var bubbleFuncs = {};
             bubbles[key] = bubbleFuncs;
-            bubbleFuncs.set = function set_bubble(k, v, oldv) { bubble("set", key, k, v, oldv) };
-            bubbleFuncs.add = function add_bubble(k, v, oldv) { bubble("add", key, k, v, oldv) };
-            bubbleFuncs.remove = function remove_bubble(k, v, oldv) { bubble("remove", key, k, v, oldv) };
+            bubbleFuncs.set = function set_bubble(k, v, oldv, e, flags) { bubble("set", key, k, v, oldv, flags) };
+            bubbleFuncs.add = function add_bubble(k, v, oldv, e, flags) { bubble("add", key, k, v, oldv, flags) };
+            bubbleFuncs.remove = function remove_bubble(k, v, oldv, e, flags) { bubble("remove", key, k, v, oldv, flags) };
             if (p.hasOwnProperty(key)) {
                 //console.log('Maggi.add: set by add for property "'+key+'" of '+JSON.stringify(p)+'.');
                 set(value);
@@ -132,7 +153,7 @@ var Maggi = function(other) {
                 var prop = { get: get, set: set, enumerable: true, configurable: true };
                 Object.defineProperty(p, key, prop);
                 installBubble(value, bubbleFuncs);
-                if (notriggerbubble!=true) trigger("add", key, value);
+                if (notriggerbubble!=true) trigger("add", key, value, undefined, (value && value._bubblelocal)?{bubblelocal:true}:undefined);
             }
         },
         remove: function(key) {
@@ -285,6 +306,11 @@ var Maggi = function(other) {
         value: Maggi.ID++,
         enumerable: false,
         writable: false
+    });
+    Object.defineProperty(p, "_bubblelocal", {
+        value: false,
+        enumerable: false,
+        writable: true
     });
     return p;
 };
@@ -889,16 +915,19 @@ Maggi.db.sync = function(socket, dbreq, db, client, raise_event, onsync, synclog
     };
     var clientinsync = false;
     var deltaid = 0;
-    var handler = function(k, v, oldv, e) {
+    var handler = function(k, v, oldv, e, flags) {
         //ensure client does not reply with same delta back to server
         if (client && applying == db.rev + 1) return;
         if (v instanceof Function)
             v=null;
         msg={ f: "delta", e: e, k: k, rev: db.rev, v: v };
         if (client) {
-            deltaid+=1;
-            msg.deltaid=deltaid;
-            emit(msg);
+			if (flags && flags.bubblelocal) {
+			} else {
+                deltaid+=1;
+                msg.deltaid=deltaid;
+                emit(msg);
+			}
         } else {
             if (clientinsync)
                 emit(msg);
@@ -1011,7 +1040,7 @@ Maggi.db.sync = function(socket, dbreq, db, client, raise_event, onsync, synclog
     return resync;
 };
 
-clientdbs = {};
+var clientdbs = {};
 Maggi.db.client = function(dbreq, events, defs, options) {
     var socket = Maggi.db.client.socket;
     options = options || {};

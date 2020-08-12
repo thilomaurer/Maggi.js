@@ -178,7 +178,7 @@ var installPartBindings=function(p,m) {
 };
 
 
-Array_unique = function (a) {
+var Array_unique = function (a) {
     var r = new Array();
     o:for(var i = 0, n = a.length; i < n; i++)
     {
@@ -393,7 +393,7 @@ Maggi.UI.parts.children={
     name:"children",
     partclass:"children",
     parts:"common",
-    members:{children:{},childdefault:null,order:null,domNS:null,domtag:"div"},
+    members:{children:{},childdefault:null,order:null,domNS:null,domtag:"div",filter:null},
     order:function children_order(m) {
         var ord=m.ui.order;
         if (ord && typeof ord === 'object') return Object2Array(ord);
@@ -403,6 +403,8 @@ Maggi.UI.parts.children={
             for (var k in m.data)
                 if (!(k in m.ui.children))
                     o.push(k);
+		if (m.ui.filter)
+			o=m.ui.filter(m,o);
 
         if (ord == "reverse")
 			o=o.reverse();
@@ -1039,8 +1041,18 @@ Maggi.UI.parts.popup={
     },
     bindings:{
         e:["set","ui.toggler",function(m,k,v,ov) {
-            if (m.togglerElement) 
+            if (m.togglerElement) {
+				var rect=m.togglerElement[0].getBoundingClientRect();
                 m.observer.observe(m.togglerElement[0], { childList:true });
+				setInterval(function() {
+					if (m.ui.switchstate==false) return;
+					var newrect=m.togglerElement[0].getBoundingClientRect()
+					if (newrect.bottom!=rect.bottom || newrect.top!=rect.top || newrect.left!=rect.left || newrect.right!=rect.right) {
+						rect=newrect;
+			            Maggi.UI.parts.popup.place(m);
+					}
+				},100);
+			}
         }],
         s:["set","ui.switchstate","onswitchstate"]
     },
@@ -1076,9 +1088,11 @@ Maggi.UI.parts.popup={
         var dom=m.outer;
         var spacing=16;
         var pt=togglerElement.offset();
-        var rect=getInnerClientRect(togglerElement);
+        var rect=togglerElement[0].getBoundingClientRect();
+//        var rect=getInnerClientRect(togglerElement);
+		//console.log(m.togglerElement,rect);
         dom.css("left",0);
-        var popupWidth=dom.width()+2*spacing;
+        var popupWidth=dom.width()+2*(1+spacing);
         var halfPopupWidth=popupWidth/2;
         var documentWidth=window.innerWidth;
         var documentHeight=window.innerHeight;
@@ -1098,20 +1112,20 @@ Maggi.UI.parts.popup={
         dom.css("left",left);
 
         var right=left+popupWidth;
-        if (right>documentWidth)
+        if (right>=documentWidth)
             dom.css("right",0);
         else
             dom.css("right","");
 
         if (downwards) {
             dom.css("top",attach.y);
-            if (attach.y+dom.height()+2*spacing>documentHeight)
+            if (attach.y+dom.height()+2*(1+spacing)>=documentHeight)
                 dom.css("bottom",0);
             else
                 dom.css("bottom","");
         } else {
             dom.css("bottom",documentHeight-1-attach.y);
-            if (attach.y-1-dom.height()-2*spacing<=0)
+            if (attach.y-1-dom.height()-2*(1+spacing)<=0)
                 dom.css("top",0);
             else
                 dom.css("top","");
@@ -1144,6 +1158,15 @@ Maggi.UI.parts.popup={
         m.observer = new MutationObserver(place);
         m.observer.observe(m.dom[0], { childList:true, subtree:true, attributes:true, characterData:true});
         $(window).resize(place);
+		window.addEventListener('mousedown', function(e){
+			if (m.ui.switchstate==false) return;
+            if (m.dom[0].contains(e.target) || m.togglerElement[0].contains(e.target)){
+	           // Clicked in box
+		    } else {
+	           // Clicked outside the box
+               m.ui.switchstate=false;
+            }
+        });
         return function() {
             m.outer.off("keyup",keyup);
         };
