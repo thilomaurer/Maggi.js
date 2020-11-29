@@ -118,13 +118,13 @@
 .mui .popup > .popup-triangle-wrapper > .popup-triangle-inner,
 .mui.popup > .popup-triangle-wrapper > .popup-triangle-inner {
 	border: 1px solid hsla(224, 8%, 15%, 1);
-	background: hsla(224, 8%, 30%, 1); //var(--mui-normal-color);
+	background: hsla(224, 8%, 30%, 1); /*var(--mui-normal-color);*/
 }
 
 .mui {
 	color:white;
 	font-family: 'Open Sans', sans-serif;
-	background:hsla(224, 8%, 30%, 1); //var(--mui-normal-color);
+	background:hsla(224, 8%, 30%, 1); /*var(--mui-normal-color);*/
 	font-size: 18px;
 	font-weight: normal;
 	text-shadow: none;
@@ -180,9 +180,9 @@
 .mui .simplelist,
 .mui.tablelist,
 .mui .tablelist {
-	border-top:1px solid hsla(224, 8%, 15%, 1); //var(--mui-dark-color);
-	border-bottom:1px solid hsla(224, 8%, 15%, 1); //var(--mui-dark-color);
-	background:hsla(224, 8%, 36%, 1); //var(--mui-light-color);
+	border-top:1px solid hsla(224, 8%, 15%, 1); /*var(--mui-dark-color);*/
+	border-bottom:1px solid hsla(224, 8%, 15%, 1); /*var(--mui-dark-color);*/
+	background:hsla(224, 8%, 36%, 1); /*var(--mui-light-color);*/
 }
 
 .mui-light .tablelist > *:first-child,
@@ -194,7 +194,7 @@
 
 .mui .simplelist > *,
 .mui .tablelist > * > * {
-	border-bottom:1px solid hsla(224, 8%, 15%, 1); //var(--mui-dark-color);
+	border-bottom:1px solid hsla(224, 8%, 15%, 1); /*var(--mui-dark-color);*/
 }
 
 .mui-light .simplelist > *,
