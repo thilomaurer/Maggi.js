@@ -5,10 +5,42 @@
  * LAGPL-3.0 - https://github.com/thilomaurer/Maggi.js/blob/master/LICENSE
  */
 
-import fs from 'fs';
-import glob from 'glob';
-import writefile from './writefile.mjs';
-import Maggi from './Maggi.mjs';
+const fs = require('fs');
+const glob = require('glob');
+const mkdirp = require('mkdirp');
+const Maggi = require('./Maggi.js');
+
+var write_s = {};
+
+var writefile=function(filename,data,enc) {
+	if (enc==null) enc="utf8";
+	if (write_s[filename]==null) 
+		write_s[filename]={filename:filename,data:data,enc:enc,saving:false,save_again:false};
+	else { write_s[filename].data=data; write_s[filename].enc=enc; write_s[filename].save_again=true; }
+
+	var save=function(x) {
+		var dir=x.filename.substring(0,x.filename.lastIndexOf("/"));
+		x.save_again=x.saving;
+		if (x.saving) return;
+		x.saving=true;
+		var done=function(err) {
+			x.saving=false;
+			if (err) console.log(JSON.stringify(err));
+			if (x.save_again) save(x);
+		};
+		mkdirp(dir,function(err) {
+			if (err) done(err);
+			else {
+				fs.rename(x.filename,x.filename+".backup", err => {
+					if (err) console.log(JSON.stringify(err));
+					fs.writeFile(x.filename, x.data, x.enc, done);
+				});
+			}
+		}); 
+	};
+	save(write_s[filename]);
+};
+
 
 
 Maggi.db.load_json = function(filename, enc) {
@@ -431,5 +463,5 @@ Maggi.db.server.vive = function(server, dbreq) {
     });
 }
 
-export default Maggi;
+module.exports = Maggi;
 
