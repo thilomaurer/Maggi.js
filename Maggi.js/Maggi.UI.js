@@ -6,10 +6,9 @@
  */
 
 
-const Maggi = require('./Maggi.js');
+const Maggi = require('./Maggi-client.js');
 const jquery = require('jquery');
 require('./Maggi.UI.css');
-require('./node_modules/typeface-open-sans/index.css');
 const sprintf = require('sprintf-js').sprintf;
 
 Maggi.id=0;
