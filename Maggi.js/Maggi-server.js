@@ -80,7 +80,7 @@ Maggi.db.create = function(server, dbreq, useroptions) {
             bindfs: false,
             persistant: true,
             loadexisting: true,
-            initialdata: {},
+            initialdata: dbreq.initialdata||{},
             initialrev: 0,
             enc: "utf8",
             allow_create: false,

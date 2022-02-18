@@ -476,6 +476,7 @@ Maggi.db.sync = function(socket, dbreq, db, client, raise_event, onsync, synclog
     var dshort = function(d) {
         if (d == null) return "(null)";
         var k = d.k;
+		var l;
         if (k instanceof Array) k = k.join(".");
         if (d.v instanceof Function)
             l = "function(...) {...}";

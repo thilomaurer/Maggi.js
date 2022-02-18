@@ -1002,6 +1002,7 @@ Maggi.UI.parts.switchable={
     members:{
         toggler:null,
         togglerselect:true,
+		usertoggle:true,
         switchstate:false, 
         switchclass:"active"
     },
@@ -1011,7 +1012,7 @@ Maggi.UI.parts.switchable={
             var st=m.parent.inner[v];
             if (st==null) { console.error("switch toggler unavailable:",m,v); return; }
             m.togglerElement=st.m.dom;
-            m.togglerElement.on("click",function(e) { m.ui.toggle(); return false; });
+            m.togglerElement.on("click",function(e) { if (m.ui.usertoggle) m.ui.toggle(); return false; });
         }],
         f:["set","ui.switchstate",function(m,k,v,ov) {
             var action={true:"addClass",false:"removeClass"}[v];

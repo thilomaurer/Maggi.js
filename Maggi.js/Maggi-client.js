@@ -81,8 +81,6 @@ Maggi.db.client = function(dbreq, events, defs, options) {
     clientdbs[dbname] = db;
 
     var onsync = function() {
-        if (db.rev == 0)
-            add_unset(db.data, defs);
         var handler = function() {
             for (var i=0;i<db.roothandlers.length;i++)
                 db.roothandlers[i].apply(null,arguments);
@@ -106,6 +104,7 @@ Maggi.db.client = function(dbreq, events, defs, options) {
     };
 
     var register = function() {
+		dbreq.initialdata = defs;
         socket.on("Maggi.db."+dbreq.reqid,response);
         socket.emit("Maggi.db", dbreq);
         raise_event("connecting");
